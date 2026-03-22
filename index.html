@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Martinson Family Dashboard v15</title>
+<title>Martinson Family Dashboard v16</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -301,7 +301,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <!-- ENTRY SCREEN -->
 <div id="entry-screen">
   <div class="entry-logo">Martinson Family</div>
-  <div class="entry-sub">Kansas City, MO · Your Family Hub · v15</div>
+  <div class="entry-sub">Kansas City, MO · Your Family Hub · v16</div>
   <div class="entry-box">
     <div class="entry-title">🔒 Enter Password</div>
     <div class="entry-dots">
@@ -399,8 +399,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       <span class="app-title">Family Dashboard</span>
     </div>
     <div style="display:flex;align-items:center;gap:8px">
-      <span id="sync-badge" style="font-size:11px;cursor:pointer" onclick="showSyncSetup()">◌ Local only</span>
-      <button onclick="showSyncSetup()" style="background:var(--surface2);border:none;color:var(--text-mid);padding:6px 10px;border-radius:8px;font-size:12px;cursor:pointer;font-family:var(--font-b)" title="Sync Settings">⚙️ Sync</button>
+      <span id="sync-badge" style="font-size:11px;cursor:pointer;color:var(--teal)" onclick="forceSyncNow()">◌ Connecting...</span>
+      <button onclick="forceSyncNow()" style="background:var(--teal-dim);border:1px solid var(--teal);color:var(--teal);padding:6px 10px;border-radius:8px;font-size:12px;cursor:pointer;font-family:var(--font-b)" title="Sync Now">⟳ Sync</button>
       <span class="user-badge douglas">Douglas</span>
       <button class="back-btn" onclick="showJamieFromDouglas()" style="background:var(--sage-dim);color:var(--sage)">Jamie's View</button>
     </div>
@@ -538,7 +538,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
         <button class="back-btn" onclick="showWho()" style="background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.8)">← Home</button>
         <button class="back-btn" onclick="pinPrompt('douglas')" style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);font-size:11px">Douglas's View 🔒</button>
-        <span id="j-sync-badge" style="font-size:10px;color:rgba(255,255,255,0.5)">◌ Local only</span>
+        <span id="j-sync-badge" style="font-size:10px;color:rgba(255,255,255,0.5);cursor:pointer" onclick="forceSyncNow()">◌ Connecting...</span>
       </div>
     </div>
   </div>
@@ -983,14 +983,19 @@ function applyKey(key, value) {
       }
       break;
     case 'last_csv_data':
-      if (!localStorage.getItem('csv_cleared') && value && value.txList && value.txList.length) {
+      // Always load CSV from Firebase — Firebase is the single source of truth
+      // The cleared flag only blocks localStorage, not Firebase data
+      if (value && value.txList && value.txList.length) {
         window._lastCsvTimestamp = value.uploadedAt || 0;
         loadCrossDeviceCsvData(value);
       }
       break;
     case 'csv_cleared':
-      if (value && value.cleared === true) localStorage.setItem('csv_cleared','true');
-      else if (value && value.cleared === false) localStorage.removeItem('csv_cleared');
+      // Only use this to clear the display, not block Firebase data
+      if (value && value.cleared === true) {
+        transactions = [];
+        localStorage.removeItem('csv_cleared');
+      }
       break;
   }
 }
@@ -1055,6 +1060,19 @@ function updateSyncBadge(status) {
 }
 
 // scheduleSave defined above in Firebase engine
+
+async function forceSyncNow() {
+  // Clear any blocking flags
+  localStorage.removeItem('csv_cleared');
+  window._lastCsvTimestamp = 0;
+  // Update badge
+  updateSyncBadge('syncing');
+  toast('⟳ Syncing...');
+  // Pull everything fresh from Firebase
+  await syncAll();
+  refreshAllUI();
+  toast('✓ Sync complete');
+}
 
 function showSyncSetup() {
   const existing = document.getElementById('sync-setup-overlay');
