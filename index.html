@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Martinson Family Dashboard v27</title>
+<title>Martinson Family Dashboard v28</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <!-- Firebase JS SDK — WebSocket real-time sync (same tech as Notion, Figma, Linear) -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -304,7 +304,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <!-- ENTRY SCREEN -->
 <div id="entry-screen">
   <div class="entry-logo">Martinson Family</div>
-  <div class="entry-sub">Kansas City, MO · Your Family Hub · v27</div>
+  <div class="entry-sub">Kansas City, MO · Your Family Hub · v28</div>
   <div class="entry-box">
     <div class="entry-title">🔒 Enter Password</div>
     <div class="entry-dots">
@@ -957,8 +957,13 @@ function applyKey(key, value) {
             const catTotals = value.cats ? JSON.parse(value.cats) : {};
             const decoded = {
               txList: txArr.map(t=>({
-                date:t.d||t.date, desc:t.n||t.desc,
-                amount:t.a||t.amount, cat:t.c||t.cat, month:t.m||t.month,
+                date: t.d||t.date||'',
+                desc: t.n||t.desc||'',
+                // CRITICAL: use explicit check — negative numbers are falsy in JS
+                // t.a || t.amount would return 0 for negative amounts like -87.43
+                amount: (t.a !== undefined && t.a !== null) ? Number(t.a) : Number(t.amount||0),
+                cat: t.c||t.cat||'Other',
+                month: t.m||t.month||'',
                 color:(RULES.find(r=>r.cat===(t.c||t.cat))||RULES[RULES.length-1]).color
               })),
               catTotals,
@@ -1352,54 +1357,37 @@ function parseCSV(text,fname){
     m: sanitize(t.month)
   }));
 
-  // KEY FIX: Store txList as a JSON-encoded STRING not a native array
-  // Firebase REST API rejects nested arrays in PATCH/PUT operations
-  // Storing as string bypasses this entirely — Firebase treats it as a leaf node
+  // Build sync payload — Firebase SDK handles nested objects fine, no need to stringify arrays
   const syncData = {
-    txData: JSON.stringify(txCompact), // encoded string — not an array
-    cats: JSON.stringify(catTotals),   // encoded string — not an object
+    txData: JSON.stringify(txCompact), // keep as string for size efficiency
+    cats: JSON.stringify(catTotals),
     period: sanitize(mn + ' – ' + mx),
     loadedOn: sanitize(loadedOn),
     count: transactions.length,
     uploadedAt: Date.now()
   };
 
-  // Store in localStorage with original format for local use
-  localStorage.setItem('fb_last_csv_data', JSON.stringify({
-    txList: txCompact.map(t=>({date:t.d,desc:t.n,amount:t.a,cat:t.c,month:t.m,
-      color:(RULES.find(r=>r.cat===t.c)||RULES[RULES.length-1]).color})),
-    catTotals,
-    period: mn+' – '+mx,
-    loadedOn,
-    count: transactions.length,
-    uploadedAt: syncData.uploadedAt
-  }));
+  // Write to Firebase using SDK — WebSocket push to ALL devices instantly
+  const el = document.getElementById('tx-sync-status');
+  if(el){ el.style.color='var(--text-mid)'; el.textContent='⟳ Syncing to all devices...'; }
 
-  // Write to Firebase — PUT to specific path, flat object with string values only
-  fetch(`${FB}/martinson/last_csv_data.json`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(syncData)
-  }).then(res => {
-    const el = document.getElementById('tx-sync-status');
-    if (res.ok) {
+  fbSet('last_csv_data', syncData)
+    .then(() => {
       lastSyncTime = new Date();
       updateSyncBadge('ok');
-      if (el) { el.style.color='var(--teal)'; el.textContent='✓ Synced to all devices — check your phone'; }
-    } else {
-      res.text().then(t => {
-        if (el) { el.style.color='var(--red)'; el.textContent='⚠ Firebase error: ' + res.status + ' — ' + t.substring(0,80); }
-      });
-    }
-  }).catch(err => {
-    const el = document.getElementById('tx-sync-status');
-    if (el) { el.style.color='var(--red)'; el.textContent='⚠ Network error: ' + err.message; }
-  });
+      if(el){ el.style.color='var(--teal)'; el.textContent='✓ Synced to all devices — check your phone'; }
+      // Also clear any stale cleared flag
+      fbSet('csv_cleared', { cleared:false, clearedAt:0, when:new Date().toISOString() });
+    })
+    .catch(err => {
+      if(el){ el.style.color='var(--red)'; el.textContent='⚠ Sync error: ' + err.message; }
+      updateSyncBadge('error');
+    });
 
   // Archive to Firebase history (2-year rolling archive by month)
   archiveToHistory(transactions, mn + ' – ' + mx);
 
-  // Show AI insights button now that we have data
+  // Show AI insights button
   const aiBtn = document.getElementById('ai-btn-wrap');
   if(aiBtn) aiBtn.style.display='block';
 
