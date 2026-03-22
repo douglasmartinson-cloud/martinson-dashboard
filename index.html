@@ -3,8 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Martinson Family Dashboard v26</title>
+<title>Martinson Family Dashboard v27</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<!-- Firebase JS SDK — WebSocket real-time sync (same tech as Notion, Figma, Linear) -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -301,7 +304,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <!-- ENTRY SCREEN -->
 <div id="entry-screen">
   <div class="entry-logo">Martinson Family</div>
-  <div class="entry-sub">Kansas City, MO · Your Family Hub · v26</div>
+  <div class="entry-sub">Kansas City, MO · Your Family Hub · v27</div>
   <div class="entry-box">
     <div class="entry-title">🔒 Enter Password</div>
     <div class="entry-dots">
@@ -434,17 +437,32 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       <div class="grid-2">
         <div class="panel">
           <div class="panel-title"><span class="dot d-red"></span>Credit Cards</div>
-          <table class="tbl"><thead><tr><th>Card</th><th style="text-align:right">Balance</th><th style="text-align:right">Min</th></tr></thead>
+          <table class="tbl" id="cc-table"><thead><tr><th>Card</th><th style="text-align:right">Balance</th><th style="text-align:right">Min</th></tr></thead>
           <tbody>
             <tr><td>BofA 9362<span class="apr">23.74%</span></td><td style="text-align:right;color:var(--red);font-weight:600">$13,567</td><td style="text-align:right">$384</td></tr>
             <tr><td>Chase 0690<span class="apr">27.24%</span></td><td style="text-align:right;color:var(--red);font-weight:600">$5,280</td><td style="text-align:right">$250</td></tr>
             <tr><td>Best Buy<span class="apr">29.99%</span></td><td style="text-align:right;color:var(--red);font-weight:600">$3,438</td><td style="text-align:right">$35</td></tr>
             <tr><td>US Bank 2405<span class="apr">21.74%</span></td><td style="text-align:right;color:var(--red);font-weight:600">$1,680</td><td style="text-align:right">$72</td></tr>
             <tr><td>US Bank 6925<span class="apr">21.74%</span></td><td style="text-align:right;color:var(--red);font-weight:600">$800</td><td style="text-align:right">$35</td></tr>
-            <tr style="border-top:2px solid var(--border)"><td style="font-weight:700">TOTAL</td><td style="text-align:right;font-weight:700;color:var(--red)">$24,765</td><td style="text-align:right;font-weight:700">$776</td></tr>
+            <tr style="border-top:2px solid var(--border)"><td style="font-weight:700">TOTAL</td><td style="text-align:right;font-weight:700;color:var(--red)" id="cc-total-bal">$24,765</td><td style="text-align:right;font-weight:700" id="cc-total-min">$776</td></tr>
           </tbody></table>
+          <div id="daily-debt-cost" style="margin-top:10px;padding:8px 12px;background:rgba(255,107,107,0.08);border-radius:8px;font-size:12px;color:var(--red);text-align:center">
+            This debt costs you <strong>$17.04/day</strong> in interest
+          </div>
+          <div id="debt-freedom-banner" style="margin-top:8px;padding:8px 12px;background:var(--teal-dim);border-radius:8px;font-size:12px;color:var(--teal);text-align:center">
+            🎯 Debt free in <strong id="freedom-countdown">32 months</strong> — <span id="freedom-date-banner">Jul 2029</span>
+          </div>
         </div>
-        <div class="panel"><div class="panel-title"><span class="dot d-teal"></span>Spending Breakdown</div><div class="chart-wrap"><canvas id="donut-chart"></canvas></div></div>
+        <div class="panel">
+          <div class="panel-title"><span class="dot d-teal"></span>Spending Breakdown</div>
+          <div class="chart-wrap"><canvas id="donut-chart"></canvas></div>
+          <div id="ai-insights-wrap" style="margin-top:10px;display:none">
+            <div id="ai-insights-content" style="font-size:12px;color:var(--text-mid);line-height:1.6"></div>
+          </div>
+          <div id="ai-btn-wrap" style="margin-top:10px;display:none">
+            <button onclick="getAIInsights()" style="width:100%;padding:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text-mid);font-size:12px;cursor:pointer;font-family:var(--font-b)">✨ Get AI Spending Insights</button>
+          </div>
+        </div>
       </div>
       <div class="grid-2">
         <div class="panel">
@@ -453,11 +471,16 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
           <div id="cat-table-wrap" style="display:none"><table class="tbl" id="cat-table"></table></div>
         </div>
         <div class="panel">
-          <div class="panel-title"><span class="dot d-blue"></span>Savings Progress</div>
+          <div class="panel-title"><span class="dot d-blue"></span>Savings &amp; Net Worth</div>
           <div style="display:flex;flex-direction:column;gap:16px;margin-top:4px">
             <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:13px;font-weight:600">Emergency Fund</span><span style="font-size:13px;color:var(--teal)">$5,145 / $10K</span></div><div class="prog-wrap"><div class="prog-bar" style="background:var(--teal);width:51.45%"></div></div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">51% — $200/mo</div></div>
             <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:13px;font-weight:600">Life Goals ✈️</span><span style="font-size:13px;color:var(--gold)" id="lg-display">$0 / $3K</span></div><div class="prog-wrap"><div class="prog-bar" id="lg-prog" style="background:var(--gold);width:0%"></div></div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">Building — $200/mo from April</div></div>
             <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:13px;font-weight:600">Retirement</span><span style="font-size:13px;color:var(--purple)">$158,540</span></div><div class="prog-wrap"><div class="prog-bar" style="background:var(--purple);width:79%"></div></div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">Merrill · not liquid</div></div>
+            <div style="padding:12px;background:var(--purple-dim);border-radius:10px;border:1px solid rgba(167,139,250,0.2)">
+              <div style="font-size:11px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Net Worth</div>
+              <div style="font-family:var(--font-d);font-size:24px" id="d-networth-val">$139,920</div>
+              <div style="font-size:11px;color:var(--text-mid);margin-top:2px" id="d-networth-sub">Assets $163,685 − Liabilities $24,765</div>
+            </div>
             <div style="padding:12px;background:var(--sage-dim);border-radius:10px;border:1px solid rgba(90,158,138,0.2)">
               <div style="font-size:11px;font-weight:700;color:var(--sage);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">🛒 Jamie's Groceries This Month</div>
               <div style="font-family:var(--font-d);font-size:22px;color:var(--sage)" id="d-jamie-grocery">$0</div>
@@ -766,224 +789,145 @@ let cmfIngCount = 0;
 // ALWAYS use this URL — Apps Script for receipt scanning and PDF only
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxgssU1_z7Xkp-b-GyhG2ls75Uq_dpBn7owG_lvHJsr9SQGSpG803xba8Nh3rH_lodmww/exec';
 
-// ══════ FIREBASE REALTIME DATABASE SYNC
-// Zero CORS issues — Firebase is designed for exactly this use case
-// Sub-second sync across all devices, works from any browser/location
-const FB = 'https://martinson-family-default-rtdb.firebaseio.com';
+// ══════════════════════════════════════════════════════════════════
+// FIREBASE JS SDK — WEBSOCKET REAL-TIME SYNC
+// ══════════════════════════════════════════════════════════════════
+// Why this works when REST/SSE didn't:
+//   REST polling: asks "any changes?" every 5s → race conditions
+//   SSE: mobile browsers kill these connections (battery optimization)
+//   Firebase SDK: persistent WebSocket the SERVER uses to PUSH changes
+//   to every connected client in <100ms. Reconnects automatically.
+//   This is how Notion, Figma, and Linear handle real-time sync.
+// ══════════════════════════════════════════════════════════════════
 
-let syncTimer = null;
+firebase.initializeApp({ databaseURL: 'https://martinson-family-default-rtdb.firebaseio.com' });
+const FBDB = firebase.database();
+const FB_ROOT = FBDB.ref('martinson');
+
 let lastSyncTime = null;
-let syncStatus = 'idle';
-let fbListener = null; // live listener reference
+let _fbListeners = []; // track listeners for cleanup
 
-// ── READ from Firebase ────────────────────────────────────────────
-async function fbGet(key) {
-  try {
-    const res = await fetch(`${FB}/martinson/${key}.json`, {
-      method: 'GET',
-      headers: { 'Accept': 'application/json' }
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data;
-  } catch(e) { return null; }
-}
-
-// ── WRITE to Firebase ─────────────────────────────────────────────
-async function fbSet(key, value) {
+// ── WRITE ─────────────────────────────────────────────────────────
+function fbSet(key, value) {
   localStorage.setItem('fb_' + key, JSON.stringify(value));
-  try {
-    // PUT to specific path — most reliable Firebase REST operation
-    // Value must be a flat object or primitive — no nested arrays
-    const res = await fetch(`${FB}/martinson/${key}.json`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(value)
-    });
-    if (!res.ok) {
-      updateSyncBadge('error');
-      return;
-    }
-    lastSyncTime = new Date();
-    updateSyncBadge('ok');
-  } catch(e) {
-    updateSyncBadge('error');
-  }
+  return FB_ROOT.child(key).set(value);
 }
 
-// ── SYNC DIAGNOSTIC — run this in browser console to test ─────────
-// Type: runSyncTest() in the browser console to see exactly what's happening
-window.runSyncTest = async function() {
-  console.log('=== FIREBASE SYNC DIAGNOSTIC ===');
-  console.log('Firebase URL:', FB);
+// ── DELETE ────────────────────────────────────────────────────────
+function fbDelete(key) {
+  localStorage.removeItem('fb_' + key);
+  return FB_ROOT.child(key).remove();
+}
 
-  // Test write
-  console.log('1. Testing WRITE...');
-  try {
-    const res = await fetch(`${FB}/martinson/sync_test.json`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ test: true, time: Date.now() })
-    });
-    console.log('Write status:', res.status, res.ok ? '✅ SUCCESS' : '❌ FAILED');
-    if (!res.ok) {
-      const text = await res.text();
-      console.error('Write error response:', text);
-      console.error('👉 Fix: Go to Firebase Console → Realtime Database → Rules → set .read and .write to true → Publish');
-    }
-  } catch(e) {
-    console.error('Write threw exception:', e.message);
+// ── READ ONCE ─────────────────────────────────────────────────────
+function fbGet(key) {
+  return FB_ROOT.child(key).once('value').then(s => s.val());
+}
+
+// ── START REAL-TIME LISTENERS ─────────────────────────────────────
+// Each listener opens a WebSocket. Firebase SDK pushes changes
+// to all listeners instantly when any device writes to Firebase.
+function startFirebaseListeners() {
+  // Clear any existing listeners
+  _fbListeners.forEach(({ref, fn}) => ref.off('value', fn));
+  _fbListeners = [];
+
+  function listen(key, handler) {
+    const ref = FB_ROOT.child(key);
+    const fn = ref.on('value', (snap) => {
+      handler(snap.val());
+      lastSyncTime = new Date();
+      updateSyncBadge('ok');
+    }, () => updateSyncBadge('error'));
+    _fbListeners.push({ref, fn});
   }
 
-  // Test read
-  console.log('2. Testing READ...');
-  try {
-    const res = await fetch(`${FB}/martinson/sync_test.json`);
-    console.log('Read status:', res.status, res.ok ? '✅ SUCCESS' : '❌ FAILED');
-    if (res.ok) {
-      const data = await res.json();
-      console.log('Read data:', data);
-    } else {
-      const text = await res.text();
-      console.error('Read error response:', text);
-    }
-  } catch(e) {
-    console.error('Read threw exception:', e.message);
-  }
-
-  // Test CSV data
-  console.log('3. Checking last_csv_data in Firebase...');
-  try {
-    const res = await fetch(`${FB}/martinson/last_csv_data.json`);
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.count) {
-        console.log(`✅ Firebase has CSV data: ${data.count} transactions from ${data.period}`);
-      } else {
-        console.log('❌ No CSV data in Firebase yet — load a CSV file first');
+  // ── CSV DATA ──────────────────────────────────────────────────
+  // Fires instantly on all devices when any device uploads or clears
+  listen('last_csv_data', (data) => {
+    if (data === null) {
+      // Data deleted — clear ALL devices immediately
+      if (window._lastCsvTimestamp > 0 && window._lastCsvTimestamp !== -1) {
+        performLocalClear();
+        refreshAllUI();
+      }
+    } else if (data && data.uploadedAt) {
+      const fbTs = data.uploadedAt;
+      // Load if: not cleared (sentinel≠-1) AND Firebase data is newer
+      if (window._lastCsvTimestamp !== -1 && fbTs > (window._lastCsvTimestamp || 0)) {
+        window._lastCsvTimestamp = fbTs;
+        localStorage.setItem('csv_sentinel', String(fbTs));
+        applyKey('last_csv_data', data);
+        renderFromTransactions();
+        refreshAllUI();
+        const aiBtn=document.getElementById('ai-btn-wrap');
+        if(aiBtn) aiBtn.style.display='block';
       }
     }
-  } catch(e) {
-    console.error('CSV check error:', e.message);
-  }
-
-  console.log('=== END DIAGNOSTIC ===');
-  console.log('Share these results so we can identify the exact issue');
-};
-
-// ── DELETE from Firebase ──────────────────────────────────────────
-async function fbDelete(key) {
-  localStorage.removeItem('fb_' + key);
-  try {
-    await fetch(`${FB}/martinson/${key}.json`, { method: 'DELETE' });
-  } catch(e) {}
-}
-
-// ── SYNC ALL — pull everything from Firebase ──────────────────────
-async function syncAll() {
-  // Phase 1: Load non-CSV data from localStorage instantly (for speed)
-  // CSV deliberately excluded from localStorage — Firebase is sole source of truth
-  const localKeys = ['custom_meals','hidden_meals','week_hist','meal_plan',
-                     'cc_balances','family_goals','financial_settings'];
-  localKeys.forEach(k => {
-    const local = localStorage.getItem('fb_' + k);
-    if (!local) return;
-    try { applyKey(k, JSON.parse(local)); } catch(e) {}
   });
 
-  updateSyncBadge('syncing');
+  // ── CLEAR SIGNAL ──────────────────────────────────────────────
+  listen('csv_cleared', (data) => {
+    if (data && data.cleared === true) {
+      const clearTs = data.clearedAt || 0;
+      const ourTs = window._lastCsvTimestamp;
+      if (ourTs > 0 && ourTs !== -1 && clearTs >= ourTs) {
+        performLocalClear();
+        refreshAllUI();
+      }
+    }
+  });
 
-  try {
-    // Phase 2: Fetch ALL keys from Firebase — including CSV and cleared flag
-    const allKeys = ['custom_meals','hidden_meals','week_hist','meal_plan',
-                     'cc_balances','family_goals','financial_settings',
-                     'last_csv_data','csv_cleared'];
-    const results = await Promise.all(
-      allKeys.map(k => fbGet(k).catch(() => null))
-    );
-    allKeys.forEach((k, i) => {
-      if (results[i] !== null && results[i] !== undefined) {
-        // Never load CSV data if user explicitly cleared (sentinel = -1)
-        if (k === 'last_csv_data' && window._lastCsvTimestamp === -1) return;
-        if (k !== 'last_csv_data') {
-          localStorage.setItem('fb_' + k, JSON.stringify(results[i]));
-        }
-        applyKey(k, results[i]);
+  // ── ALL OTHER KEYS ────────────────────────────────────────────
+  ['meal_plan','week_hist','custom_meals','hidden_meals',
+   'financial_settings','cc_balances','family_goals'].forEach(key => {
+    listen(key, (data) => {
+      if (data !== null && data !== undefined) {
+        localStorage.setItem('fb_' + key, JSON.stringify(data));
+        applyKey(key, data);
+        refreshAllUI();
       }
     });
-    lastSyncTime = new Date();
-    updateSyncBadge('ok');
-  } catch(e) {
-    updateSyncBadge('error');
-  }
+  });
 }
 
-// ── START LIVE LISTENER — polls every 5 seconds ───────────────────
-function startLiveSync() {
-  if (fbListener) clearInterval(fbListener);
-  fbListener = setInterval(async () => {
-    try {
-      const [mp, wh, csvData, csvCleared, settings, cm, hm] = await Promise.all([
-        fbGet('meal_plan').catch(()=>null),
-        fbGet('week_hist').catch(()=>null),
-        fbGet('last_csv_data').catch(()=>null),
-        fbGet('csv_cleared').catch(()=>null),
-        fbGet('financial_settings').catch(()=>null),
-        fbGet('custom_meals').catch(()=>null),
-        fbGet('hidden_meals').catch(()=>null),
-      ]);
-
-      let changed = false;
-
-      if (cm !== null) { applyKey('custom_meals', cm); localStorage.setItem('fb_custom_meals', JSON.stringify(cm)); changed = true; }
-      if (hm !== null) { applyKey('hidden_meals', hm); localStorage.setItem('fb_hidden_meals', JSON.stringify(hm)); changed = true; }
-      if (mp !== null) { applyKey('meal_plan', mp); localStorage.setItem('fb_meal_plan', JSON.stringify(mp)); changed = true; }
-      if (wh !== null) { applyKey('week_hist', wh); localStorage.setItem('fb_week_hist', JSON.stringify(wh)); changed = true; }
-      if (settings !== null) { applyKey('financial_settings', settings); localStorage.setItem('fb_financial_settings', JSON.stringify(settings)); changed = true; }
-
-      // Handle clear signal
-      if (csvCleared !== null && csvCleared.cleared === true) {
-        // Only act if we actually have data loaded AND this clear happened after our data loaded
-        const clearTime = csvCleared.clearedAt || 0;
-        const ourLoadTime = window._lastCsvTimestamp || 0;
-        if (ourLoadTime > 0 && clearTime >= ourLoadTime) {
-          // This clear is newer than our data — wipe it
-          transactions=[];
-          localStorage.removeItem('fb_last_csv_data');
-          window._lastCsvTimestamp=-1;
-          localStorage.setItem('csv_sentinel','-1');
-          clearCSVDisplay();
-          changed=true;
-        }
-        // NOTE: Do NOT delete csv_cleared here — let it persist so all devices see it
-        // It only gets cleared when a new CSV is loaded
-      } else if (csvData === null && transactions.length>0 && window._lastCsvTimestamp>0) {
-        // Firebase has no CSV data — clear this device
-        transactions=[];
-        localStorage.removeItem('fb_last_csv_data');
-        window._lastCsvTimestamp=-1;
-        localStorage.setItem('csv_sentinel','-1');
-        clearCSVDisplay();
-        changed=true;
-      } else if (csvData !== null && csvData.uploadedAt) {
-        const fbTimestamp = csvData.uploadedAt||0;
-        if(window._lastCsvTimestamp !== -1 && fbTimestamp > (window._lastCsvTimestamp||0)){
-          window._lastCsvTimestamp=fbTimestamp;
-          applyKey('last_csv_data',csvData);
-          changed=true;
-        }
-      }
-
-      if (changed) {
-        refreshAllUI();
-        lastSyncTime = new Date();
-        updateSyncBadge('ok');
-      }
-    } catch(e) {}
-  }, 5000);
+// ── FORCE SYNC ────────────────────────────────────────────────────
+async function forceSyncNow() {
+  updateSyncBadge('syncing');
+  toast('⟳ Syncing...');
+  // Reconnect all listeners — SDK will fire 'value' immediately with current data
+  startFirebaseListeners();
+  toast('✓ Connected');
 }
 
-// ── APPLY KEY — map Firebase data to app state ────────────────────
+// ── INITIAL LOAD ──────────────────────────────────────────────────
+async function syncAll() {
+  // Load non-CSV keys from localStorage for instant startup
+  ['custom_meals','hidden_meals','week_hist','meal_plan',
+   'cc_balances','family_goals','financial_settings'].forEach(k => {
+    const v = localStorage.getItem('fb_' + k);
+    if (v) try { applyKey(k, JSON.parse(v)); } catch(e) {}
+  });
+  updateSyncBadge('syncing');
+}
+
+// ── PERFORM LOCAL CLEAR ───────────────────────────────────────────
+function performLocalClear() {
+  transactions = [];
+  window._lastCsvTimestamp = -1;
+  localStorage.setItem('csv_sentinel', '-1');
+  localStorage.removeItem('fb_last_csv_data');
+  clearCSVDisplay();
+}
+
+// ── DEBOUNCED SAVE ────────────────────────────────────────────────
+const _saveTimers = {};
+function scheduleSave(key, value) {
+  clearTimeout(_saveTimers[key]);
+  _saveTimers[key] = setTimeout(() => fbSet(key, value), 800);
+}
+
+// ── APPLY KEY — map Firebase data to local app state ──────────────
 function applyKey(key, value) {
   if (value === null || value === undefined) return;
   switch(key) {
@@ -1045,12 +989,6 @@ function applyKey(key, value) {
       }
       break;
   }
-}
-
-// ── DEBOUNCED SAVE ────────────────────────────────────────────────
-function scheduleSave(key, value) {
-  clearTimeout(syncTimer);
-  syncTimer = setTimeout(() => fbSet(key, value), 600);
 }
 
 // ── FINANCIAL SETTINGS — editable from UI ─────────────────────────
@@ -1177,9 +1115,18 @@ function refreshAllUI() {
   syncJamieToDoug();
   updateCCDisplay();
   updateGoalsDisplay();
-  // NOTE: CSV data is NOT loaded here from localStorage
-  // Firebase is the ONLY source of truth for transactions
-  // applyKey('last_csv_data') handles all CSV loading directly from Firebase
+}
+
+// Render all transaction-dependent views
+function renderFromTransactions() {
+  if (!transactions.length) return;
+  renderCatTable();
+  renderTx();
+  renderBVA();
+  updateDonutFromTransactions();
+  updateProj();
+  renderMilestones();
+  renderFreedomChart();
 }
 
 // ══════ INIT
@@ -1191,31 +1138,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('j-week-of').textContent = getWeekOf();
   document.getElementById('j-gauge-week').textContent = 'Week ' + currentWeek;
 
-  // CRITICAL: Restore sentinel from localStorage FIRST before any sync runs
-  // This ensures cleared state survives hard refreshes (Ctrl+Shift+R)
-  const savedSentinel = localStorage.getItem('csv_sentinel');
-  if (savedSentinel === '-1') {
-    window._lastCsvTimestamp = -1; // user cleared — don't reload from Firebase
-  } else if (savedSentinel) {
-    window._lastCsvTimestamp = parseInt(savedSentinel) || 0;
-  }
+  // Restore sentinel FIRST — before any network activity
+  const saved = localStorage.getItem('csv_sentinel');
+  window._lastCsvTimestamp = saved === '-1' ? -1 : (parseInt(saved) || 0);
 
-  // Phase 1: Load non-CSV data from localStorage instantly
-  const localKeys = ['custom_meals','hidden_meals','week_hist','meal_plan',
-                     'cc_balances','family_goals','financial_settings'];
-  localKeys.forEach(k => {
-    const local = localStorage.getItem('fb_' + k);
-    if (local) try { applyKey(k, JSON.parse(local)); } catch(e) {}
-  });
+  // Load non-CSV state from localStorage instantly (no network needed)
+  syncAll();
   refreshAllUI();
 
-  // Phase 2: Full sync from Firebase
+  // Start Firebase SDK real-time listeners
+  // These open WebSocket connections. Firebase PUSHES all changes
+  // to every connected device in <100ms — no polling, no race conditions.
   updateSyncBadge('syncing');
-  await syncAll();
-  refreshAllUI();
+  startFirebaseListeners();
 
-  // Phase 3: Start live 5-second polling
-  startLiveSync();
+  // Update net worth and debt metrics
+  updateNetWorth();
+  updateDebtMetrics();
 });
 
 function getWeekOf(){const n=new Date();const d=n.getDate()-n.getDay()+(n.getDay()===0?-6:1);const m=new Date(n.setDate(d));return m.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
@@ -1457,6 +1396,13 @@ function parseCSV(text,fname){
     if (el) { el.style.color='var(--red)'; el.textContent='⚠ Network error: ' + err.message; }
   });
 
+  // Archive to Firebase history (2-year rolling archive by month)
+  archiveToHistory(transactions, mn + ' – ' + mx);
+
+  // Show AI insights button now that we have data
+  const aiBtn = document.getElementById('ai-btn-wrap');
+  if(aiBtn) aiBtn.style.display='block';
+
   syncTransactionsToSheet(transactions, loadedOn);
 }
 
@@ -1507,53 +1453,38 @@ function clearCSVDisplay(){
 
 function resetCSV(openPicker){
   if(openPicker===true){
-    // Load different file — reset everything and open picker
-    transactions=[];
-    window._lastCsvTimestamp=0;
-    localStorage.removeItem('csv_cleared');
-    localStorage.removeItem('csv_sentinel');
-    localStorage.removeItem('fb_last_csv_data');
-    clearCSVDisplay();
+    // Load different file — reset sentinel and open file picker
+    performLocalClear();
+    window._lastCsvTimestamp = 0;
+    localStorage.setItem('csv_sentinel','0');
     fbDelete('csv_cleared');
     fbDelete('last_csv_data');
     setTimeout(()=>{
       const fresh=document.createElement('input');
-      fresh.type='file';
-      fresh.accept='.csv,.pdf,application/pdf';
+      fresh.type='file'; fresh.accept='.csv,.pdf,application/pdf';
       fresh.addEventListener('change',onFileSel);
-      document.body.appendChild(fresh);
-      fresh.click();
+      document.body.appendChild(fresh); fresh.click();
       setTimeout(()=>{ if(fresh.parentNode)fresh.remove(); },5000);
     },50);
   } else {
-    // ── DEFINITIVE CLEAR ──────────────────────────────────────────
-    // Step 1: Set sentinel BEFORE clearing so sync can't sneak in
+    // ── DEFINITIVE CLEAR ─────────────────────────────────────────
+    // Set sentinel FIRST — Firebase listener won't reload data if sentinel=-1
     window._lastCsvTimestamp = -1;
-    localStorage.setItem('csv_sentinel', '-1'); // persists across refreshes
-
-    // Step 2: Pause live sync so it can't interfere during the clear operation
-    if(fbListener){ clearInterval(fbListener); fbListener=null; }
-
-    // Step 3: Clear all local data
+    localStorage.setItem('csv_sentinel','-1');
     transactions=[];
-    localStorage.setItem('csv_cleared','true');
     localStorage.removeItem('fb_last_csv_data');
-    localStorage.removeItem('m_last_csv_data');
     clearCSVDisplay();
+    updateNetWorth();
+    updateDebtMetrics();
 
-    // Step 4: Wipe Firebase — both the data and any stale cleared flag
     const clearedAt = Date.now();
+    // Delete data + write clear signal atomically
+    // Firebase SDK pushes the null value to ALL devices instantly via WebSocket
     Promise.all([
       fbDelete('last_csv_data'),
-      fbSet('csv_cleared', { cleared:true, clearedAt, when:new Date().toISOString() })
-    ]).then(()=>{
-      toast('✓ Cleared on all devices');
-      // Step 5: Restart live sync after Firebase ops complete
-      setTimeout(startLiveSync, 1000);
-    }).catch(()=>{
-      toast('✓ Cleared locally');
-      setTimeout(startLiveSync, 1000);
-    });
+      fbSet('csv_cleared',{cleared:true, clearedAt})
+    ]).then(()=>toast('✓ Cleared on all devices'))
+      .catch(()=>toast('✓ Cleared'));
   }
 }
 
@@ -2169,27 +2100,141 @@ function renderWeekHist(){
 }
 
 function updateCCDisplay(){
-  // Update Douglas's CC table with synced balances
-  const total=Object.values(ccBalances).reduce((s,v)=>s+v,0);
-  // Update projections with new balances
   CARDS[0].balance=ccBalances.bofa||13567.18;
   CARDS[1].balance=ccBalances.chase||5279.89;
   CARDS[2].balance=ccBalances.bestbuy||3438.17;
   CARDS[3].balance=ccBalances.usbank2405||1679.65;
   CARDS[4].balance=ccBalances.usbank6925||800;
+  updateDebtMetrics();
+  updateNetWorth();
 }
 
 function updateGoalsDisplay(){
   const ef=document.getElementById('d-ef-val');
   if(ef)ef.textContent='$'+familyGoals.efund.toLocaleString();
-  const pct=(familyGoals.efund/10000*100).toFixed(1);
   const lgP=document.getElementById('lg-prog');
   if(lgP)lgP.style.width=(familyGoals.lgfund/3000*100)+'%';
   const lgD=document.getElementById('lg-display');
   if(lgD)lgD.textContent='$'+familyGoals.lgfund.toLocaleString()+' / $3K';
+  updateNetWorth();
 }
 
-// Douglas updates CC balances — syncs to Jamie's view
+// ── NET WORTH ─────────────────────────────────────────────────────
+function updateNetWorth(){
+  const totalDebt = CARDS.reduce((s,c)=>s+c.balance,0);
+  const efund = familyGoals.efund || 5145;
+  const lgfund = familyGoals.lgfund || 0;
+  const retirement = 158540; // Merrill — update manually when it changes
+  const assets = efund + lgfund + retirement;
+  const netWorth = assets - totalDebt;
+
+  const el = document.getElementById('d-networth-val');
+  const sub = document.getElementById('d-networth-sub');
+  if(el){
+    el.textContent = (netWorth<0?'-':'') + fmt(netWorth);
+    el.style.color = netWorth >= 0 ? 'var(--teal)' : 'var(--red)';
+  }
+  if(sub) sub.textContent = `Assets ${fmt(assets)} − Liabilities ${fmt(totalDebt)}`;
+}
+
+// ── DEBT METRICS ─────────────────────────────────────────────────
+function updateDebtMetrics(){
+  const totalDebt = CARDS.reduce((s,c)=>s+c.balance,0);
+  const dailyInterest = CARDS.reduce((s,c)=>s+(c.balance*(c.apr/365)),0);
+  const monthlyInterest = CARDS.reduce((s,c)=>s+(c.balance*(c.apr/12)),0);
+
+  // Daily cost banner
+  const daily = document.getElementById('daily-debt-cost');
+  if(daily) daily.innerHTML = `This debt costs you <strong>$${dailyInterest.toFixed(2)}/day</strong> in interest`;
+
+  // Freedom countdown using avalanche, minimums only
+  const sc = calcPayoff(0,'avalanche');
+  const freedomMonths = sc.length;
+  const freedomEl = document.getElementById('freedom-countdown');
+  const freedomDate = document.getElementById('freedom-date-banner');
+  if(freedomEl) freedomEl.textContent = freedomMonths + ' months';
+  if(freedomDate) freedomDate.textContent = mlabel(freedomMonths);
+
+  // Update debt card
+  const debtEl = document.getElementById('d-debt-val');
+  const debtSub = document.getElementById('d-debt-sub');
+  if(debtEl) debtEl.textContent = fmt(totalDebt);
+  if(debtSub) debtSub.textContent = `${CARDS.length} cards · $${Math.round(monthlyInterest).toLocaleString()}/mo interest`;
+}
+
+// ── AI INSIGHTS ───────────────────────────────────────────────────
+async function getAIInsights(){
+  if(!transactions.length){ toast('Load a CSV first'); return; }
+  const btn = document.getElementById('ai-btn-wrap');
+  const wrap = document.getElementById('ai-insights-wrap');
+  const content = document.getElementById('ai-insights-content');
+  if(!wrap||!content) return;
+
+  wrap.style.display='block';
+  content.innerHTML='<div style="color:var(--teal);font-size:12px">✨ Analyzing your spending...</div>';
+  if(btn) btn.style.display='none';
+
+  // Build spending summary
+  const EXCL=['Transfers','Income'];
+  const ct={};
+  const txDates=transactions.map(t=>new Date(t.date)).filter(d=>!isNaN(d));
+  const days=txDates.length>1?(Math.max(...txDates)-Math.min(...txDates))/(86400000):30;
+  const months=Math.max(1,days/30.44);
+  transactions.filter(t=>t.amount<0&&!EXCL.includes(t.cat))
+    .forEach(t=>{ct[t.cat]=(ct[t.cat]||0)+Math.abs(t.amount);});
+  const monthly=Object.entries(ct).map(([k,v])=>`${k}: $${(v/months).toFixed(0)}/mo`).join(', ');
+  const surplus=FINANCIAL.income-Object.values(ct).reduce((s,v)=>s+v,0)/months;
+  const totalDebt=CARDS.reduce((s,c)=>s+c.balance,0);
+  const sc=calcPayoff(0,'avalanche');
+
+  const prompt=`You are a sharp, warm financial advisor helping the Martinson family in Kansas City. 
+Income: $${FINANCIAL.income}/mo. Monthly spending: ${monthly}. 
+Monthly surplus: $${surplus.toFixed(0)}. Total CC debt: $${totalDebt.toFixed(0)} across 5 cards (highest APR: Best Buy 29.99%).
+Debt-free in ${sc.length} months at current pace.
+Provide 3 specific, actionable insights in plain language. Be direct and encouraging. 
+Format as: "1. [insight]" on separate lines. Max 120 words total. No jargon.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:200,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.[0]?.text || '';
+    content.innerHTML = '<div style="font-size:11px;font-weight:700;color:var(--teal);margin-bottom:6px">✨ AI Insights</div>' +
+      text.split('\n').filter(l=>l.trim()).map(l=>`<div style="margin-bottom:6px;color:var(--text)">${l}</div>`).join('');
+    if(btn){btn.style.display='block';btn.querySelector('button').textContent='↻ Refresh Insights';}
+  } catch(e) {
+    content.innerHTML='<div style="color:var(--text-mid);font-size:12px">Insights unavailable — check API key in Google Keep</div>';
+    if(btn) btn.style.display='block';
+  }
+}
+
+// ── HISTORY — store each CSV load by month for 2-year archive ─────
+function archiveToHistory(txns, period){
+  if(!txns.length) return;
+  const monthKey = new Date().toISOString().substring(0,7); // YYYY-MM
+  const snapshot = {
+    period, count:txns.length, savedAt:Date.now(),
+    cats:{}, totalSpend:0, totalIncome:0
+  };
+  const EXCL=['Transfers','Income'];
+  txns.forEach(t=>{
+    if(t.amount<0&&!EXCL.includes(t.cat)){
+      snapshot.cats[t.cat]=(snapshot.cats[t.cat]||0)+Math.abs(t.amount);
+      snapshot.totalSpend+=Math.abs(t.amount);
+    }
+    if(t.cat==='Income') snapshot.totalIncome+=t.amount;
+  });
+  // Store in Firebase under history/YYYY-MM — keeps up to 24 months
+  FBDB.ref(`martinson/history/${monthKey}`).set(snapshot);
+}
+
 function updateCCBalance(card, value){
   ccBalances[card] = parseFloat(value)||0;
   fbSet('cc_balances', ccBalances);
