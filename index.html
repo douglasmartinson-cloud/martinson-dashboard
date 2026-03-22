@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Martinson Family Dashboard v25</title>
+<title>Martinson Family Dashboard v26</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -301,7 +301,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <!-- ENTRY SCREEN -->
 <div id="entry-screen">
   <div class="entry-logo">Martinson Family</div>
-  <div class="entry-sub">Kansas City, MO · Your Family Hub · v25</div>
+  <div class="entry-sub">Kansas City, MO · Your Family Hub · v26</div>
   <div class="entry-box">
     <div class="entry-title">🔒 Enter Password</div>
     <div class="entry-dots">
@@ -941,16 +941,24 @@ function startLiveSync() {
       if (wh !== null) { applyKey('week_hist', wh); localStorage.setItem('fb_week_hist', JSON.stringify(wh)); changed = true; }
       if (settings !== null) { applyKey('financial_settings', settings); localStorage.setItem('fb_financial_settings', JSON.stringify(settings)); changed = true; }
 
-      // Handle clear signal — null from Firebase means data was deleted
+      // Handle clear signal
       if (csvCleared !== null && csvCleared.cleared === true) {
-        transactions=[];
-        localStorage.removeItem('fb_last_csv_data');
-        window._lastCsvTimestamp=-1;
-        localStorage.setItem('csv_sentinel','-1');
-        clearCSVDisplay();
-        fbDelete('csv_cleared');
-        changed=true;
+        // Only act if we actually have data loaded AND this clear happened after our data loaded
+        const clearTime = csvCleared.clearedAt || 0;
+        const ourLoadTime = window._lastCsvTimestamp || 0;
+        if (ourLoadTime > 0 && clearTime >= ourLoadTime) {
+          // This clear is newer than our data — wipe it
+          transactions=[];
+          localStorage.removeItem('fb_last_csv_data');
+          window._lastCsvTimestamp=-1;
+          localStorage.setItem('csv_sentinel','-1');
+          clearCSVDisplay();
+          changed=true;
+        }
+        // NOTE: Do NOT delete csv_cleared here — let it persist so all devices see it
+        // It only gets cleared when a new CSV is loaded
       } else if (csvData === null && transactions.length>0 && window._lastCsvTimestamp>0) {
+        // Firebase has no CSV data — clear this device
         transactions=[];
         localStorage.removeItem('fb_last_csv_data');
         window._lastCsvTimestamp=-1;
@@ -959,7 +967,6 @@ function startLiveSync() {
         changed=true;
       } else if (csvData !== null && csvData.uploadedAt) {
         const fbTimestamp = csvData.uploadedAt||0;
-        // Only reload if: sentinel not set AND Firebase has newer data
         if(window._lastCsvTimestamp !== -1 && fbTimestamp > (window._lastCsvTimestamp||0)){
           window._lastCsvTimestamp=fbTimestamp;
           applyKey('last_csv_data',csvData);
@@ -1026,10 +1033,15 @@ function applyKey(key, value) {
       break;
     case 'csv_cleared':
       if (value && value.cleared === true) {
-        // Clear on every device — wipe transactions AND reset the UI
-        transactions = [];
-        localStorage.removeItem('csv_cleared');
-        clearCSVDisplay();
+        const clearTime = value.clearedAt || 0;
+        const ourLoadTime = window._lastCsvTimestamp || 0;
+        if (ourLoadTime > 0 && clearTime >= ourLoadTime) {
+          transactions = [];
+          localStorage.removeItem('csv_cleared');
+          window._lastCsvTimestamp = -1;
+          localStorage.setItem('csv_sentinel', '-1');
+          clearCSVDisplay();
+        }
       }
       break;
   }
