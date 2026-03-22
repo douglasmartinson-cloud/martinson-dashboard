@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Martinson Family Dashboard v24</title>
+<title>Martinson Family Dashboard v25</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -301,7 +301,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <!-- ENTRY SCREEN -->
 <div id="entry-screen">
   <div class="entry-logo">Martinson Family</div>
-  <div class="entry-sub">Kansas City, MO · Your Family Hub · v24</div>
+  <div class="entry-sub">Kansas City, MO · Your Family Hub · v25</div>
   <div class="entry-box">
     <div class="entry-title">🔒 Enter Password</div>
     <div class="entry-dots">
@@ -1675,10 +1675,25 @@ function resetReceipt(){
 }
 
 function renderCatTable(){
-  const tot={};transactions.filter(t=>t.amount<0&&t.cat!=='Transfers'&&t.cat!=='Income').forEach(t=>{tot[t.cat]=(tot[t.cat]||0)+Math.abs(t.amount);});
-  const sorted=Object.entries(tot).sort((a,b)=>b[1]-a[1]);const total=sorted.reduce((s,[,v])=>s+v,0);
-  document.getElementById('cat-table').innerHTML=`<thead><tr><th>Category</th><th style="text-align:right">Spent</th><th style="text-align:right">%</th></tr></thead><tbody>${sorted.map(([cat,amt])=>{const r=RULES.find(x=>x.cat===cat)||RULES[RULES.length-1];return`<tr><td><span class="cat-dot" style="background:${r.color}"></span>${cat}</td><td style="text-align:right;font-weight:600">${fmt(amt)}</td><td style="text-align:right;color:var(--text-mid)">${(amt/total*100).toFixed(1)}%</td></tr>`;}).join('')}<tr style="border-top:2px solid var(--border)"><td style="font-weight:700">TOTAL</td><td style="text-align:right;font-weight:700;color:var(--red)">${fmt(total)}</td><td></td></tr></tbody>`;
-  document.getElementById('cat-empty').style.display='none';document.getElementById('cat-table-wrap').style.display='block';
+  const EXCLUDE_CAT = ['Transfers','Income'];
+  const tot={};
+  transactions.filter(t=>t.amount<0 && !EXCLUDE_CAT.includes(t.cat))
+    .forEach(t=>{tot[t.cat]=(tot[t.cat]||0)+Math.abs(t.amount);});
+
+  // Pro-rate to monthly average
+  const txDates=transactions.map(t=>new Date(t.date)).filter(d=>!isNaN(d));
+  const days=txDates.length>1?(Math.max(...txDates)-Math.min(...txDates))/(1000*60*60*24):30;
+  const months=Math.max(1,days/30.44);
+  const isMultiMonth=months>1.2;
+
+  const sorted=Object.entries(tot).sort((a,b)=>b[1]-a[1]);
+  const total=sorted.reduce((s,[,v])=>s+v,0);
+  const monthlyTotal=total/months;
+
+  const label=isMultiMonth?`Monthly Avg <span style="color:var(--text-soft);font-weight:400">(${months.toFixed(1)}mo data)</span>`:'Spent';
+  document.getElementById('cat-table').innerHTML=`<thead><tr><th>Category</th><th style="text-align:right">${label}</th><th style="text-align:right">%</th></tr></thead><tbody>${sorted.map(([cat,amt])=>{const r=RULES.find(x=>x.cat===cat)||RULES[RULES.length-1];const display=isMultiMonth?amt/months:amt;const pct=monthlyTotal>0?(display/monthlyTotal*100).toFixed(1):0;return`<tr><td><span class="cat-dot" style="background:${r.color}"></span>${cat}</td><td style="text-align:right;font-weight:600">${fmt(display)}</td><td style="text-align:right;color:var(--text-mid)">${pct}%</td></tr>`;}).join('')}<tr style="border-top:2px solid var(--border)"><td style="font-weight:700">TOTAL</td><td style="text-align:right;font-weight:700;color:var(--red)">${fmt(monthlyTotal)}</td><td></td></tr></tbody>`;
+  document.getElementById('cat-empty').style.display='none';
+  document.getElementById('cat-table-wrap').style.display='block';
 }
 
 function renderTx(){
@@ -1779,12 +1794,16 @@ function updateDonutFromTransactions(){
 }
 
 // Load cross-device CSV data — always replaces whatever is currently loaded
-// The most recently uploaded file always wins across all devices
 function loadCrossDeviceCsvData(data){
   if(!data||!data.txList||!data.txList.length) return;
-  // Fully replace transactions — no merging, no combining
   transactions = data.txList.map(t=>({
-    ...t, color: (RULES.find(r=>r.cat===t.cat)||RULES[RULES.length-1]).color
+    date: t.d||t.date||'',
+    desc: t.n||t.desc||'',
+    // CRITICAL: use explicit null check not || for amounts (negative numbers are falsy issue)
+    amount: (t.a !== undefined && t.a !== null) ? Number(t.a) : Number(t.amount||0),
+    cat: t.c||t.cat||'Other',
+    month: t.m||t.month||'',
+    color:(RULES.find(r=>r.cat===(t.c||t.cat))||RULES[RULES.length-1]).color
   }));
   transactions.sort((a,b)=>new Date(b.date)-new Date(a.date));
 
