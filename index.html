@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Martinson Family Dashboard v18</title>
+<title>Martinson Family Dashboard v19</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -301,7 +301,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <!-- ENTRY SCREEN -->
 <div id="entry-screen">
   <div class="entry-logo">Martinson Family</div>
-  <div class="entry-sub">Kansas City, MO · Your Family Hub · v18</div>
+  <div class="entry-sub">Kansas City, MO · Your Family Hub · v19</div>
   <div class="entry-box">
     <div class="entry-title">🔒 Enter Password</div>
     <div class="entry-dots">
@@ -793,24 +793,20 @@ async function fbGet(key) {
 async function fbSet(key, value) {
   localStorage.setItem('fb_' + key, JSON.stringify(value));
   try {
-    // Use PATCH instead of PUT — more reliable cross-origin
-    const res = await fetch(`${FB}/martinson.json`, {
-      method: 'PATCH',
+    // PUT to specific path — most reliable Firebase REST operation
+    // Value must be a flat object or primitive — no nested arrays
+    const res = await fetch(`${FB}/martinson/${key}.json`, {
+      method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ [key]: value })
+      body: JSON.stringify(value)
     });
     if (!res.ok) {
-      const errText = await res.text();
-      const el = document.getElementById('tx-sync-status');
-      if (el) { el.style.color='var(--red)'; el.textContent=`⚠ Firebase error ${res.status}: ${errText.substring(0,60)}`; }
       updateSyncBadge('error');
       return;
     }
     lastSyncTime = new Date();
     updateSyncBadge('ok');
   } catch(e) {
-    const el = document.getElementById('tx-sync-status');
-    if (el) { el.style.color='var(--red)'; el.textContent=`⚠ Network error: ${e.message}`; }
     updateSyncBadge('error');
   }
 }
@@ -879,12 +875,7 @@ window.runSyncTest = async function() {
 async function fbDelete(key) {
   localStorage.removeItem('fb_' + key);
   try {
-    // Set to null via PATCH to delete the key
-    await fetch(`${FB}/martinson.json`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ [key]: null })
-    });
+    await fetch(`${FB}/martinson/${key}.json`, { method: 'DELETE' });
   } catch(e) {}
 }
 
@@ -987,11 +978,32 @@ function applyKey(key, value) {
       }
       break;
     case 'last_csv_data':
-      // Always load CSV from Firebase — Firebase is the single source of truth
-      // The cleared flag only blocks localStorage, not Firebase data
-      if (value && value.txList && value.txList.length) {
+      if (value && (value.txData || value.txList)) {
         window._lastCsvTimestamp = value.uploadedAt || 0;
-        loadCrossDeviceCsvData(value);
+        // Handle both new format (txData as string) and old format (txList as array)
+        if (value.txData && typeof value.txData === 'string') {
+          // New format: decode the string-encoded transaction list
+          try {
+            const txArr = JSON.parse(value.txData);
+            const catTotals = value.cats ? JSON.parse(value.cats) : {};
+            const decoded = {
+              txList: txArr.map(t=>({
+                date:t.d||t.date, desc:t.n||t.desc,
+                amount:t.a||t.amount, cat:t.c||t.cat, month:t.m||t.month,
+                color:(RULES.find(r=>r.cat===(t.c||t.cat))||RULES[RULES.length-1]).color
+              })),
+              catTotals,
+              period: value.period,
+              loadedOn: value.loadedOn,
+              count: value.count,
+              uploadedAt: value.uploadedAt
+            };
+            loadCrossDeviceCsvData(decoded);
+          } catch(e) {}
+        } else if (value.txList && Array.isArray(value.txList)) {
+          // Old format: txList already an array
+          loadCrossDeviceCsvData(value);
+        }
       }
       break;
     case 'csv_cleared':
@@ -1345,35 +1357,51 @@ function parseCSV(text,fname){
   updateDonutFromTransactions();
   toast('✓ '+transactions.length+' transactions loaded — syncing...');
 
-  // ── CROSS-DEVICE SYNC: push processed data to Google Sheets ───────
-  // Build category totals from this CSV
+  // ── CROSS-DEVICE SYNC ─────────────────────────────────────────────
   const catTotals={};
   transactions.filter(t=>t.amount<0&&t.cat!=='Transfers'&&t.cat!=='Income')
     .forEach(t=>{catTotals[t.cat]=(catTotals[t.cat]||0)+Math.abs(t.amount);});
 
-  // Build compact transaction list for cross-device viewing
-  const txCompact=transactions.map(t=>({
-    date:t.date,desc:t.desc,amount:t.amount,cat:t.cat,month:t.month
+  // Sanitize strings — remove any chars that break Firebase JSON parsing
+  // Firebase rejects null bytes, control chars, and improperly encoded strings
+  function sanitize(s){ return String(s||'').replace(/[\x00-\x1F\x7F]/g,' ').trim(); }
+
+  const txCompact = transactions.map(t=>({
+    d: sanitize(t.date),
+    n: sanitize(t.desc).substring(0,50), // cap description at 50 chars
+    a: isFinite(t.amount) ? t.amount : 0,
+    c: sanitize(t.cat),
+    m: sanitize(t.month)
   }));
 
-  // Sync to Firebase so other devices see it immediately
-  const syncData={
+  // KEY FIX: Store txList as a JSON-encoded STRING not a native array
+  // Firebase REST API rejects nested arrays in PATCH/PUT operations
+  // Storing as string bypasses this entirely — Firebase treats it as a leaf node
+  const syncData = {
+    txData: JSON.stringify(txCompact), // encoded string — not an array
+    cats: JSON.stringify(catTotals),   // encoded string — not an object
+    period: sanitize(mn + ' – ' + mx),
+    loadedOn: sanitize(loadedOn),
+    count: transactions.length,
+    uploadedAt: Date.now()
+  };
+
+  // Store in localStorage with original format for local use
+  localStorage.setItem('fb_last_csv_data', JSON.stringify({
+    txList: txCompact.map(t=>({date:t.d,desc:t.n,amount:t.a,cat:t.c,month:t.m,
+      color:(RULES.find(r=>r.cat===t.c)||RULES[RULES.length-1]).color})),
     catTotals,
-    txList: txCompact,
     period: mn+' – '+mx,
     loadedOn,
     count: transactions.length,
-    uploadedAt: Date.now(),
-    uploadedFrom: 'device'
-  };
-  localStorage.setItem('fb_last_csv_data', JSON.stringify(syncData));
+    uploadedAt: syncData.uploadedAt
+  }));
 
-  // Write to Firebase with explicit success/error logging
-  console.log('Writing CSV data to Firebase...', syncData.count, 'transactions');
-  fetch(`${FB}/martinson.json`, {
-    method: 'PATCH',
+  // Write to Firebase — PUT to specific path, flat object with string values only
+  fetch(`${FB}/martinson/last_csv_data.json`, {
+    method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ last_csv_data: syncData })
+    body: JSON.stringify(syncData)
   }).then(res => {
     const el = document.getElementById('tx-sync-status');
     if (res.ok) {
@@ -1387,7 +1415,7 @@ function parseCSV(text,fname){
     }
   }).catch(err => {
     const el = document.getElementById('tx-sync-status');
-    if (el) { el.style.color='var(--red)'; el.textContent='⚠ Write failed: ' + err.message; }
+    if (el) { el.style.color='var(--red)'; el.textContent='⚠ Network error: ' + err.message; }
   });
 
   syncTransactionsToSheet(transactions, loadedOn);
