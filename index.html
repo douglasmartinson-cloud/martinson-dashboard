@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Martinson Family Dashboard v16</title>
+<title>Martinson Family Dashboard v17</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -301,7 +301,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <!-- ENTRY SCREEN -->
 <div id="entry-screen">
   <div class="entry-logo">Martinson Family</div>
-  <div class="entry-sub">Kansas City, MO · Your Family Hub · v16</div>
+  <div class="entry-sub">Kansas City, MO · Your Family Hub · v17</div>
   <div class="entry-box">
     <div class="entry-title">🔒 Enter Password</div>
     <div class="entry-dots">
@@ -1359,11 +1359,33 @@ function parseCSV(text,fname){
     period: mn+' – '+mx,
     loadedOn,
     count: transactions.length,
-    uploadedAt: Date.now(), // timestamp so newest upload always wins
-    uploadedFrom: window.location.href.includes('phone') ? 'phone' : 'laptop'
+    uploadedAt: Date.now(),
+    uploadedFrom: 'device'
   };
   localStorage.setItem('fb_last_csv_data', JSON.stringify(syncData));
-  fbSet('last_csv_data', syncData);
+
+  // Write to Firebase with explicit success/error logging
+  console.log('Writing CSV data to Firebase...', syncData.count, 'transactions');
+  fetch(`${FB}/martinson/last_csv_data.json`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(syncData)
+  }).then(res => {
+    console.log('Firebase CSV write status:', res.status, res.ok ? '✅ SUCCESS' : '❌ FAILED');
+    if (res.ok) {
+      lastSyncTime = new Date();
+      updateSyncBadge('ok');
+      const el = document.getElementById('tx-sync-status');
+      if (el) { el.style.color='var(--teal)'; el.textContent='✓ Synced to all devices'; }
+    } else {
+      res.text().then(t => console.error('Firebase error:', t));
+      const el = document.getElementById('tx-sync-status');
+      if (el) { el.style.color='var(--red)'; el.textContent='⚠ Sync failed — see console'; }
+    }
+  }).catch(err => {
+    console.error('Firebase CSV write error:', err.message);
+  });
+
   syncTransactionsToSheet(transactions, loadedOn);
 }
 
