@@ -1371,19 +1371,19 @@ function parseCSV(text,fname){
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(syncData)
   }).then(res => {
-    console.log('Firebase CSV write status:', res.status, res.ok ? '✅ SUCCESS' : '❌ FAILED');
+    const el = document.getElementById('tx-sync-status');
     if (res.ok) {
       lastSyncTime = new Date();
       updateSyncBadge('ok');
-      const el = document.getElementById('tx-sync-status');
-      if (el) { el.style.color='var(--teal)'; el.textContent='✓ Synced to all devices'; }
+      if (el) { el.style.color='var(--teal)'; el.textContent='✓ Synced to all devices — check your phone'; }
     } else {
-      res.text().then(t => console.error('Firebase error:', t));
-      const el = document.getElementById('tx-sync-status');
-      if (el) { el.style.color='var(--red)'; el.textContent='⚠ Sync failed — see console'; }
+      res.text().then(t => {
+        if (el) { el.style.color='var(--red)'; el.textContent='⚠ Firebase error: ' + res.status + ' — ' + t.substring(0,80); }
+      });
     }
   }).catch(err => {
-    console.error('Firebase CSV write error:', err.message);
+    const el = document.getElementById('tx-sync-status');
+    if (el) { el.style.color='var(--red)'; el.textContent='⚠ Write failed: ' + err.message; }
   });
 
   syncTransactionsToSheet(transactions, loadedOn);
