@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Martinson Family Dashboard v17</title>
+<title>Martinson Family Dashboard v18</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -301,7 +301,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <!-- ENTRY SCREEN -->
 <div id="entry-screen">
   <div class="entry-logo">Martinson Family</div>
-  <div class="entry-sub">Kansas City, MO · Your Family Hub · v17</div>
+  <div class="entry-sub">Kansas City, MO · Your Family Hub · v18</div>
   <div class="entry-box">
     <div class="entry-title">🔒 Enter Password</div>
     <div class="entry-dots">
@@ -779,39 +779,38 @@ let fbListener = null; // live listener reference
 // ── READ from Firebase ────────────────────────────────────────────
 async function fbGet(key) {
   try {
-    const res = await fetch(`${FB}/martinson/${key}.json`);
-    if (!res.ok) {
-      console.warn(`Firebase GET ${key} failed: ${res.status} ${res.statusText}`);
-      return null;
-    }
+    const res = await fetch(`${FB}/martinson/${key}.json`, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' }
+    });
+    if (!res.ok) return null;
     const data = await res.json();
-    console.log(`Firebase GET ${key}:`, data ? 'got data' : 'null');
     return data;
-  } catch(e) {
-    console.error(`Firebase GET ${key} error:`, e.message);
-    return null;
-  }
+  } catch(e) { return null; }
 }
 
 // ── WRITE to Firebase ─────────────────────────────────────────────
 async function fbSet(key, value) {
   localStorage.setItem('fb_' + key, JSON.stringify(value));
   try {
-    const res = await fetch(`${FB}/martinson/${key}.json`, {
-      method: 'PUT',
+    // Use PATCH instead of PUT — more reliable cross-origin
+    const res = await fetch(`${FB}/martinson.json`, {
+      method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(value)
+      body: JSON.stringify({ [key]: value })
     });
     if (!res.ok) {
-      console.error(`Firebase SET ${key} failed: ${res.status} ${res.statusText}`);
+      const errText = await res.text();
+      const el = document.getElementById('tx-sync-status');
+      if (el) { el.style.color='var(--red)'; el.textContent=`⚠ Firebase error ${res.status}: ${errText.substring(0,60)}`; }
       updateSyncBadge('error');
       return;
     }
-    console.log(`Firebase SET ${key}: success`);
     lastSyncTime = new Date();
     updateSyncBadge('ok');
   } catch(e) {
-    console.error(`Firebase SET ${key} error:`, e.message);
+    const el = document.getElementById('tx-sync-status');
+    if (el) { el.style.color='var(--red)'; el.textContent=`⚠ Network error: ${e.message}`; }
     updateSyncBadge('error');
   }
 }
@@ -880,7 +879,12 @@ window.runSyncTest = async function() {
 async function fbDelete(key) {
   localStorage.removeItem('fb_' + key);
   try {
-    await fetch(`${FB}/martinson/${key}.json`, { method: 'DELETE' });
+    // Set to null via PATCH to delete the key
+    await fetch(`${FB}/martinson.json`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ [key]: null })
+    });
   } catch(e) {}
 }
 
@@ -1366,10 +1370,10 @@ function parseCSV(text,fname){
 
   // Write to Firebase with explicit success/error logging
   console.log('Writing CSV data to Firebase...', syncData.count, 'transactions');
-  fetch(`${FB}/martinson/last_csv_data.json`, {
-    method: 'PUT',
+  fetch(`${FB}/martinson.json`, {
+    method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(syncData)
+    body: JSON.stringify({ last_csv_data: syncData })
   }).then(res => {
     const el = document.getElementById('tx-sync-status');
     if (res.ok) {
