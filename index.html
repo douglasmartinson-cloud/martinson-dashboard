@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Martinson Family Dashboard v19</title>
+<title>Martinson Family Dashboard v20</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -301,7 +301,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <!-- ENTRY SCREEN -->
 <div id="entry-screen">
   <div class="entry-logo">Martinson Family</div>
-  <div class="entry-sub">Kansas City, MO · Your Family Hub · v19</div>
+  <div class="entry-sub">Kansas City, MO · Your Family Hub · v20</div>
   <div class="entry-box">
     <div class="entry-title">🔒 Enter Password</div>
     <div class="entry-dots">
@@ -426,9 +426,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         </div>
       </div>
       <div class="metrics">
-        <div class="metric m-teal"><div class="metric-label">Monthly Surplus</div><div class="metric-val">$393</div><div class="metric-sub">After all bills &amp; debt</div></div>
-        <div class="metric m-red"><div class="metric-label">Total CC Debt</div><div class="metric-val">$24,765</div><div class="metric-sub">5 cards · $519/mo interest</div></div>
-        <div class="metric m-gold"><div class="metric-label">Monthly Income</div><div class="metric-val">$9,090</div><div class="metric-sub">SymphonyAI · net</div></div>
+        <div class="metric m-teal"><div class="metric-label">Monthly Surplus</div><div class="metric-val" id="d-surplus-val">$393</div><div class="metric-sub" id="d-surplus-sub">After all bills &amp; debt</div></div>
+        <div class="metric m-red"><div class="metric-label">Total CC Debt</div><div class="metric-val" id="d-debt-val">$24,765</div><div class="metric-sub" id="d-debt-sub">5 cards · $519/mo interest</div></div>
+        <div class="metric m-gold"><div class="metric-label">Monthly Income</div><div class="metric-val" id="d-income-val">$9,090</div><div class="metric-sub">SymphonyAI · net</div></div>
         <div class="metric m-blue"><div class="metric-label">Emergency Fund</div><div class="metric-val" id="d-ef-val">$5,145</div><div class="metric-sub">Target: $10,000</div></div>
       </div>
       <div class="grid-2">
@@ -1007,10 +1007,11 @@ function applyKey(key, value) {
       }
       break;
     case 'csv_cleared':
-      // Only use this to clear the display, not block Firebase data
       if (value && value.cleared === true) {
+        // Clear on every device — wipe transactions AND reset the UI
         transactions = [];
         localStorage.removeItem('csv_cleared');
+        clearCSVDisplay();
       }
       break;
   }
@@ -1438,22 +1439,37 @@ async function syncTransactionsToSheet(txns, loadedOn) {
     if (el) { el.style.color = 'var(--text-mid)'; el.textContent = '✓ Saved locally'; }
   }
 }
-function resetCSV(openPicker){
-  transactions=[];
+function clearCSVDisplay(){
   const dz=document.getElementById('drop-zone');
-  dz.classList.remove('loaded');
-
-  // Re-enable the invisible drop-input so clicking zone works again
+  if(dz) dz.classList.remove('loaded');
   const dropInp=document.getElementById('drop-input');
   if(dropInp){ dropInp.style.pointerEvents='auto'; dropInp.value=''; }
+  const dc=document.getElementById('drop-content');
+  if(dc) dc.innerHTML='<div style="font-size:32px;margin-bottom:8px">📂</div><div style="font-size:15px;font-weight:600;margin-bottom:4px">Drop BofA CSV or PDF here — or click to browse</div><div style="font-size:12px;color:var(--text-mid)">BofA → Checking ...9289 → Download → CSV or PDF</div><div style="margin-top:10px;font-size:11px;color:var(--text-soft)">After loading: use ✕ Clear to remove, or Load different file to replace.</div>';
+  // Reset all tabs that depend on transaction data
+  const catEmpty=document.getElementById('cat-empty');
+  const catWrap=document.getElementById('cat-table-wrap');
+  const txEmpty=document.getElementById('tx-empty-state');
+  const txLoaded=document.getElementById('tx-loaded');
+  const bvaEmpty=document.getElementById('bva-empty');
+  const bvaLoaded=document.getElementById('bva-loaded');
+  if(catEmpty) catEmpty.style.display='block';
+  if(catWrap) catWrap.style.display='none';
+  if(txEmpty) txEmpty.style.display='block';
+  if(txLoaded) txLoaded.style.display='none';
+  if(bvaEmpty) bvaEmpty.style.display='block';
+  if(bvaLoaded) bvaLoaded.style.display='none';
+  // Reset donut to static budget view
+  renderDonut();
+  // Reset projections to hardcoded card balances
+  updateProj();
+  // Reset milestones
+  renderMilestones();
+}
 
-  document.getElementById('drop-content').innerHTML='<div style="font-size:32px;margin-bottom:8px">📂</div><div style="font-size:15px;font-weight:600;margin-bottom:4px">Drop BofA CSV or PDF here — or click to browse</div><div style="font-size:12px;color:var(--text-mid)">BofA → Checking ...9289 → Download → CSV or PDF</div><div style="margin-top:10px;font-size:11px;color:var(--text-soft)">After loading: use ✕ Clear to remove, or Load different file to replace.</div>';
-  document.getElementById('cat-empty').style.display='block';
-  document.getElementById('cat-table-wrap').style.display='none';
-  document.getElementById('tx-empty-state').style.display='block';
-  document.getElementById('tx-loaded').style.display='none';
-  document.getElementById('bva-empty').style.display='block';
-  document.getElementById('bva-loaded').style.display='none';
+function resetCSV(openPicker){
+  transactions=[];
+  clearCSVDisplay();
 
   if(openPicker===true){
     // Load different file — clear the flag so new file can load
@@ -1469,11 +1485,13 @@ function resetCSV(openPicker){
       setTimeout(()=>{ if(fresh.parentNode)fresh.remove(); },5000);
     },50);
   } else {
-    // Pure clear — set flag so auto-sync never reloads this data
+    // Pure clear — wipe from Firebase AND local
     localStorage.setItem('csv_cleared','true');
-    // Also remove cached CSV data so it doesn't come back
+    localStorage.removeItem('fb_last_csv_data');
     localStorage.removeItem('m_last_csv_data');
-    // Tell the Sheet the user cleared — other devices respect this too
+    // Delete last_csv_data from Firebase so other devices don't reload it
+    fbDelete('last_csv_data');
+    // Tell all devices the user cleared
     fbSet('csv_cleared', { cleared:true, when:new Date().toISOString() });
     toast('✓ Cleared');
   }
@@ -1652,24 +1670,55 @@ function renderBVA(){
   else{const ctx=document.getElementById('bar-chart').getContext('2d');charts.bar=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Budget',data:bd,backgroundColor:'rgba(77,159,255,0.6)',borderRadius:4},{label:'Actual',data:ad,backgroundColor:'rgba(0,201,167,0.6)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8b92a8',font:{family:'DM Sans'},boxWidth:10}}},scales:{x:{ticks:{color:'#8b92a8',font:{size:10}},grid:{color:'rgba(42,48,69,0.4)'}},y:{ticks:{color:'#8b92a8',callback:v=>'$'+v.toLocaleString()},grid:{color:'rgba(42,48,69,0.4)'}}}}});}
 }
 
-// ══════ DONUT — updates from live transaction data when available
+// ══════ UPDATE ALL VISUALS FROM LIVE TRANSACTION DATA
 function updateDonutFromTransactions(){
   if(!transactions.length) return;
+
+  // Calculate spending by category
   const ct={};
   transactions.filter(t=>t.amount<0&&t.cat!=='Transfers'&&t.cat!=='Income')
     .forEach(t=>{ct[t.cat]=(ct[t.cat]||0)+Math.abs(t.amount);});
-  const mortgage=ct['Mortgage']||0;
-  const bills=(ct['Utilities']||0)+(ct['Phone & Internet']||0)+(ct['Loan Payment']||0)+(ct['Insurance']||0);
-  const debt=ct['Debt Payments']||0;
-  const subs=ct['Subscriptions']||0;
-  const food=(ct['Food & Life']||0)+(ct['Groceries']||0)+(ct['Amazon']||0);
-  const misc=(ct['Home & Repairs']||0)+(ct['Health & Fitness']||0)+(ct['Venmo/Other']||0)+(ct['Other']||0);
-  const totalSpend=Object.values(ct).reduce((s,v)=>s+v,0);
-  const surplus=Math.max(0,9090-totalSpend);
+
+  // Calculate income from transactions
+  const txIncome = transactions.filter(t=>t.amount>0&&t.cat==='Income')
+    .reduce((s,t)=>s+t.amount,0);
+  const income = txIncome || FINANCIAL.income;
+
+  // Calculate total spending
+  const totalSpend = Object.values(ct).reduce((s,v)=>s+v,0);
+
+  // Calculate surplus
+  const surplus = Math.max(0, income - totalSpend);
+
+  // Donut chart segments from real data
+  const billsAndMortgage = (ct['Mortgage']||0)+(ct['Utilities']||0)+(ct['Phone & Internet']||0)+(ct['Loan Payment']||0)+(ct['Insurance']||0)+(ct['Subscriptions']||0);
+  const foodAndLife = (ct['Food & Life']||0)+(ct['Groceries']||0)+(ct['Amazon']||0);
+  const debtPayments = ct['Debt Payments']||0;
+  const other = totalSpend - billsAndMortgage - foodAndLife - debtPayments;
+
   if(charts.donut){
-    charts.donut.data.datasets[0].data=[mortgage+bills+debt+subs,food,800,surplus];
+    charts.donut.data.datasets[0].data=[billsAndMortgage+debtPayments, foodAndLife, other>0?other:0, surplus];
+    charts.donut.options.plugins.tooltip.callbacks.label = c=>`${fmt(c.raw)} (${income>0?(c.raw/income*100).toFixed(1):0}%)`;
     charts.donut.update();
   }
+
+  // Update metric cards with live data
+  const surplusEl=document.getElementById('d-surplus-val');
+  const surplusSubEl=document.getElementById('d-surplus-sub');
+  const incomeEl=document.getElementById('d-income-val');
+  const debtEl=document.getElementById('d-debt-val');
+  const debtSubEl=document.getElementById('d-debt-sub');
+
+  if(surplusEl) surplusEl.textContent = fmt(surplus);
+  if(surplusSubEl) surplusSubEl.textContent = surplus >= 393 ? 'After all bills & debt ✓' : 'After all bills & debt';
+  if(incomeEl && txIncome > 0) incomeEl.textContent = fmt(txIncome);
+
+  // Update total CC debt display
+  const totalDebt = CARDS.reduce((s,c)=>s+c.balance,0);
+  const totalMin = CARDS.reduce((s,c)=>s+c.min,0);
+  const totalInterest = CARDS.reduce((s,c)=>s+(c.balance*(c.apr/12)),0);
+  if(debtEl) debtEl.textContent = fmt(totalDebt);
+  if(debtSubEl) debtSubEl.textContent = `${CARDS.length} cards · $${Math.round(totalInterest).toLocaleString()}/mo interest`;
 }
 
 // Load cross-device CSV data — always replaces whatever is currently loaded
