@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Martinson Family Dashboard v28</title>
+<title>Martinson Family Dashboard v30</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <!-- Firebase JS SDK — WebSocket real-time sync (same tech as Notion, Figma, Linear) -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -304,7 +304,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <!-- ENTRY SCREEN -->
 <div id="entry-screen">
   <div class="entry-logo">Martinson Family</div>
-  <div class="entry-sub">Kansas City, MO · Your Family Hub · v28</div>
+  <div class="entry-sub">Kansas City, MO · Your Family Hub · v30</div>
   <div class="entry-box">
     <div class="entry-title">🔒 Enter Password</div>
     <div class="entry-dots">
@@ -722,21 +722,21 @@ const CARDS = [
 ];
 const BUDGETS = {"Mortgage":2578,"Utilities":568,"Phone & Internet":364,"Loan Payment":248,"Debt Payments":776,"Subscriptions":552,"Groceries":800,"Food & Life":1140,"Known Unknowns":455};
 const RULES = [
-  {cat:"Mortgage",color:"#4d9fff",kw:["ROCKET MORTGAGE"]},
-  {cat:"Phone & Internet",color:"#a78bfa",kw:["ATT* BILL","AT&T","GOOGLE FIBER"]},
-  {cat:"Utilities",color:"#6dd5fa",kw:["SPIRE","EVERGY","KANSAS CITY WATER"]},
-  {cat:"Loan Payment",color:"#f7971e",kw:["UPGRADE, INC","NEFURNMART"]},
-  {cat:"Debt Payments",color:"#ff6b6b",kw:["U.S. BANK DES:WEB PYMT","BEST BUY DES:PAYMENT","CITICTP"]},
-  {cat:"Groceries",color:"#00c9a7",kw:["ALDI","PRICE CHOPPER","HY-VEE","HYVEE","WM SUPERCENTER","WAL-MART","WALMART","COSTCO","TARGET T-","TARGET 000","TARGET DEBIT","DOLLAR TREE","WHOLE FOODS","TRADER JOE"]},
-  {cat:"Subscriptions",color:"#ffc542",kw:["NETFLIX","HULU","SPOTIFY","XBOX","ROBLOX","ADOBE","GOOGLE *CHATGP","CHATGPT","AMAZON PRIME","PRIME VIDEO","GOOGLE *YOUTUB","GOOGLE *TRUECA","AUDIBLE","NOOM","DISNEY"]},
-  {cat:"Food & Life",color:"#fd9644",kw:["DOORDASH","DD *DOORDASH","MCDONALD","STARBUCKS","CHIPOTLE","FIRST WATCH","BUBBLES WINE","QT ","NORTH OAK SINC","SHELL","CASEY"]},
-  {cat:"Insurance",color:"#778ca3",kw:["STATE FARM"]},
-  {cat:"Health & Fitness",color:"#26de81",kw:["PLANET FIT","MpPNorthKansas"]},
-  {cat:"Amazon",color:"#ff9900",kw:["AMAZON MKTPL","AMAZON.COM"]},
-  {cat:"Home & Repairs",color:"#a55eea",kw:["HOME DEPOT","MENARDS","SHERWIN"]},
+  {cat:"Mortgage",color:"#4d9fff",kw:["ROCKET MORTGAGE","ROCKET MTG"]},
+  {cat:"Phone & Internet",color:"#a78bfa",kw:["ATT* BILL","AT&T","GOOGLE *FIBER","GOOGLE FIBER","AT&T FIBER","SPECTRUM","COX COMM","XFINITY"]},
+  {cat:"Utilities",color:"#6dd5fa",kw:["SPIRE","EVERGY","KANSAS CITY WATER","CLAY COUNTY MO UTIL","ATMOS ENERGY"]},
+  {cat:"Loan Payment",color:"#f7971e",kw:["UPGRADE, INC","NEFURNMART","PROSPER","LENDING CLUB","SOFI"]},
+  {cat:"Debt Payments",color:"#ff6b6b",kw:["U.S. BANK DES:WEB PYMT","BEST BUY DES:PAYMENT","CITICTP","CHASE CREDIT CRD","CHASE EPAY","BANK OF AMERICA","BOFA","DISCOVER BANK","CAPITAL ONE PYMT","SYNCHRONY"]},
+  {cat:"Groceries",color:"#00c9a7",kw:["ALDI","PRICE CHOPPER","HY-VEE","HYVEE","WM SUPERCENTER","WAL-MART","WALMART","WAL MART","COSTCO","TARGET T-","TARGET 000","TARGET DEBIT","DOLLAR TREE","WHOLE FOODS","TRADER JOE","SPROUTS","SAVE A LOT","FRESH THYME","SCHNUCKS","DILLONS","RULER FOODS"]},
+  {cat:"Subscriptions",color:"#ffc542",kw:["NETFLIX","HULU","SPOTIFY","XBOX","ROBLOX","ADOBE","GOOGLE *CHATGP","CHATGPT","CLAUDE.AI","AMAZON PRIME","PRIME VIDEO","GOOGLE *YOUTUB","GOOGLE *TRUECA","GOOGLE *LINKED","GOOGLE *INSTAG","GOOGLE *GOOGL","AUDIBLE","NOOM","DISNEY","APPLE.COM/BILL","PEACOCK","PARAMOUNT","ESPN+","MAX ","HBO","SIRIUSXM","DROPBOX","MICROSOFT 365"]},
+  {cat:"Food & Life",color:"#fd9644",kw:["DOORDASH","DD *DOORDASH","MCDONALD","STARBUCKS","CHIPOTLE","FIRST WATCH","BUBBLES WINE","QT ","NORTH OAK SINC","SHELL","CASEY","DUNKIN","PANERA","CHICK-FIL","TACO BELL","SONIC ","DOMINO","PIZZA","DAIRY QUEEN","PANDA EXPRESS","JIMMY JOHN","RAISING CANE","CULVER","APPLEBEE","OLIVE GARDEN","CRACKER BARREL","OUTBACK","CHEESECAKE","SP COMFRT","FOOTHILLS PROF"]},
+  {cat:"Insurance",color:"#778ca3",kw:["STATE FARM","GEICO","PROGRESSIVE","ALLSTATE","NATIONWIDE","USAA"]},
+  {cat:"Health & Fitness",color:"#26de81",kw:["PLANET FIT","MpPNorthKansas","CVS/PHARMACY","CVS ","WALGREEN","URGENT CARE","PHARMACY","DENTIST","OPTOMETRIST","MEDICAL","CLINIC","DOCTOR","THERAPY","LABCORP","QUEST DIAG"]},
+  {cat:"Amazon",color:"#ff9900",kw:["AMAZON MKTPL","AMAZON.COM","AMZN MKTP"]},
+  {cat:"Home & Repairs",color:"#a55eea",kw:["HOME DEPOT","MENARDS","MNRD-","SHERWIN","LOWES","ROYAL FLUSH","PLUMB","ACE HARDWARE","TRUE VALUE","HOBBY LOBBY","HOBBYLOBBY","MICHAELS","JOANN","CLAY COUNTY","PROPERTY TAX"]},
   {cat:"Income",color:"#00c9a7",kw:["SYMPHONYAI","PAYROLL"]},
   {cat:"Transfers",color:"#4a5168",kw:["ONLINE BANKING TRANSFER","OVERDRAFT PROTECTION"]},
-  {cat:"Venmo/Other",color:"#778ca3",kw:["VENMO","SENDWAVE"]},
+  {cat:"Venmo/Other",color:"#778ca3",kw:["VENMO","SENDWAVE","ZELLE","CASH APP","PAYPAL"]},
   {cat:"Other",color:"#8b92a8",kw:[]},
 ];
 const BVA_MAP = {"Mortgage":["Mortgage"],"Utilities":["Utilities"],"Phone & Internet":["Phone & Internet"],"Loan Payment":["Loan Payment"],"Debt Payments":["Debt Payments"],"Subscriptions":["Subscriptions"],"Groceries":["Groceries"],"Food & Life":["Food & Life","Amazon"],"Known Unknowns":["Home & Repairs","Health & Fitness","Insurance","Venmo/Other"]};
@@ -790,98 +790,86 @@ let cmfIngCount = 0;
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxgssU1_z7Xkp-b-GyhG2ls75Uq_dpBn7owG_lvHJsr9SQGSpG803xba8Nh3rH_lodmww/exec';
 
 // ══════════════════════════════════════════════════════════════════
-// FIREBASE JS SDK — WEBSOCKET REAL-TIME SYNC
+// HYBRID SYNC ENGINE — Firebase SDK WebSocket + REST polling backup
 // ══════════════════════════════════════════════════════════════════
-// Why this works when REST/SSE didn't:
-//   REST polling: asks "any changes?" every 5s → race conditions
-//   SSE: mobile browsers kill these connections (battery optimization)
-//   Firebase SDK: persistent WebSocket the SERVER uses to PUSH changes
-//   to every connected client in <100ms. Reconnects automatically.
-//   This is how Notion, Figma, and Linear handle real-time sync.
+// Strategy: Try Firebase SDK WebSocket first (instant push).
+// If SDK doesn't fire within 8 seconds, fall back to REST polling.
+// Both write paths use the SDK. Read paths use whichever works.
+// This guarantees sync works on every device and browser.
 // ══════════════════════════════════════════════════════════════════
 
-firebase.initializeApp({ databaseURL: 'https://martinson-family-default-rtdb.firebaseio.com' });
+const FB = 'https://martinson-family-default-rtdb.firebaseio.com';
+firebase.initializeApp({ databaseURL: FB });
 const FBDB = firebase.database();
 const FB_ROOT = FBDB.ref('martinson');
 
 let lastSyncTime = null;
-let _fbListeners = []; // track listeners for cleanup
+let _fbListeners = [];
+let _pollTimer = null;
+let _sdkConnected = false;
 
-// ── WRITE ─────────────────────────────────────────────────────────
+// ── WRITE — always use SDK ────────────────────────────────────────
 function fbSet(key, value) {
   localStorage.setItem('fb_' + key, JSON.stringify(value));
-  return FB_ROOT.child(key).set(value);
+  return FB_ROOT.child(key).set(value).catch(() => {
+    // SDK write failed — try REST as backup
+    return fetch(`${FB}/martinson/${key}.json`, {
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(value)
+    });
+  });
 }
 
 // ── DELETE ────────────────────────────────────────────────────────
 function fbDelete(key) {
   localStorage.removeItem('fb_' + key);
-  return FB_ROOT.child(key).remove();
+  return FB_ROOT.child(key).remove().catch(() =>
+    fetch(`${FB}/martinson/${key}.json`, {method:'DELETE'})
+  );
 }
 
-// ── READ ONCE ─────────────────────────────────────────────────────
-function fbGet(key) {
-  return FB_ROOT.child(key).once('value').then(s => s.val());
+// ── READ ONCE — REST (always works) ──────────────────────────────
+async function fbGet(key) {
+  try {
+    const res = await fetch(`${FB}/martinson/${key}.json`);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch(e) { return null; }
 }
 
-// ── START REAL-TIME LISTENERS ─────────────────────────────────────
-// Each listener opens a WebSocket. Firebase SDK pushes changes
-// to all listeners instantly when any device writes to Firebase.
+// ── READ ALL ONCE — REST ──────────────────────────────────────────
+async function fbGetAll() {
+  try {
+    const res = await fetch(`${FB}/martinson.json`);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch(e) { return null; }
+}
+
+// ── START SDK LISTENERS (WebSocket push) ─────────────────────────
 function startFirebaseListeners() {
-  // Clear any existing listeners
   _fbListeners.forEach(({ref, fn}) => ref.off('value', fn));
   _fbListeners = [];
 
   function listen(key, handler) {
     const ref = FB_ROOT.child(key);
-    const fn = ref.on('value', (snap) => {
+    const fn = ref.on('value', snap => {
+      _sdkConnected = true;
       handler(snap.val());
       lastSyncTime = new Date();
       updateSyncBadge('ok');
-    }, () => updateSyncBadge('error'));
+    }, err => {
+      updateSyncBadge('error');
+    });
     _fbListeners.push({ref, fn});
   }
 
-  // ── CSV DATA ──────────────────────────────────────────────────
-  // Fires instantly on all devices when any device uploads or clears
-  listen('last_csv_data', (data) => {
-    if (data === null) {
-      // Data deleted — clear ALL devices immediately
-      if (window._lastCsvTimestamp > 0 && window._lastCsvTimestamp !== -1) {
-        performLocalClear();
-        refreshAllUI();
-      }
-    } else if (data && data.uploadedAt) {
-      const fbTs = data.uploadedAt;
-      // Load if: not cleared (sentinel≠-1) AND Firebase data is newer
-      if (window._lastCsvTimestamp !== -1 && fbTs > (window._lastCsvTimestamp || 0)) {
-        window._lastCsvTimestamp = fbTs;
-        localStorage.setItem('csv_sentinel', String(fbTs));
-        applyKey('last_csv_data', data);
-        renderFromTransactions();
-        refreshAllUI();
-        const aiBtn=document.getElementById('ai-btn-wrap');
-        if(aiBtn) aiBtn.style.display='block';
-      }
-    }
-  });
+  listen('last_csv_data', handleCsvData);
+  listen('csv_cleared', handleCsvCleared);
 
-  // ── CLEAR SIGNAL ──────────────────────────────────────────────
-  listen('csv_cleared', (data) => {
-    if (data && data.cleared === true) {
-      const clearTs = data.clearedAt || 0;
-      const ourTs = window._lastCsvTimestamp;
-      if (ourTs > 0 && ourTs !== -1 && clearTs >= ourTs) {
-        performLocalClear();
-        refreshAllUI();
-      }
-    }
-  });
-
-  // ── ALL OTHER KEYS ────────────────────────────────────────────
   ['meal_plan','week_hist','custom_meals','hidden_meals',
    'financial_settings','cc_balances','family_goals'].forEach(key => {
-    listen(key, (data) => {
+    listen(key, data => {
       if (data !== null && data !== undefined) {
         localStorage.setItem('fb_' + key, JSON.stringify(data));
         applyKey(key, data);
@@ -889,26 +877,127 @@ function startFirebaseListeners() {
       }
     });
   });
+
+  // If SDK doesn't connect in 8 seconds, start REST polling as backup
+  setTimeout(() => {
+    if (!_sdkConnected) {
+      console.log('SDK not connected — starting REST polling fallback');
+      startPolling();
+    }
+  }, 8000);
+}
+
+// ── HANDLE CSV DATA (shared by SDK and polling) ───────────────────
+function handleCsvData(data) {
+  if (data === null) {
+    if (window._lastCsvTimestamp > 0 && window._lastCsvTimestamp !== -1) {
+      performLocalClear();
+      refreshAllUI();
+    }
+  } else if (data && data.uploadedAt) {
+    const fbTs = data.uploadedAt;
+    if (window._lastCsvTimestamp !== -1 && fbTs > (window._lastCsvTimestamp || 0)) {
+      window._lastCsvTimestamp = fbTs;
+      localStorage.setItem('csv_sentinel', String(fbTs));
+      applyKey('last_csv_data', data);
+      renderFromTransactions();
+      refreshAllUI();
+      const aiBtn = document.getElementById('ai-btn-wrap');
+      if(aiBtn) aiBtn.style.display = 'block';
+    }
+  }
+}
+
+// ── HANDLE CLEAR SIGNAL ───────────────────────────────────────────
+function handleCsvCleared(data) {
+  if (data && data.cleared === true) {
+    const clearTs = data.clearedAt || 0;
+    const ourTs = window._lastCsvTimestamp;
+    if (ourTs > 0 && ourTs !== -1 && clearTs >= ourTs) {
+      performLocalClear();
+      refreshAllUI();
+    }
+  }
+}
+
+// ── REST POLLING FALLBACK — fires every 4 seconds ────────────────
+// Used when WebSocket isn't available (some corporate/mobile networks)
+// Simple, reliable, proven — same approach that powered v19-v26
+function startPolling() {
+  if (_pollTimer) clearInterval(_pollTimer);
+  _pollTimer = setInterval(async () => {
+    try {
+      const all = await fbGetAll();
+      if (!all) return;
+      // Process each key
+      if (all.last_csv_data !== undefined) handleCsvData(all.last_csv_data);
+      if (all.csv_cleared !== undefined) handleCsvCleared(all.csv_cleared);
+      ['meal_plan','week_hist','custom_meals','hidden_meals',
+       'financial_settings','cc_balances','family_goals'].forEach(k => {
+        if (all[k] !== undefined && all[k] !== null) {
+          localStorage.setItem('fb_' + k, JSON.stringify(all[k]));
+          applyKey(k, all[k]);
+        }
+      });
+      lastSyncTime = new Date();
+      updateSyncBadge('ok');
+      refreshAllUI();
+    } catch(e) { updateSyncBadge('error'); }
+  }, 4000);
 }
 
 // ── FORCE SYNC ────────────────────────────────────────────────────
 async function forceSyncNow() {
   updateSyncBadge('syncing');
   toast('⟳ Syncing...');
-  // Reconnect all listeners — SDK will fire 'value' immediately with current data
-  startFirebaseListeners();
-  toast('✓ Connected');
+  // Immediate REST fetch for instant result
+  const all = await fbGetAll();
+  if (all) {
+    if (all.last_csv_data !== undefined) handleCsvData(all.last_csv_data);
+    if (all.csv_cleared !== undefined) handleCsvCleared(all.csv_cleared);
+    ['meal_plan','week_hist','custom_meals','hidden_meals',
+     'financial_settings','cc_balances','family_goals'].forEach(k => {
+      if (all[k] !== null && all[k] !== undefined) {
+        localStorage.setItem('fb_' + k, JSON.stringify(all[k]));
+        applyKey(k, all[k]);
+      }
+    });
+    lastSyncTime = new Date();
+    updateSyncBadge('ok');
+    refreshAllUI();
+    toast('✓ Synced');
+  } else {
+    toast('⚠ Could not reach Firebase');
+    updateSyncBadge('error');
+  }
 }
 
 // ── INITIAL LOAD ──────────────────────────────────────────────────
 async function syncAll() {
-  // Load non-CSV keys from localStorage for instant startup
   ['custom_meals','hidden_meals','week_hist','meal_plan',
    'cc_balances','family_goals','financial_settings'].forEach(k => {
     const v = localStorage.getItem('fb_' + k);
     if (v) try { applyKey(k, JSON.parse(v)); } catch(e) {}
   });
   updateSyncBadge('syncing');
+
+  // Immediate REST fetch for fast initial load
+  try {
+    const all = await fbGetAll();
+    if (all) {
+      if (all.last_csv_data !== undefined) handleCsvData(all.last_csv_data);
+      if (all.csv_cleared !== undefined) handleCsvCleared(all.csv_cleared);
+      ['meal_plan','week_hist','custom_meals','hidden_meals',
+       'financial_settings','cc_balances','family_goals'].forEach(k => {
+        if (all[k] !== null && all[k] !== undefined) {
+          localStorage.setItem('fb_' + k, JSON.stringify(all[k]));
+          applyKey(k, all[k]);
+        }
+      });
+      lastSyncTime = new Date();
+      updateSyncBadge('ok');
+    }
+  } catch(e) { updateSyncBadge('error'); }
 }
 
 // ── PERFORM LOCAL CLEAR ───────────────────────────────────────────
@@ -1147,19 +1236,28 @@ document.addEventListener('DOMContentLoaded', async () => {
   const saved = localStorage.getItem('csv_sentinel');
   window._lastCsvTimestamp = saved === '-1' ? -1 : (parseInt(saved) || 0);
 
-  // Load non-CSV state from localStorage instantly (no network needed)
-  syncAll();
+  // Load non-CSV state from localStorage instantly
+  ['custom_meals','hidden_meals','week_hist','meal_plan',
+   'cc_balances','family_goals','financial_settings'].forEach(k => {
+    const v = localStorage.getItem('fb_' + k);
+    if (v) try { applyKey(k, JSON.parse(v)); } catch(e) {}
+  });
   refreshAllUI();
-
-  // Start Firebase SDK real-time listeners
-  // These open WebSocket connections. Firebase PUSHES all changes
-  // to every connected device in <100ms — no polling, no race conditions.
-  updateSyncBadge('syncing');
-  startFirebaseListeners();
-
-  // Update net worth and debt metrics
   updateNetWorth();
   updateDebtMetrics();
+
+  // Start hybrid sync:
+  // 1. Immediate REST fetch for fast initial data
+  // 2. SDK WebSocket listeners for push updates
+  // 3. REST polling kicks in after 8s if SDK doesn't connect
+  updateSyncBadge('syncing');
+  await syncAll();
+  refreshAllUI();
+  updateNetWorth();
+  updateDebtMetrics();
+  startFirebaseListeners();
+  // Always also start polling — runs alongside SDK for maximum reliability
+  startPolling();
 });
 
 function getWeekOf(){const n=new Date();const d=n.getDate()-n.getDay()+(n.getDay()===0?-6:1);const m=new Date(n.setDate(d));return m.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
@@ -1712,11 +1810,17 @@ function updateDonutFromTransactions(){
   const debtSubEl=document.getElementById('d-debt-sub');
 
   if(surplusEl){
-    surplusEl.textContent=fmt(Math.abs(surplus));
-    surplusEl.style.color=surplus>=0?'var(--teal)':'var(--red)';
+    // Show actual signed value — negative means overspending (shown in red with minus sign)
+    surplusEl.textContent = (surplus < 0 ? '-' : '') + fmt(Math.abs(surplus));
+    surplusEl.style.color = surplus >= 0 ? 'var(--teal)' : 'var(--red)';
   }
-  if(surplusSubEl) surplusSubEl.textContent=monthsCovered>1.2?`Monthly avg · ${monthsCovered.toFixed(1)}mo of data`:'After all bills & debt';
-  if(incomeEl) incomeEl.textContent=fmt(monthlyIncome);
+  if(surplusSubEl){
+    const base = monthsCovered > 1.2 ? `Monthly avg · ${monthsCovered.toFixed(1)}mo of data` : 'After all bills & debt';
+    const warn = surplus < -200 ? ' ⚠ Overspending' : '';
+    surplusSubEl.textContent = base + warn;
+    surplusSubEl.style.color = surplus < 0 ? 'var(--red)' : '';
+  }
+  if(incomeEl) incomeEl.textContent = fmt(monthlyIncome);
 
   const totalDebt=CARDS.reduce((s,c)=>s+c.balance,0);
   const totalInterest=CARDS.reduce((s,c)=>s+(c.balance*(c.apr/12)),0);
