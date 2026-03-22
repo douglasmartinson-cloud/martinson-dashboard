@@ -1,0 +1,2000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Martinson Family Dashboard v15</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0f1117; --surface:#181c27; --surface2:#1e2333; --border:#2a3045;
+  --teal:#00c9a7; --teal-dim:rgba(0,201,167,0.12);
+  --red:#ff6b6b; --red-dim:rgba(255,107,107,0.12);
+  --gold:#ffc542; --gold-dim:rgba(255,197,66,0.12);
+  --blue:#4d9fff; --blue-dim:rgba(77,159,255,0.12);
+  --purple:#a78bfa; --purple-dim:rgba(167,139,250,0.12);
+  --sage:#5a9e8a; --sage-dim:rgba(90,158,138,0.15);
+  --text:#e8eaf0; --text-mid:#8b92a8; --text-soft:#4a5168;
+  --font-d:'Playfair Display',serif; --font-b:'DM Sans',sans-serif;
+  --r:14px; --sh:0 4px 24px rgba(0,0,0,0.2);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:var(--font-b);min-height:100vh}
+.hidden{display:none!important}
+
+/* ── ENTRY SCREEN ── */
+#entry-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;background:radial-gradient(ellipse at 30% 20%,rgba(0,201,167,0.08),transparent 60%),radial-gradient(ellipse at 70% 80%,rgba(77,159,255,0.06),transparent 60%)}
+.entry-logo{font-family:var(--font-d);font-size:38px;color:var(--text);text-align:center;margin-bottom:6px}
+.entry-sub{font-size:13px;color:var(--text-mid);text-align:center;margin-bottom:40px}
+.entry-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px 28px;width:100%;max-width:340px;text-align:center;box-shadow:var(--sh)}
+.entry-title{font-size:14px;font-weight:600;color:var(--text-mid);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:20px}
+.entry-dots{display:flex;gap:14px;justify-content:center;margin-bottom:24px}
+.entry-dot{width:14px;height:14px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);transition:all 0.2s}
+.entry-dot.filled{background:var(--teal);border-color:var(--teal)}
+.entry-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.entry-key{padding:15px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;font-size:20px;font-weight:600;cursor:pointer;font-family:var(--font-b);color:var(--text);transition:all 0.15s}
+.entry-key:active{background:var(--border);transform:scale(0.95)}
+.entry-error{font-size:13px;color:var(--red);margin-top:12px;min-height:18px}
+.entry-hint{font-size:11px;color:var(--text-soft);margin-top:16px}
+
+/* ── WHO SCREEN ── */
+#who-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;background:radial-gradient(ellipse at 30% 20%,rgba(0,201,167,0.08),transparent 60%),radial-gradient(ellipse at 70% 80%,rgba(77,159,255,0.06),transparent 60%)}
+.who-title{font-family:var(--font-d);font-size:36px;text-align:center;margin-bottom:8px;color:var(--text)}
+.who-sub{font-size:14px;color:var(--text-mid);text-align:center;margin-bottom:48px}
+.who-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;width:100%;max-width:480px}
+.who-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px 20px;text-align:center;cursor:pointer;transition:all 0.25s;box-shadow:var(--sh)}
+.who-card:hover,.who-card:active{transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,0,0,0.3)}
+.who-card.douglas{border-top:3px solid var(--teal)}
+.who-card.jamie{border-top:3px solid var(--sage)}
+.who-emoji{font-size:40px;margin-bottom:12px}
+.who-name{font-family:var(--font-d);font-size:22px;margin-bottom:4px}
+.who-role{font-size:12px;color:var(--text-mid)}
+.sunday-btn{margin-top:24px;padding:12px 28px;background:var(--gold-dim);border:1px solid rgba(255,197,66,0.3);border-radius:100px;color:var(--gold);font-family:var(--font-b);font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s}
+.sunday-btn:hover{background:rgba(255,197,66,0.2)}
+
+/* ── SHARED HEADER ── */
+.app-header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:50}
+.app-header-left{display:flex;align-items:center;gap:12px}
+.back-btn{background:var(--surface2);border:none;color:var(--text-mid);padding:6px 12px;border-radius:8px;font-size:12px;cursor:pointer;font-family:var(--font-b)}
+.app-title{font-family:var(--font-d);font-size:18px}
+.user-badge{padding:4px 12px;border-radius:100px;font-size:12px;font-weight:600}
+.user-badge.douglas{background:var(--teal-dim);color:var(--teal)}
+.user-badge.jamie{background:var(--sage-dim);color:var(--sage)}
+
+/* ── TAB BAR ── */
+.tab-bar{display:flex;gap:4px;padding:12px 16px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);background:var(--bg)}
+.tab-bar::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;padding:7px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--text-mid);transition:all 0.2s;font-family:var(--font-b)}
+.tab.active{background:var(--teal-dim);color:var(--teal)}
+.tab.active.jamie-tab{background:var(--sage-dim);color:var(--sage)}
+
+/* ── PAGE SHELL ── */
+.app-body{padding:24px;max-width:1200px}
+.page{display:none}.page.active{display:block}
+
+/* ── METRICS ── */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+@media(max-width:700px){.metrics{grid-template-columns:1fr 1fr}}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 20px;position:relative;overflow:hidden}
+.metric::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0}
+.m-teal::before{background:var(--teal)}.m-red::before{background:var(--red)}.m-gold::before{background:var(--gold)}.m-blue::before{background:var(--blue)}
+.metric-label{font-size:10px;font-weight:600;letter-spacing:0.7px;text-transform:uppercase;color:var(--text-mid);margin-bottom:6px}
+.metric-val{font-family:var(--font-d);font-size:28px;line-height:1}
+.m-teal .metric-val{color:var(--teal)}.m-red .metric-val{color:var(--red)}.m-gold .metric-val{color:var(--gold)}.m-blue .metric-val{color:var(--blue)}
+.metric-sub{font-size:11px;color:var(--text-mid);margin-top:4px}
+
+/* ── PANELS ── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:700px){.grid-2{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px}
+.panel-title{font-size:11px;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;color:var(--text-mid);margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.d-teal{background:var(--teal)}.d-red{background:var(--red)}.d-gold{background:var(--gold)}.d-blue{background:var(--blue)}.d-purple{background:var(--purple)}.d-sage{background:var(--sage)}
+
+/* ── TABLES ── */
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{text-align:left;padding:7px 10px;font-size:10px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:var(--text-soft);border-bottom:1px solid var(--border)}
+.tbl td{padding:8px 10px;border-bottom:1px solid rgba(42,48,69,0.5);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(255,255,255,0.015)}
+.tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:600}
+.tag-green{background:var(--teal-dim);color:var(--teal)}.tag-red{background:var(--red-dim);color:var(--red)}.tag-gold{background:var(--gold-dim);color:var(--gold)}.tag-gray{background:var(--surface2);color:var(--text-mid)}
+.apr{display:inline-block;padding:2px 5px;border-radius:4px;font-size:10px;font-weight:600;background:var(--red-dim);color:var(--red);margin-left:4px}
+.prog-wrap{background:var(--surface2);border-radius:100px;height:5px;overflow:hidden;margin-top:3px}
+.prog-bar{height:100%;border-radius:100px;transition:width 0.6s}
+.chart-wrap{position:relative;height:220px}
+
+/* ── DROP ZONE ── */
+.drop-zone{border:2px dashed var(--border);border-radius:var(--r);padding:28px;text-align:center;margin-bottom:20px;cursor:pointer;position:relative;transition:all 0.3s}
+.drop-zone.drag-over{border-color:var(--teal);background:var(--teal-dim)}
+.drop-zone.loaded{border-color:var(--teal);border-style:solid;background:var(--teal-dim)}
+.drop-input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+.loaded-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:100px;background:rgba(0,201,167,0.2);color:var(--teal);font-size:13px;font-weight:600}
+
+/* ── PROJECTIONS ── */
+.proj-ctrl{display:flex;align-items:center;gap:16px;padding:12px 16px;background:var(--surface2);border-radius:10px;margin-bottom:16px;flex-wrap:wrap}
+.slider-wrap{display:flex;align-items:center;gap:12px;flex:1;min-width:240px}
+.slider-label{font-size:13px;color:var(--text-mid);white-space:nowrap}
+input[type=range]{-webkit-appearance:none;flex:1;height:4px;background:var(--border);border-radius:100px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--teal);cursor:pointer}
+.slider-val{font-size:14px;font-weight:600;color:var(--teal);min-width:48px;text-align:right}
+.ctrl-sel{background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font-b);font-size:13px;padding:6px 10px;cursor:pointer}
+.payoff-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px}
+@media(max-width:600px){.payoff-grid{grid-template-columns:1fr 1fr}}
+.payoff-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center}
+.pc-name{font-size:10px;font-weight:600;color:var(--text-mid);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:5px}
+.pc-mo{font-family:var(--font-d);font-size:20px}
+.pc-date{font-size:11px;color:var(--text-mid);margin-top:2px}
+.pc-saved{font-size:11px;color:var(--teal);margin-top:2px}
+
+/* ── JAMIE SIDE ── */
+.jamie-bg{background:linear-gradient(135deg,#1a2818 0%,#0f1117 100%)}
+.j-header{background:linear-gradient(135deg,#2d5a3d,#1a3d2a);padding:24px;border-bottom:1px solid rgba(90,158,138,0.2)}
+.j-greeting{font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:2px}
+.j-name{font-family:var(--font-d);font-size:26px;color:#fff}
+.j-sub{font-size:12px;color:rgba(255,255,255,0.55);margin-top:3px}
+.j-budget-strip{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:14px;background:rgba(255,255,255,0.04);border-bottom:1px solid rgba(90,158,138,0.15)}
+.jbs-val{font-family:var(--font-d);font-size:22px;font-weight:600;text-align:center}
+.jbs-label{font-size:10px;color:var(--text-mid);text-align:center;margin-top:2px;text-transform:uppercase;letter-spacing:0.4px;font-weight:600}
+.gauge-card{background:var(--surface);margin:14px;border-radius:var(--r);padding:16px}
+.gauge-title{font-size:13px;font-weight:600;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.gauge-bar-bg{background:var(--surface2);border-radius:100px;height:10px;overflow:hidden;margin-bottom:6px}
+.gauge-bar-fill{height:100%;border-radius:100px;transition:width 0.5s,background 0.3s}
+.gauge-sub{display:flex;justify-content:space-between;font-size:12px;color:var(--text-mid)}
+
+/* meal planner */
+.j-page{display:none;padding:14px}.j-page.active{display:block}
+.j-sec-title{font-family:var(--font-d);font-size:20px;margin-bottom:4px}
+.j-sec-sub{font-size:13px;color:var(--text-mid);margin-bottom:14px}
+.day-card{background:var(--surface);border-radius:var(--r);margin-bottom:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.15)}
+.day-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;background:var(--surface2)}
+.day-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-mid)}
+.day-meal-name{font-size:14px;font-weight:600;color:var(--sage)}
+.day-empty-txt{font-size:13px;color:var(--text-soft);font-style:italic}
+.day-chev{font-size:11px;color:var(--text-soft);transition:transform 0.2s}
+.day-chev.open{transform:rotate(180deg)}
+.meal-chips{display:none;padding:12px;flex-wrap:wrap;gap:4px}
+.meal-chips.open{display:flex}
+.m-chip-wrap{display:inline-flex;align-items:center;gap:2px;margin:3px 0}
+.m-chip{padding:7px 12px;border-radius:100px;border:1.5px solid var(--border);background:transparent;color:var(--text-mid);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;white-space:nowrap;font-family:var(--font-b)}
+.m-chip.sel{background:var(--sage);border-color:var(--sage);color:#fff}
+.m-chip:active{transform:scale(0.96)}
+.m-chip-rm{background:rgba(255,107,107,0.12);border:none;color:var(--red);font-size:11px;border-radius:100px;width:20px;height:20px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;transition:background 0.15s;line-height:1;margin-right:4px}
+.m-chip-rm:hover{background:rgba(255,107,107,0.28)}
+
+/* grocery */
+.spend-summary{background:var(--surface);border-radius:var(--r);padding:14px 16px;margin-bottom:14px}
+.ss-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0}
+.ss-label{font-size:13px;color:var(--text-mid);font-weight:500}
+.ss-val{font-size:17px;font-weight:700;font-family:var(--font-d)}
+.add-row{display:flex;gap:8px;margin-bottom:14px}
+.add-inp{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font-family:var(--font-b);font-size:14px}
+.add-inp:focus{outline:none;border-color:var(--sage)}
+.add-btn-go{padding:10px 16px;background:var(--sage);color:#fff;border:none;border-radius:10px;font-family:var(--font-b);font-size:14px;font-weight:700;cursor:pointer}
+.store-hdr{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;margin-bottom:7px}
+.store-hdr.aldi{background:linear-gradient(90deg,rgba(90,158,138,0.2),transparent)}
+.store-hdr.other{background:linear-gradient(90deg,rgba(255,197,66,0.15),transparent)}
+.s-badge{font-size:10px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;padding:2px 7px;border-radius:100px}
+.s-badge.aldi{background:var(--sage-dim);color:var(--sage)}.s-badge.other{background:var(--gold-dim);color:var(--gold)}
+.sec-label{font-size:10px;font-weight:700;color:var(--text-soft);text-transform:uppercase;letter-spacing:0.4px;padding:4px 6px;margin-bottom:3px}
+.g-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border-radius:10px;margin-bottom:5px;cursor:pointer;transition:opacity 0.2s;border:1px solid var(--border)}
+.g-item.chk{opacity:0.45;background:var(--surface2)}
+.g-item.chk .gi-name{text-decoration:line-through;color:var(--text-soft)}
+.gi-cb{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--surface2);transition:all 0.2s}
+.g-item.chk .gi-cb{background:var(--sage);border-color:var(--sage);color:#fff;font-size:11px}
+.gi-name{font-size:13px;font-weight:600;flex:1}
+.gi-est{font-size:11px;color:var(--text-soft)}
+.gi-price-inp{width:68px;padding:5px 7px;border:1.5px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-size:13px;font-weight:600;text-align:right;font-family:var(--font-b)}
+.gi-price-inp:focus{outline:none;border-color:var(--sage)}
+.empty-state{text-align:center;padding:40px 20px;color:var(--text-mid)}
+.es-icon{font-size:36px;margin-bottom:10px}
+
+/* history */
+.hist-item{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--surface);border-radius:10px;margin-bottom:8px;border:1px solid var(--border)}
+.hi-week{font-size:13px;font-weight:600}.hi-date{font-size:11px;color:var(--text-mid);margin-top:1px}
+.hi-amt{font-family:var(--font-d);font-size:18px}.hi-status{font-size:10px;font-weight:700;padding:2px 7px;border-radius:100px;margin-top:2px;display:inline-block}
+.hs-under{background:var(--sage-dim);color:var(--sage)}.hs-over{background:var(--red-dim);color:var(--red)}
+
+/* goals */
+.goal-card{background:var(--surface);border-radius:var(--r);padding:16px;margin-bottom:10px;border-left:4px solid var(--border);border-bottom:1px solid var(--border)}
+.goal-card.g-vac{border-left-color:var(--gold)}.goal-card.g-emerg{border-left-color:var(--teal)}.goal-card.g-debt{border-left-color:var(--red)}
+.g-emoji{font-size:24px;margin-bottom:6px}
+.g-name{font-size:15px;font-weight:700;margin-bottom:4px}
+.g-desc{font-size:13px;color:var(--text-mid);line-height:1.5;margin-bottom:10px}
+.g-prog-lbl{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px}
+
+.impact-panel{background:linear-gradient(135deg,var(--sage-dim),rgba(90,158,138,0.05));border:1px solid rgba(90,158,138,0.2);border-radius:var(--r);padding:16px;margin-bottom:14px}
+.ip-title{font-size:13px;font-weight:700;color:var(--sage);margin-bottom:10px}
+.ip-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(90,158,138,0.1)}
+.ip-row:last-child{border-bottom:none}
+.ip-label{font-size:13px;color:var(--text-mid)}.ip-val{font-size:14px;font-weight:700;color:var(--sage)}
+
+/* ── CUSTOM MEAL FORM ── */
+.custom-meal-form{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:14px}
+.cmf-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px}
+.cmf-row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.cmf-inp{flex:1;min-width:140px;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-family:var(--font-b);font-size:13px}
+.cmf-inp:focus{outline:none;border-color:var(--sage)}
+.cmf-btn{padding:9px 14px;background:var(--sage);color:#fff;border:none;border-radius:8px;font-family:var(--font-b);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+.cmf-btn:active{transform:scale(0.97)}
+.cmf-ing-row{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+.cmf-ing-name{flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-family:var(--font-b);font-size:12px}
+.cmf-ing-name:focus{outline:none;border-color:var(--sage)}
+.cmf-ing-price{width:70px;padding:7px 8px;border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-family:var(--font-b);font-size:12px;text-align:right}
+.cmf-ing-price:focus{outline:none;border-color:var(--sage)}
+.cmf-ing-rm{background:none;border:none;color:var(--text-soft);font-size:16px;cursor:pointer;padding:0 4px;line-height:1}
+.cmf-add-ing{background:none;border:1px dashed var(--border);border-radius:7px;color:var(--text-mid);font-size:12px;padding:6px 10px;cursor:pointer;width:100%;margin-bottom:8px;font-family:var(--font-b)}
+.cmf-add-ing:hover{border-color:var(--sage);color:var(--sage)}
+.custom-meals-list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.custom-meal-tag{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface);border:1px solid var(--sage);border-radius:8px}
+.cmt-name{font-size:13px;font-weight:600;color:var(--sage)}
+.cmt-rm{background:none;border:none;color:var(--text-soft);font-size:14px;cursor:pointer;padding:0 4px}
+/* ── RECEIPT UPLOAD ── */
+.receipt-zone{border:2px dashed var(--border);border-radius:var(--r);padding:20px;text-align:center;cursor:pointer;position:relative;transition:all 0.3s;margin-bottom:14px}
+.receipt-zone.drag-over{border-color:var(--sage);background:var(--sage-dim)}
+.receipt-zone.scanning{border-color:var(--gold);border-style:solid;background:var(--gold-dim);pointer-events:none}
+.receipt-zone.done{border-color:var(--sage);border-style:solid;background:var(--sage-dim)}
+.receipt-inp{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+.scan-spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,197,66,0.3);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* buttons */
+.btn{width:100%;padding:13px;border:none;border-radius:var(--r);font-family:var(--font-b);font-size:15px;font-weight:700;cursor:pointer;margin-bottom:8px;transition:all 0.2s}
+.btn:active{transform:scale(0.98)}
+.btn-primary{background:var(--sage);color:#fff}
+.btn-outline{background:transparent;color:var(--sage);border:2px solid var(--sage)}
+.btn-gold{background:var(--gold);color:#000}
+.btn-small{width:auto;padding:8px 16px;font-size:13px;margin-bottom:0}
+
+/* SUNDAY MODE */
+#sunday-screen{min-height:100vh;background:radial-gradient(ellipse at 50% 0%,rgba(255,197,66,0.1),transparent 60%),var(--bg)}
+.sunday-header{text-align:center;padding:32px 24px 20px}
+.sunday-header h1{font-family:var(--font-d);font-size:30px;color:var(--gold);margin-bottom:4px}
+.sunday-header p{font-size:14px;color:var(--text-mid)}
+.sunday-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:0 20px 20px}
+@media(max-width:500px){.sunday-grid{grid-template-columns:1fr}}
+.sunday-card{background:var(--surface);border-radius:var(--r);padding:20px;border:1px solid var(--border)}
+.sc-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-mid);margin-bottom:14px}
+.big-num{font-family:var(--font-d);font-size:32px;margin-bottom:4px}
+.big-sub{font-size:12px;color:var(--text-mid)}
+.meal-summary{display:flex;flex-direction:column;gap:6px}
+.ms-row{display:flex;align-items:center;gap:10px;padding:7px 10px;background:var(--surface2);border-radius:8px}
+.ms-day{font-size:11px;font-weight:700;color:var(--text-soft);width:28px;text-transform:uppercase}
+.ms-meal{font-size:13px;font-weight:500}
+.sunday-back{display:block;width:calc(100% - 40px);margin:0 20px 20px;padding:13px;background:var(--surface2);border:none;border-radius:var(--r);color:var(--text-mid);font-family:var(--font-b);font-size:14px;font-weight:600;cursor:pointer;text-align:center}
+
+/* PIN */
+.pin-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px)}
+.pin-box{background:var(--surface);border-radius:20px;padding:32px 28px;max-width:320px;width:90%;text-align:center}
+.pin-title{font-family:var(--font-d);font-size:22px;margin-bottom:6px}
+.pin-sub{font-size:13px;color:var(--text-mid);margin-bottom:20px}
+.pin-dots{display:flex;gap:12px;justify-content:center;margin-bottom:24px}
+.pin-dot{width:14px;height:14px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);transition:all 0.2s}
+.pin-dot.filled{background:var(--teal);border-color:var(--teal)}
+.pin-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.pin-key{padding:14px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;font-size:20px;font-weight:600;cursor:pointer;font-family:var(--font-b);color:var(--text);transition:all 0.15s}
+.pin-key:active{background:var(--border);transform:scale(0.95)}
+.pin-error{font-size:13px;color:var(--red);margin-top:10px;min-height:18px}
+.pin-cancel{margin-top:14px;background:none;border:none;color:var(--text-mid);font-family:var(--font-b);font-size:13px;cursor:pointer;text-decoration:underline}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);color:var(--text);padding:10px 20px;border-radius:100px;font-size:13px;font-weight:600;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:300;white-space:nowrap;box-shadow:var(--sh)}
+.toast.show{opacity:1}
+
+/* TX list */
+.tx-filter-bar{display:flex;gap:7px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px;scrollbar-width:none}
+.tx-filter-bar::-webkit-scrollbar{display:none}
+.txf{flex-shrink:0;padding:5px 12px;border-radius:100px;border:1px solid var(--border);background:transparent;color:var(--text-mid);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font-b);transition:all 0.2s}
+.txf.active{border-color:var(--teal);background:var(--teal-dim);color:var(--teal)}
+.tx-scroll{max-height:400px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.cat-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:5px}
+
+/* nav bottom for jamie */
+.j-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(4,1fr);z-index:50;padding:8px 0 10px}
+.jn-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;background:none;border:none;font-family:var(--font-b);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;color:var(--text-soft);padding:4px;transition:color 0.2s}
+.jn-item.active{color:var(--sage)}
+.jn-icon{font-size:20px}
+</style>
+</head>
+<body>
+
+<!-- ENTRY SCREEN -->
+<div id="entry-screen">
+  <div class="entry-logo">Martinson Family</div>
+  <div class="entry-sub">Kansas City, MO · Your Family Hub · v15</div>
+  <div class="entry-box">
+    <div class="entry-title">🔒 Enter Password</div>
+    <div class="entry-dots">
+      <div class="entry-dot" id="ed0"></div>
+      <div class="entry-dot" id="ed1"></div>
+      <div class="entry-dot" id="ed2"></div>
+      <div class="entry-dot" id="ed3"></div>
+    </div>
+    <div class="entry-keypad">
+      <button class="entry-key" onclick="entryKey('1')">1</button>
+      <button class="entry-key" onclick="entryKey('2')">2</button>
+      <button class="entry-key" onclick="entryKey('3')">3</button>
+      <button class="entry-key" onclick="entryKey('4')">4</button>
+      <button class="entry-key" onclick="entryKey('5')">5</button>
+      <button class="entry-key" onclick="entryKey('6')">6</button>
+      <button class="entry-key" onclick="entryKey('7')">7</button>
+      <button class="entry-key" onclick="entryKey('8')">8</button>
+      <button class="entry-key" onclick="entryKey('9')">9</button>
+      <button class="entry-key" onclick="entryKey('back')" style="font-size:16px">⌫</button>
+      <button class="entry-key" onclick="entryKey('0')">0</button>
+      <button class="entry-key" style="font-size:13px;color:var(--text-soft)" onclick="entryKey('clear')">✕</button>
+    </div>
+    <div class="entry-error" id="entry-error"></div>
+    <div class="entry-hint">Family access only</div>
+  </div>
+</div>
+
+<!-- WHO SCREEN -->
+<div id="who-screen" class="hidden">
+  <div class="who-title">Martinson Family</div>
+  <div class="who-sub">Kansas City, MO · April 2026</div>
+  <div class="who-cards">
+    <div class="who-card douglas" onclick="enterAs('douglas')">
+      <div class="who-emoji">👨‍💼</div>
+      <div class="who-name">Douglas</div>
+      <div class="who-role">Full Dashboard</div>
+    </div>
+    <div class="who-card jamie" onclick="enterAs('jamie')">
+      <div class="who-emoji">👩‍🍳</div>
+      <div class="who-name">Jamie</div>
+      <div class="who-role">Meals & Grocery</div>
+    </div>
+  </div>
+  <button class="sunday-btn" onclick="showSunday()">☀️ Sunday Check-In Mode</button>
+</div>
+
+<!-- SUNDAY SCREEN -->
+<div id="sunday-screen" class="hidden">
+  <div class="sunday-header">
+    <h1>☀️ Sunday Check-In</h1>
+    <p>3 questions. 10 minutes. Team Martinson.</p>
+  </div>
+  <div class="sunday-grid">
+    <div class="sunday-card">
+      <div class="sc-title">💰 Money Left Over</div>
+      <div class="big-num" style="color:var(--teal)">$393</div>
+      <div class="big-sub">after every bill is paid</div>
+    </div>
+    <div class="sunday-card">
+      <div class="sc-title">💳 Debt We're Killing</div>
+      <div class="big-num" style="color:var(--red)">$24,765</div>
+      <div class="big-sub">going down every month</div>
+    </div>
+    <div class="sunday-card">
+      <div class="sc-title">🛒 Groceries This Month</div>
+      <div class="big-num" id="sun-grocery" style="color:var(--sage)">$0</div>
+      <div class="big-sub" id="sun-grocery-sub">of $800 budget</div>
+    </div>
+    <div class="sunday-card">
+      <div class="sc-title">✈️ Vacation Fund</div>
+      <div class="big-num" style="color:var(--gold)">$0</div>
+      <div class="big-sub">Life Goals Fund · building</div>
+    </div>
+    <div class="sunday-card" style="grid-column:1/-1">
+      <div class="sc-title">🍽️ This Week's Meal Plan</div>
+      <div class="meal-summary" id="sun-meals"></div>
+    </div>
+    <div class="sunday-card" style="grid-column:1/-1">
+      <div class="sc-title">📋 Three Questions</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px">
+        <div style="padding:12px;background:var(--surface2);border-radius:10px;font-size:14px;line-height:1.6"><strong>1.</strong> How did groceries go? Did we stay under $200/week?</div>
+        <div style="padding:12px;background:var(--surface2);border-radius:10px;font-size:14px;line-height:1.6"><strong>2.</strong> Did the debt number go down from last month?</div>
+        <div style="padding:12px;background:var(--surface2);border-radius:10px;font-size:14px;line-height:1.6"><strong>3.</strong> Anything coming up next week we need to plan for?</div>
+      </div>
+    </div>
+  </div>
+  <button class="sunday-back" onclick="showWho()">← Back to Home</button>
+</div>
+
+<!-- DOUGLAS APP -->
+<div id="douglas-app" class="hidden">
+  <div class="app-header">
+    <div class="app-header-left">
+      <button class="back-btn" onclick="showWho()">← Home</button>
+      <span class="app-title">Family Dashboard</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span id="sync-badge" style="font-size:11px;cursor:pointer" onclick="showSyncSetup()">◌ Local only</span>
+      <button onclick="showSyncSetup()" style="background:var(--surface2);border:none;color:var(--text-mid);padding:6px 10px;border-radius:8px;font-size:12px;cursor:pointer;font-family:var(--font-b)" title="Sync Settings">⚙️ Sync</button>
+      <span class="user-badge douglas">Douglas</span>
+      <button class="back-btn" onclick="showJamieFromDouglas()" style="background:var(--sage-dim);color:var(--sage)">Jamie's View</button>
+    </div>
+  </div>
+  <div class="tab-bar" id="d-tabs">
+    <button class="tab active" onclick="dPage('overview',this)">Overview</button>
+    <button class="tab" onclick="dPage('transactions',this)">Transactions</button>
+    <button class="tab" onclick="dPage('budget',this)">Budget vs Actual</button>
+    <button class="tab" onclick="dPage('projections',this)">Projections</button>
+    <button class="tab" onclick="dPage('goals',this)">Goals</button>
+  </div>
+  <div class="app-body">
+
+    <!-- OVERVIEW -->
+    <div class="page active" id="d-overview">
+      <div class="drop-zone" id="drop-zone" ondragover="onDragOver(event)" ondragleave="onDragLeave()" ondrop="onDrop(event)">
+        <input type="file" id="drop-input" class="drop-input" accept=".csv,.pdf,application/pdf" onchange="onFileSel(event)">
+        <div id="drop-content">
+          <div style="font-size:32px;margin-bottom:8px">📂</div>
+          <div style="font-size:15px;font-weight:600;margin-bottom:4px">Drop BofA CSV or PDF here — or click to browse</div>
+          <div style="font-size:12px;color:var(--text-mid)">BofA → Checking ...9289 → Download Transactions → CSV or PDF · Weekly or monthly</div>
+          <div style="margin-top:10px;font-size:11px;color:var(--text-soft)">Loaded a file by mistake? The undo button appears after loading.</div>
+        </div>
+      </div>
+      <div class="metrics">
+        <div class="metric m-teal"><div class="metric-label">Monthly Surplus</div><div class="metric-val">$393</div><div class="metric-sub">After all bills &amp; debt</div></div>
+        <div class="metric m-red"><div class="metric-label">Total CC Debt</div><div class="metric-val">$24,765</div><div class="metric-sub">5 cards · $519/mo interest</div></div>
+        <div class="metric m-gold"><div class="metric-label">Monthly Income</div><div class="metric-val">$9,090</div><div class="metric-sub">SymphonyAI · net</div></div>
+        <div class="metric m-blue"><div class="metric-label">Emergency Fund</div><div class="metric-val" id="d-ef-val">$5,145</div><div class="metric-sub">Target: $10,000</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-title"><span class="dot d-red"></span>Credit Cards</div>
+          <table class="tbl"><thead><tr><th>Card</th><th style="text-align:right">Balance</th><th style="text-align:right">Min</th></tr></thead>
+          <tbody>
+            <tr><td>BofA 9362<span class="apr">23.74%</span></td><td style="text-align:right;color:var(--red);font-weight:600">$13,567</td><td style="text-align:right">$384</td></tr>
+            <tr><td>Chase 0690<span class="apr">27.24%</span></td><td style="text-align:right;color:var(--red);font-weight:600">$5,280</td><td style="text-align:right">$250</td></tr>
+            <tr><td>Best Buy<span class="apr">29.99%</span></td><td style="text-align:right;color:var(--red);font-weight:600">$3,438</td><td style="text-align:right">$35</td></tr>
+            <tr><td>US Bank 2405<span class="apr">21.74%</span></td><td style="text-align:right;color:var(--red);font-weight:600">$1,680</td><td style="text-align:right">$72</td></tr>
+            <tr><td>US Bank 6925<span class="apr">21.74%</span></td><td style="text-align:right;color:var(--red);font-weight:600">$800</td><td style="text-align:right">$35</td></tr>
+            <tr style="border-top:2px solid var(--border)"><td style="font-weight:700">TOTAL</td><td style="text-align:right;font-weight:700;color:var(--red)">$24,765</td><td style="text-align:right;font-weight:700">$776</td></tr>
+          </tbody></table>
+        </div>
+        <div class="panel"><div class="panel-title"><span class="dot d-teal"></span>Spending Breakdown</div><div class="chart-wrap"><canvas id="donut-chart"></canvas></div></div>
+      </div>
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-title"><span class="dot d-gold"></span>Category Spending (from CSV)</div>
+          <div id="cat-empty" class="empty-state"><div class="es-icon">📂</div><p style="font-size:13px">Drop CSV above to see category breakdown</p></div>
+          <div id="cat-table-wrap" style="display:none"><table class="tbl" id="cat-table"></table></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title"><span class="dot d-blue"></span>Savings Progress</div>
+          <div style="display:flex;flex-direction:column;gap:16px;margin-top:4px">
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:13px;font-weight:600">Emergency Fund</span><span style="font-size:13px;color:var(--teal)">$5,145 / $10K</span></div><div class="prog-wrap"><div class="prog-bar" style="background:var(--teal);width:51.45%"></div></div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">51% — $200/mo</div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:13px;font-weight:600">Life Goals ✈️</span><span style="font-size:13px;color:var(--gold)" id="lg-display">$0 / $3K</span></div><div class="prog-wrap"><div class="prog-bar" id="lg-prog" style="background:var(--gold);width:0%"></div></div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">Building — $200/mo from April</div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:13px;font-weight:600">Retirement</span><span style="font-size:13px;color:var(--purple)">$158,540</span></div><div class="prog-wrap"><div class="prog-bar" style="background:var(--purple);width:79%"></div></div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">Merrill · not liquid</div></div>
+            <div style="padding:12px;background:var(--sage-dim);border-radius:10px;border:1px solid rgba(90,158,138,0.2)">
+              <div style="font-size:11px;font-weight:700;color:var(--sage);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">🛒 Jamie's Groceries This Month</div>
+              <div style="font-family:var(--font-d);font-size:22px;color:var(--sage)" id="d-jamie-grocery">$0</div>
+              <div style="font-size:11px;color:var(--text-mid);margin-top:2px" id="d-jamie-grocery-sub">of $800 budget</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRANSACTIONS -->
+    <div class="page" id="d-transactions">
+      <div id="tx-empty-state" class="empty-state"><div class="es-icon">📂</div><p>Drop BofA CSV on Overview tab to see transactions</p></div>
+      <div id="tx-loaded" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+          <div style="font-family:var(--font-d);font-size:20px" id="tx-title">Transactions</div>
+          <div style="font-size:12px;color:var(--text-mid)" id="tx-count"></div>
+        </div>
+        <div class="tx-filter-bar" id="tx-filters"></div>
+        <div class="panel"><div class="tx-scroll"><table class="tbl"><thead><tr><th>Date</th><th>Description</th><th>Category</th><th style="text-align:right">Amount</th></tr></thead><tbody id="tx-tbody"></tbody></table></div></div>
+      </div>
+    </div>
+
+    <!-- BUDGET VS ACTUAL -->
+    <div class="page" id="d-budget">
+      <div id="bva-empty" class="empty-state"><div class="es-icon">📂</div><p>Drop CSV on Overview tab first</p></div>
+      <div id="bva-loaded" style="display:none">
+        <div class="panel" style="margin-bottom:16px"><div class="panel-title"><span class="dot d-gold"></span>Budget vs Actual — from CSV</div>
+        <table class="tbl"><thead><tr><th>Category</th><th style="text-align:right">Budget</th><th style="text-align:right">Actual</th><th style="text-align:right">Diff</th><th>Status</th></tr></thead><tbody id="bva-tbody"></tbody></table></div>
+        <div class="panel"><div class="panel-title"><span class="dot d-blue"></span>Visual</div><div class="chart-wrap" style="height:280px"><canvas id="bar-chart"></canvas></div></div>
+      </div>
+    </div>
+
+    <!-- PROJECTIONS -->
+    <div class="page" id="d-projections">
+      <div style="font-family:var(--font-d);font-size:22px;margin-bottom:16px">Debt Payoff Projector</div>
+      <div class="proj-ctrl">
+        <div class="slider-wrap">
+          <span class="slider-label">Extra/month:</span>
+          <input type="range" id="extra-slider" min="0" max="500" step="25" value="0" oninput="updateProj()">
+          <span class="slider-val" id="extra-display">+$0</span>
+        </div>
+        <select class="ctrl-sel" id="proj-strat" onchange="updateProj()">
+          <option value="avalanche">Highest APR first (saves most $)</option>
+          <option value="snowball">Smallest balance first (most wins)</option>
+        </select>
+      </div>
+      <div class="payoff-grid" id="payoff-cards"></div>
+      <div class="grid-2">
+        <div class="panel"><div class="panel-title"><span class="dot d-red"></span>Balance Over Time</div><div class="chart-wrap" style="height:240px"><canvas id="payoff-chart"></canvas></div></div>
+        <div class="panel"><div class="panel-title"><span class="dot d-gold"></span>Interest Savings</div><div id="int-summary" style="display:flex;flex-direction:column;gap:12px;margin-top:4px"></div></div>
+      </div>
+    </div>
+
+    <!-- GOALS (DOUGLAS) -->
+    <div class="page" id="d-goals">
+      <div style="background:linear-gradient(135deg,var(--teal-dim),var(--blue-dim));border:1px solid rgba(0,201,167,0.2);border-radius:var(--r);padding:20px;margin-bottom:16px">
+        <div style="font-family:var(--font-d);font-size:20px;color:var(--teal);margin-bottom:6px">You are not in a crisis. You are in a turnaround.</div>
+        <div style="font-size:13px;color:var(--text-mid);line-height:1.6">$150K income. No student debt. Home equity. $158K retirement. Three kids living their lives. By 2028–2029 you could be completely debt-free with $1,500+/month surplus.</div>
+      </div>
+      <div class="grid-2">
+        <div class="panel"><div class="panel-title"><span class="dot d-teal"></span>Milestones</div><div id="milestone-list"></div></div>
+        <div class="panel"><div class="panel-title"><span class="dot d-red"></span>Debt Freedom Timeline</div><div class="chart-wrap" style="height:240px"><canvas id="freedom-chart"></canvas></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JAMIE APP -->
+<div id="jamie-app" class="hidden" style="padding-bottom:70px">
+  <div class="j-header">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div>
+        <div class="j-greeting">Hey Jamie 👋</div>
+        <div class="j-name">Family Hub</div>
+        <div class="j-sub" id="j-week-label">Week of <span id="j-week-of"></span></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+        <button class="back-btn" onclick="showWho()" style="background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.8)">← Home</button>
+        <button class="back-btn" onclick="pinPrompt('douglas')" style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);font-size:11px">Douglas's View 🔒</button>
+        <span id="j-sync-badge" style="font-size:10px;color:rgba(255,255,255,0.5)">◌ Local only</span>
+      </div>
+    </div>
+  </div>
+  <div class="j-budget-strip">
+    <div><div class="jbs-val" style="color:var(--sage)" id="j-budget-val">$200</div><div class="jbs-label">Weekly Budget</div></div>
+    <div><div class="jbs-val" style="color:var(--red)" id="j-spent-val">$0</div><div class="jbs-label">Spent</div></div>
+    <div><div class="jbs-val" id="j-left-val" style="color:var(--gold)">$200</div><div class="jbs-label">Remaining</div></div>
+  </div>
+  <div class="gauge-card">
+    <div class="gauge-title"><span>🛒 This Week's Budget</span><span id="j-gauge-week" style="font-size:12px;color:var(--text-mid);background:var(--surface2);padding:2px 8px;border-radius:100px">Week 1</span></div>
+    <div class="gauge-bar-bg"><div class="gauge-bar-fill" id="j-gauge-bar" style="width:0%;background:var(--sage)"></div></div>
+    <div class="gauge-sub"><span>Spent: <strong id="j-gauge-spent">$0</strong></span><span id="j-gauge-rem">$200 remaining</span></div>
+  </div>
+
+  <!-- JAMIE NAV -->
+  <nav class="j-nav">
+    <button class="jn-item active" onclick="jPage('meals',this)"><span class="jn-icon">🍽️</span>Meals</button>
+    <button class="jn-item" onclick="jPage('grocery',this)"><span class="jn-icon">🛒</span>Grocery</button>
+    <button class="jn-item" onclick="jPage('tracker',this)"><span class="jn-icon">📊</span>Tracker</button>
+    <button class="jn-item" onclick="jPage('goals',this)"><span class="jn-icon">⭐</span>Goals</button>
+  </nav>
+
+  <!-- MEALS -->
+  <div class="j-page active" id="j-meals">
+    <div class="j-sec-title">This Week's Dinners</div>
+    <div class="j-sec-sub">Tap a day → pick your meal → tap "Build List" when done</div>
+
+    <!-- CUSTOM MEAL FORM -->
+    <div class="custom-meal-form">
+      <div class="cmf-title">➕ Add Your Own Meal</div>
+      <div class="cmf-row">
+        <input type="text" class="cmf-inp" id="cmf-meal-name" placeholder="Meal name (e.g. Mom's Casserole)">
+        <button class="cmf-btn" onclick="addCustomMealIngRow()">+ Ingredient</button>
+      </div>
+      <div id="cmf-ing-list"></div>
+      <button class="cmf-add-ing" onclick="addCustomMealIngRow()">+ Add another ingredient</button>
+      <button class="cmf-btn" style="width:100%;margin-top:4px" onclick="saveCustomMeal()">✓ Save This Meal</button>
+    </div>
+
+    <!-- CUSTOM MEALS SAVED -->
+    <div id="custom-meals-display" style="display:none;margin-bottom:12px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--sage);margin-bottom:8px">Your Custom Meals</div>
+      <div class="custom-meals-list" id="custom-meals-list"></div>
+    </div>
+
+    <div id="j-day-cards"></div>
+    <button class="btn btn-primary" onclick="buildList()">✨ Build My Grocery List</button>
+    <button class="btn btn-outline" onclick="clearMeals()">Clear & Start Over</button>
+  </div>
+
+  <!-- GROCERY -->
+  <div class="j-page" id="j-grocery">
+    <div class="spend-summary">
+      <div class="ss-row"><span class="ss-label">💰 Budget</span><span class="ss-val" style="color:var(--text-mid)">$200.00</span></div>
+      <div class="ss-row"><span class="ss-label">🛒 In Cart</span><span class="ss-val" id="j-cart-total" style="color:var(--sage)">$0.00</span></div>
+      <div class="ss-row" style="margin-bottom:0"><span class="ss-label">✅ Remaining</span><span class="ss-val" id="j-cart-rem" style="color:var(--sage)">$200.00</span></div>
+    </div>
+    <div class="add-row">
+      <input type="text" class="add-inp" id="j-custom-inp" placeholder="Add item...">
+      <button class="add-btn-go" onclick="addCustom()">Add</button>
+    </div>
+
+    <!-- RECEIPT UPLOAD -->
+    <div class="receipt-zone" id="receipt-zone" ondragover="onReceiptDragOver(event)" ondragleave="onReceiptDragLeave()" ondrop="onReceiptDrop(event)">
+      <input type="file" class="receipt-inp" id="receipt-inp" accept="image/*" capture="environment" onchange="onReceiptSel(event)">
+      <div id="receipt-content">
+        <div style="font-size:24px;margin-bottom:6px">📸</div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:3px">Scan Receipt</div>
+        <div style="font-size:12px;color:var(--text-mid)">Take a photo or upload a receipt image — AI reads it and updates your list automatically</div>
+      </div>
+    </div>
+    <div id="j-grocery-wrap">
+      <div class="empty-state" id="j-groc-empty"><div class="es-icon">🍽️</div><p>Plan meals first, then tap<br><strong>Build My Grocery List</strong></p></div>
+      <div id="j-groc-sections" style="display:none"></div>
+    </div>
+    <button class="btn btn-primary" id="j-done-btn" style="display:none;margin-top:8px" onclick="finishShop()">✅ Done Shopping — Save Total</button>
+  </div>
+
+  <!-- TRACKER -->
+  <div class="j-page" id="j-tracker">
+    <div class="j-sec-title">Spending History</div>
+    <div class="impact-panel">
+      <div class="ip-title">📊 Your Impact on the Family Budget</div>
+      <div class="ip-row"><span class="ip-label">Weekly budget</span><span class="ip-val">$200</span></div>
+      <div class="ip-row"><span class="ip-label">Monthly grocery budget</span><span class="ip-val">$800</span></div>
+      <div class="ip-row"><span class="ip-label">Spent so far this month</span><span class="ip-val" id="j-month-spent">$0</span></div>
+      <div class="ip-row"><span class="ip-label">Remaining this month</span><span class="ip-val" id="j-month-rem">$800</span></div>
+      <div class="ip-row"><span class="ip-label">DoorDash savings vs March</span><span class="ip-val" style="color:var(--gold)">~$800/mo</span></div>
+    </div>
+    <div id="j-hist-wrap"></div>
+  </div>
+
+  <!-- GOALS -->
+  <div class="j-page" id="j-goals">
+    <div class="j-sec-title">Family Goals</div>
+    <div class="j-sec-sub">What we're building together</div>
+    <div class="goal-card g-vac">
+      <div class="g-emoji">✈️</div><div class="g-name">Family Vacation</div>
+      <div class="g-desc">Douglas puts $200/month into the vacation fund starting April. Every week you stay under $200 on groceries is money that stays in the family — and gets us there faster.</div>
+      <div class="g-prog-lbl"><span style="color:var(--text-mid);font-weight:600">Life Goals Fund</span><span style="color:var(--gold)">$0 of $3,000</span></div>
+      <div class="prog-wrap"><div class="prog-bar" style="background:var(--gold);width:0%"></div></div>
+    </div>
+    <div class="goal-card g-emerg">
+      <div class="g-emoji">🛡️</div><div class="g-name">Emergency Fund — $10,000</div>
+      <div class="g-desc">We have $5,145 saved. Adding $200/month. This is the "never panic" fund. Car breaks down? Covered. Surprise bill? Covered. This is what lets us sleep at night.</div>
+      <div class="g-prog-lbl"><span style="color:var(--text-mid);font-weight:600">Emergency Savings</span><span style="color:var(--teal)">$5,145 of $10,000</span></div>
+      <div class="prog-wrap"><div class="prog-bar" style="background:var(--teal);width:51.45%"></div></div>
+    </div>
+    <div class="goal-card g-debt">
+      <div class="g-emoji">💳</div><div class="g-name">Zero Credit Card Debt</div>
+      <div class="g-desc">$24,765 across 5 cards. At current pace all gone by 2028–2029. Your meal plan alone saves $800/month vs what we were spending on DoorDash.</div>
+      <div class="g-prog-lbl"><span style="color:var(--text-mid);font-weight:600">Debt Remaining</span><span style="color:var(--red)">$24,765</span></div>
+      <div class="prog-wrap"><div class="prog-bar" style="background:var(--red);width:4%"></div></div>
+    </div>
+    <div class="impact-panel" style="margin-top:4px">
+      <div class="ip-title">💚 How Your Meal Plan Helps</div>
+      <div class="ip-row"><span class="ip-label">DoorDash in March</span><span class="ip-val" style="color:var(--red)">$799</span></div>
+      <div class="ip-row"><span class="ip-label">DoorDash from April</span><span class="ip-val">$0</span></div>
+      <div class="ip-row"><span class="ip-label">Saved per month</span><span class="ip-val">~$800</span></div>
+      <div class="ip-row"><span class="ip-label">Saved per year</span><span class="ip-val">~$9,600</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- PIN OVERLAY -->
+<div class="pin-overlay hidden" id="pin-overlay">
+  <div class="pin-box">
+    <div class="pin-title">🔐 Douglas's View</div>
+    <div class="pin-sub">Enter the family PIN</div>
+    <div class="pin-dots" id="pin-dots">
+      <div class="pin-dot" id="pd0"></div><div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div><div class="pin-dot" id="pd3"></div>
+    </div>
+    <div class="pin-keypad">
+      <button class="pin-key" onclick="pinKey('1')">1</button><button class="pin-key" onclick="pinKey('2')">2</button><button class="pin-key" onclick="pinKey('3')">3</button>
+      <button class="pin-key" onclick="pinKey('4')">4</button><button class="pin-key" onclick="pinKey('5')">5</button><button class="pin-key" onclick="pinKey('6')">6</button>
+      <button class="pin-key" onclick="pinKey('7')">7</button><button class="pin-key" onclick="pinKey('8')">8</button><button class="pin-key" onclick="pinKey('9')">9</button>
+      <button class="pin-key" onclick="pinKey('back')" style="font-size:16px">⌫</button><button class="pin-key" onclick="pinKey('0')">0</button><button class="pin-key" onclick="pinCancel()" style="font-size:13px;color:var(--text-mid)">✕</button>
+    </div>
+    <div class="pin-error" id="pin-error"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════ CONFIG
+const ENTRY_PASS = "5626"; // Entry password — change this anytime
+const PIN = "1234"; // Douglas's view PIN for Jamie
+const WEEKLY_BUDGET = 200;
+const CARDS = [
+  {name:"BofA 9362",balance:13567.18,apr:0.2374,min:384,color:"#ff6b6b"},
+  {name:"Chase 0690",balance:5279.89,apr:0.2724,min:250,color:"#ff9f43"},
+  {name:"Best Buy",balance:3438.17,apr:0.2999,min:35,color:"#ffc542"},
+  {name:"US Bank 2405",balance:1679.65,apr:0.2174,min:72,color:"#4d9fff"},
+  {name:"US Bank 6925",balance:800,apr:0.2174,min:35,color:"#a78bfa"},
+];
+const BUDGETS = {"Mortgage":2578,"Utilities":568,"Phone & Internet":364,"Loan Payment":248,"Debt Payments":776,"Subscriptions":552,"Groceries":800,"Food & Life":1140,"Known Unknowns":455};
+const RULES = [
+  {cat:"Mortgage",color:"#4d9fff",kw:["ROCKET MORTGAGE"]},
+  {cat:"Phone & Internet",color:"#a78bfa",kw:["ATT* BILL","AT&T","GOOGLE FIBER"]},
+  {cat:"Utilities",color:"#6dd5fa",kw:["SPIRE","EVERGY","KANSAS CITY WATER"]},
+  {cat:"Loan Payment",color:"#f7971e",kw:["UPGRADE, INC","NEFURNMART"]},
+  {cat:"Debt Payments",color:"#ff6b6b",kw:["U.S. BANK DES:WEB PYMT","BEST BUY DES:PAYMENT","CITICTP"]},
+  {cat:"Groceries",color:"#00c9a7",kw:["ALDI","PRICE CHOPPER","HY-VEE","HYVEE","WM SUPERCENTER","WAL-MART","WALMART","COSTCO","TARGET T-","TARGET 000","TARGET DEBIT","DOLLAR TREE","WHOLE FOODS","TRADER JOE"]},
+  {cat:"Subscriptions",color:"#ffc542",kw:["NETFLIX","HULU","SPOTIFY","XBOX","ROBLOX","ADOBE","GOOGLE *CHATGP","CHATGPT","AMAZON PRIME","PRIME VIDEO","GOOGLE *YOUTUB","GOOGLE *TRUECA","AUDIBLE","NOOM","DISNEY"]},
+  {cat:"Food & Life",color:"#fd9644",kw:["DOORDASH","DD *DOORDASH","MCDONALD","STARBUCKS","CHIPOTLE","FIRST WATCH","BUBBLES WINE","QT ","NORTH OAK SINC","SHELL","CASEY"]},
+  {cat:"Insurance",color:"#778ca3",kw:["STATE FARM"]},
+  {cat:"Health & Fitness",color:"#26de81",kw:["PLANET FIT","MpPNorthKansas"]},
+  {cat:"Amazon",color:"#ff9900",kw:["AMAZON MKTPL","AMAZON.COM"]},
+  {cat:"Home & Repairs",color:"#a55eea",kw:["HOME DEPOT","MENARDS","SHERWIN"]},
+  {cat:"Income",color:"#00c9a7",kw:["SYMPHONYAI","PAYROLL"]},
+  {cat:"Transfers",color:"#4a5168",kw:["ONLINE BANKING TRANSFER","OVERDRAFT PROTECTION"]},
+  {cat:"Venmo/Other",color:"#778ca3",kw:["VENMO","SENDWAVE"]},
+  {cat:"Other",color:"#8b92a8",kw:[]},
+];
+const BVA_MAP = {"Mortgage":["Mortgage"],"Utilities":["Utilities"],"Phone & Internet":["Phone & Internet"],"Loan Payment":["Loan Payment"],"Debt Payments":["Debt Payments"],"Subscriptions":["Subscriptions"],"Groceries":["Groceries"],"Food & Life":["Food & Life","Amazon"],"Known Unknowns":["Home & Repairs","Health & Fitness","Insurance","Venmo/Other"]};
+const MEALS = [
+  {n:"Spaghetti & Meat Sauce",c:"~$12",items:[{n:"Ground beef 1lb",s:"aldi",sec:"Meat",e:4.5},{n:"Spaghetti",s:"aldi",sec:"Pantry",e:1.2},{n:"Pasta sauce",s:"aldi",sec:"Pantry",e:1.8},{n:"Parmesan",s:"aldi",sec:"Dairy",e:2.5},{n:"Garlic bread",s:"aldi",sec:"Bakery",e:2.0}]},
+  {n:"Chicken Tacos",c:"~$15",items:[{n:"Chicken breast 2lb",s:"aldi",sec:"Meat",e:6.0},{n:"Taco shells",s:"aldi",sec:"Pantry",e:2.5},{n:"Shredded cheese",s:"aldi",sec:"Dairy",e:2.5},{n:"Lettuce",s:"aldi",sec:"Produce",e:1.2},{n:"Sour cream",s:"aldi",sec:"Dairy",e:1.8},{n:"Salsa",s:"aldi",sec:"Pantry",e:2.0}]},
+  {n:"Beef Stir Fry",c:"~$14",items:[{n:"Beef strips",s:"aldi",sec:"Meat",e:5.5},{n:"Broccoli",s:"aldi",sec:"Produce",e:2.0},{n:"Soy sauce",s:"aldi",sec:"Pantry",e:1.5},{n:"Rice 2lb",s:"aldi",sec:"Pantry",e:2.5},{n:"Garlic",s:"aldi",sec:"Produce",e:0.8}]},
+  {n:"Homemade Pizza",c:"~$10",items:[{n:"Pizza dough",s:"aldi",sec:"Bakery",e:2.5},{n:"Pizza sauce",s:"aldi",sec:"Pantry",e:1.5},{n:"Mozzarella",s:"aldi",sec:"Dairy",e:3.5},{n:"Pepperoni",s:"aldi",sec:"Meat",e:3.0},{n:"Bell peppers",s:"aldi",sec:"Produce",e:1.5}]},
+  {n:"Chicken Alfredo",c:"~$13",items:[{n:"Chicken breast",s:"aldi",sec:"Meat",e:5.0},{n:"Fettuccine",s:"aldi",sec:"Pantry",e:1.5},{n:"Alfredo sauce",s:"aldi",sec:"Pantry",e:2.5},{n:"Parmesan",s:"aldi",sec:"Dairy",e:2.5}]},
+  {n:"Sheet Pan Chicken",c:"~$14",items:[{n:"Chicken thighs",s:"aldi",sec:"Meat",e:5.5},{n:"Potatoes",s:"aldi",sec:"Produce",e:2.0},{n:"Carrots",s:"aldi",sec:"Produce",e:1.5},{n:"Olive oil",s:"aldi",sec:"Pantry",e:3.0}]},
+  {n:"Chili + Cornbread",c:"~$11",items:[{n:"Ground beef 1lb",s:"aldi",sec:"Meat",e:4.5},{n:"Kidney beans x2",s:"aldi",sec:"Pantry",e:1.8},{n:"Diced tomatoes x2",s:"aldi",sec:"Pantry",e:2.0},{n:"Chili seasoning",s:"aldi",sec:"Pantry",e:1.2},{n:"Cornbread mix",s:"aldi",sec:"Pantry",e:1.5}]},
+  {n:"Grilled Cheese & Soup",c:"~$8",items:[{n:"Bread loaf",s:"aldi",sec:"Bakery",e:2.0},{n:"American cheese",s:"aldi",sec:"Dairy",e:2.5},{n:"Butter",s:"aldi",sec:"Dairy",e:2.5},{n:"Tomato soup x2",s:"aldi",sec:"Pantry",e:2.0}]},
+  {n:"Baked Salmon",c:"~$16",items:[{n:"Salmon fillets",s:"aldi",sec:"Meat",e:8.0},{n:"Rice",s:"aldi",sec:"Pantry",e:2.0},{n:"Green beans",s:"aldi",sec:"Produce",e:2.0},{n:"Lemon",s:"aldi",sec:"Produce",e:0.8}]},
+  {n:"Pot Roast",c:"~$18",items:[{n:"Chuck roast 3lb",s:"aldi",sec:"Meat",e:10.0},{n:"Potatoes",s:"aldi",sec:"Produce",e:2.5},{n:"Carrots",s:"aldi",sec:"Produce",e:1.5},{n:"Onion",s:"aldi",sec:"Produce",e:0.8},{n:"Beef broth",s:"aldi",sec:"Pantry",e:2.0}]},
+  {n:"Pancakes & Bacon",c:"~$9",items:[{n:"Pancake mix",s:"aldi",sec:"Pantry",e:2.5},{n:"Eggs",s:"aldi",sec:"Dairy",e:2.5},{n:"Bacon",s:"aldi",sec:"Meat",e:4.5},{n:"Maple syrup",s:"aldi",sec:"Pantry",e:2.5}]},
+  {n:"Mac & Cheese + Hot Dogs",c:"~$7",items:[{n:"Mac & cheese x3",s:"aldi",sec:"Pantry",e:2.5},{n:"Hot dogs",s:"aldi",sec:"Meat",e:3.0},{n:"Butter",s:"aldi",sec:"Dairy",e:1.5}]},
+  {n:"Chicken Soup",c:"~$12",items:[{n:"Chicken parts",s:"aldi",sec:"Meat",e:5.5},{n:"Carrots",s:"aldi",sec:"Produce",e:1.5},{n:"Celery",s:"aldi",sec:"Produce",e:1.5},{n:"Egg noodles",s:"aldi",sec:"Pantry",e:1.5},{n:"Chicken broth",s:"aldi",sec:"Pantry",e:2.0}]},
+  {n:"Burgers on the Grill",c:"~$13",items:[{n:"Ground beef 2lb",s:"aldi",sec:"Meat",e:7.0},{n:"Burger buns",s:"aldi",sec:"Bakery",e:2.0},{n:"Cheese slices",s:"aldi",sec:"Dairy",e:2.5},{n:"Lettuce & tomato",s:"aldi",sec:"Produce",e:2.0}]},
+  {n:"Quesadillas",c:"~$10",items:[{n:"Large tortillas",s:"aldi",sec:"Pantry",e:2.0},{n:"Shredded chicken",s:"aldi",sec:"Meat",e:3.5},{n:"Shredded cheese",s:"aldi",sec:"Dairy",e:2.5},{n:"Salad bag",s:"aldi",sec:"Produce",e:2.5}]},
+  {n:"Fried Rice",c:"~$8",items:[{n:"Rice",s:"aldi",sec:"Pantry",e:2.0},{n:"Eggs",s:"aldi",sec:"Dairy",e:2.5},{n:"Frozen peas & carrots",s:"aldi",sec:"Frozen",e:1.5},{n:"Soy sauce",s:"aldi",sec:"Pantry",e:1.0}]},
+  {n:"Lasagna",c:"~$14",items:[{n:"Ground beef 1lb",s:"aldi",sec:"Meat",e:4.5},{n:"Lasagna noodles",s:"aldi",sec:"Pantry",e:1.5},{n:"Ricotta",s:"aldi",sec:"Dairy",e:3.0},{n:"Mozzarella",s:"aldi",sec:"Dairy",e:3.0},{n:"Pasta sauce x2",s:"aldi",sec:"Pantry",e:3.5}]},
+  {n:"Fish Sticks & Mac",c:"~$10",items:[{n:"Frozen fish sticks",s:"aldi",sec:"Frozen",e:4.5},{n:"Mac & cheese x2",s:"aldi",sec:"Pantry",e:2.0},{n:"Frozen corn",s:"aldi",sec:"Frozen",e:1.5}]},
+  {n:"Pulled Pork Sandwiches",c:"~$15",items:[{n:"Pork shoulder",s:"aldi",sec:"Meat",e:7.0},{n:"BBQ sauce",s:"aldi",sec:"Pantry",e:2.5},{n:"Brioche buns",s:"aldi",sec:"Bakery",e:2.5},{n:"Coleslaw mix",s:"aldi",sec:"Produce",e:2.0}]},
+  {n:"Veggie Beef Stew",c:"~$13",items:[{n:"Stew beef",s:"aldi",sec:"Meat",e:5.5},{n:"Potatoes",s:"aldi",sec:"Produce",e:2.0},{n:"Carrots",s:"aldi",sec:"Produce",e:1.5},{n:"Beef broth",s:"aldi",sec:"Pantry",e:2.0},{n:"Tomato paste",s:"aldi",sec:"Pantry",e:0.8}]},
+];
+const STAPLES = [{n:"Milk gallon",s:"aldi",sec:"Dairy",e:3.5},{n:"Eggs dozen",s:"aldi",sec:"Dairy",e:2.5},{n:"Bread loaf",s:"aldi",sec:"Bakery",e:2.0},{n:"Bananas",s:"aldi",sec:"Produce",e:1.5},{n:"Butter",s:"aldi",sec:"Dairy",e:3.5}];
+const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday"];
+
+// ══════ STATE
+let transactions = [];
+let charts = {};
+let mealPlan = {};
+let grocItems = [];
+let customMeals = [];
+let hiddenMeals = [];
+let weekHist = [];
+let ccBalances = {
+  bofa: 13567.18,
+  chase: 5279.89,
+  bestbuy: 3438.17,
+  usbank2405: 1679.65,
+  usbank6925: 800.00
+};
+let familyGoals = { efund: 5145, lgfund: 0 };
+let currentWeek = Math.max(1,Math.ceil((new Date()-new Date(2026,3,1))/(7*24*60*60*1000)));
+let pinBuffer = '';
+let pinTarget = '';
+let entryBuffer = '';
+let cmfIngCount = 0;
+// ALWAYS use this URL — Apps Script for receipt scanning and PDF only
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxgssU1_z7Xkp-b-GyhG2ls75Uq_dpBn7owG_lvHJsr9SQGSpG803xba8Nh3rH_lodmww/exec';
+
+// ══════ FIREBASE REALTIME DATABASE SYNC
+// Zero CORS issues — Firebase is designed for exactly this use case
+// Sub-second sync across all devices, works from any browser/location
+const FB = 'https://martinson-family-default-rtdb.firebaseio.com';
+
+let syncTimer = null;
+let lastSyncTime = null;
+let syncStatus = 'idle';
+let fbListener = null; // live listener reference
+
+// ── READ from Firebase ────────────────────────────────────────────
+async function fbGet(key) {
+  try {
+    const res = await fetch(`${FB}/martinson/${key}.json`);
+    if (!res.ok) {
+      console.warn(`Firebase GET ${key} failed: ${res.status} ${res.statusText}`);
+      return null;
+    }
+    const data = await res.json();
+    console.log(`Firebase GET ${key}:`, data ? 'got data' : 'null');
+    return data;
+  } catch(e) {
+    console.error(`Firebase GET ${key} error:`, e.message);
+    return null;
+  }
+}
+
+// ── WRITE to Firebase ─────────────────────────────────────────────
+async function fbSet(key, value) {
+  localStorage.setItem('fb_' + key, JSON.stringify(value));
+  try {
+    const res = await fetch(`${FB}/martinson/${key}.json`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(value)
+    });
+    if (!res.ok) {
+      console.error(`Firebase SET ${key} failed: ${res.status} ${res.statusText}`);
+      updateSyncBadge('error');
+      return;
+    }
+    console.log(`Firebase SET ${key}: success`);
+    lastSyncTime = new Date();
+    updateSyncBadge('ok');
+  } catch(e) {
+    console.error(`Firebase SET ${key} error:`, e.message);
+    updateSyncBadge('error');
+  }
+}
+
+// ── SYNC DIAGNOSTIC — run this in browser console to test ─────────
+// Type: runSyncTest() in the browser console to see exactly what's happening
+window.runSyncTest = async function() {
+  console.log('=== FIREBASE SYNC DIAGNOSTIC ===');
+  console.log('Firebase URL:', FB);
+
+  // Test write
+  console.log('1. Testing WRITE...');
+  try {
+    const res = await fetch(`${FB}/martinson/sync_test.json`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ test: true, time: Date.now() })
+    });
+    console.log('Write status:', res.status, res.ok ? '✅ SUCCESS' : '❌ FAILED');
+    if (!res.ok) {
+      const text = await res.text();
+      console.error('Write error response:', text);
+      console.error('👉 Fix: Go to Firebase Console → Realtime Database → Rules → set .read and .write to true → Publish');
+    }
+  } catch(e) {
+    console.error('Write threw exception:', e.message);
+  }
+
+  // Test read
+  console.log('2. Testing READ...');
+  try {
+    const res = await fetch(`${FB}/martinson/sync_test.json`);
+    console.log('Read status:', res.status, res.ok ? '✅ SUCCESS' : '❌ FAILED');
+    if (res.ok) {
+      const data = await res.json();
+      console.log('Read data:', data);
+    } else {
+      const text = await res.text();
+      console.error('Read error response:', text);
+    }
+  } catch(e) {
+    console.error('Read threw exception:', e.message);
+  }
+
+  // Test CSV data
+  console.log('3. Checking last_csv_data in Firebase...');
+  try {
+    const res = await fetch(`${FB}/martinson/last_csv_data.json`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.count) {
+        console.log(`✅ Firebase has CSV data: ${data.count} transactions from ${data.period}`);
+      } else {
+        console.log('❌ No CSV data in Firebase yet — load a CSV file first');
+      }
+    }
+  } catch(e) {
+    console.error('CSV check error:', e.message);
+  }
+
+  console.log('=== END DIAGNOSTIC ===');
+  console.log('Share these results so we can identify the exact issue');
+};
+
+// ── DELETE from Firebase ──────────────────────────────────────────
+async function fbDelete(key) {
+  localStorage.removeItem('fb_' + key);
+  try {
+    await fetch(`${FB}/martinson/${key}.json`, { method: 'DELETE' });
+  } catch(e) {}
+}
+
+// ── SYNC ALL — pull everything from Firebase ──────────────────────
+async function syncAll() {
+  // Phase 1: Load non-CSV data from localStorage instantly (for speed)
+  // CSV deliberately excluded from localStorage — Firebase is sole source of truth
+  const localKeys = ['custom_meals','hidden_meals','week_hist','meal_plan',
+                     'cc_balances','family_goals','financial_settings'];
+  localKeys.forEach(k => {
+    const local = localStorage.getItem('fb_' + k);
+    if (!local) return;
+    try { applyKey(k, JSON.parse(local)); } catch(e) {}
+  });
+
+  updateSyncBadge('syncing');
+
+  try {
+    // Phase 2: Fetch ALL keys from Firebase — including CSV and cleared flag
+    const allKeys = ['custom_meals','hidden_meals','week_hist','meal_plan',
+                     'cc_balances','family_goals','financial_settings',
+                     'last_csv_data','csv_cleared'];
+    const results = await Promise.all(
+      allKeys.map(k => fbGet(k).catch(() => null))
+    );
+    allKeys.forEach((k, i) => {
+      if (results[i] !== null && results[i] !== undefined) {
+        // Cache non-CSV keys in localStorage for instant load next time
+        if (k !== 'last_csv_data') {
+          localStorage.setItem('fb_' + k, JSON.stringify(results[i]));
+        }
+        applyKey(k, results[i]);
+      }
+    });
+    lastSyncTime = new Date();
+    updateSyncBadge('ok');
+  } catch(e) {
+    updateSyncBadge('error');
+  }
+}
+
+// ── START LIVE LISTENER — polls every 5 seconds ───────────────────
+function startLiveSync() {
+  if (fbListener) clearInterval(fbListener);
+  fbListener = setInterval(async () => {
+    try {
+      const [mp, wh, csvData, csvCleared, settings, cm, hm] = await Promise.all([
+        fbGet('meal_plan').catch(()=>null),
+        fbGet('week_hist').catch(()=>null),
+        fbGet('last_csv_data').catch(()=>null),
+        fbGet('csv_cleared').catch(()=>null),
+        fbGet('financial_settings').catch(()=>null),
+        fbGet('custom_meals').catch(()=>null),
+        fbGet('hidden_meals').catch(()=>null),
+      ]);
+
+      let changed = false;
+
+      if (cm !== null) { applyKey('custom_meals', cm); localStorage.setItem('fb_custom_meals', JSON.stringify(cm)); changed = true; }
+      if (hm !== null) { applyKey('hidden_meals', hm); localStorage.setItem('fb_hidden_meals', JSON.stringify(hm)); changed = true; }
+      if (mp !== null) { applyKey('meal_plan', mp); localStorage.setItem('fb_meal_plan', JSON.stringify(mp)); changed = true; }
+      if (wh !== null) { applyKey('week_hist', wh); localStorage.setItem('fb_week_hist', JSON.stringify(wh)); changed = true; }
+      if (settings !== null) { applyKey('financial_settings', settings); localStorage.setItem('fb_financial_settings', JSON.stringify(settings)); changed = true; }
+      if (csvCleared !== null) { applyKey('csv_cleared', csvCleared); changed = true; }
+      // CSV — only apply if Firebase has newer data than what's currently showing
+      if (csvData !== null) {
+        const currentTimestamp = transactions.length > 0 ? (window._lastCsvTimestamp || 0) : 0;
+        const fbTimestamp = csvData.uploadedAt || 0;
+        if (fbTimestamp > currentTimestamp) {
+          window._lastCsvTimestamp = fbTimestamp;
+          applyKey('last_csv_data', csvData);
+          changed = true;
+        }
+      }
+
+      if (changed) {
+        refreshAllUI();
+        lastSyncTime = new Date();
+        updateSyncBadge('ok');
+      }
+    } catch(e) {}
+  }, 5000);
+}
+
+// ── APPLY KEY — map Firebase data to app state ────────────────────
+function applyKey(key, value) {
+  if (value === null || value === undefined) return;
+  switch(key) {
+    case 'custom_meals': customMeals = value; break;
+    case 'hidden_meals': hiddenMeals = value; break;
+    case 'week_hist': weekHist = value; break;
+    case 'meal_plan': mealPlan = value; break;
+    case 'cc_balances': ccBalances = value; break;
+    case 'family_goals': familyGoals = value; break;
+    case 'financial_settings':
+      if (value.income) FINANCIAL.income = value.income;
+      if (value.efundTarget) FINANCIAL.efundTarget = value.efundTarget;
+      if (value.cards) {
+        value.cards.forEach((c,i) => { if(CARDS[i]) CARDS[i].balance = c.balance; });
+      }
+      break;
+    case 'last_csv_data':
+      if (!localStorage.getItem('csv_cleared') && value && value.txList && value.txList.length) {
+        window._lastCsvTimestamp = value.uploadedAt || 0;
+        loadCrossDeviceCsvData(value);
+      }
+      break;
+    case 'csv_cleared':
+      if (value && value.cleared === true) localStorage.setItem('csv_cleared','true');
+      else if (value && value.cleared === false) localStorage.removeItem('csv_cleared');
+      break;
+  }
+}
+
+// ── DEBOUNCED SAVE ────────────────────────────────────────────────
+function scheduleSave(key, value) {
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => fbSet(key, value), 600);
+}
+
+// ── FINANCIAL SETTINGS — editable from UI ─────────────────────────
+const FINANCIAL = {
+  income: 9090.46,
+  efundTarget: 10000,
+};
+
+// Save updated financial settings (CC balances, income, etc)
+function saveFinancialSettings() {
+  const settings = {
+    income: FINANCIAL.income,
+    efundTarget: FINANCIAL.efundTarget,
+    cards: CARDS.map(c => ({ name:c.name, balance:c.balance })),
+    updatedAt: new Date().toISOString()
+  };
+  fbSet('financial_settings', settings);
+}
+
+async function syncTransactionBatch(txns, loadedOn) {
+  if (!txns.length) return { added:txns.length, duplicates:0 };
+  // Write to Apps Script for permanent Sheets archive (fire and forget)
+  try {
+    fetch(SHEET_URL, {
+      method:'POST', mode:'no-cors',
+      headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify({action:'appendTransactions',transactions:txns,loadedOn})
+    }).catch(()=>{});
+  } catch(e) {}
+  return { added:txns.length, duplicates:0 };
+}
+
+function updateSyncBadge(status) {
+  syncStatus = status;
+  const configs = {
+    syncing: { color: 'var(--gold)', text: '⟳ Syncing...' },
+    ok: { color: 'var(--teal)', text: '✓ Synced ' + (lastSyncTime ? lastSyncTime.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) : '') + ' · tap to refresh' },
+    error: { color: 'var(--red)', text: '⚠ Sync error · tap to retry' },
+    unconfigured: { color: 'var(--text-soft)', text: '◌ Local only — tap to enable sync' },
+    idle: { color: 'var(--text-soft)', text: '' },
+  };
+  const cfg = configs[status] || configs.idle;
+  ['sync-badge','j-sync-badge'].forEach(id => {
+    const badge = document.getElementById(id);
+    if (!badge) return;
+    badge.style.color = cfg.color;
+    badge.textContent = cfg.text;
+    badge.style.cursor = 'pointer';
+    badge.title = 'Tap to sync now';
+    badge.onclick = status === 'unconfigured'
+      ? showSyncSetup
+      : async () => { await syncAll(); refreshAllUI(); toast('✓ Synced'); };
+  });
+}
+
+// scheduleSave defined above in Firebase engine
+
+function showSyncSetup() {
+  const existing = document.getElementById('sync-setup-overlay');
+  if (existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'sync-setup-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:400;display:flex;align-items:center;justify-content:center;padding:24px';
+  overlay.innerHTML = `
+    <div style="background:var(--surface);border-radius:20px;padding:28px;width:100%;max-width:480px;box-shadow:var(--sh)">
+      <div style="font-family:var(--font-d);font-size:22px;margin-bottom:8px">🔗 Enable Google Sheets Sync</div>
+      <div style="font-size:13px;color:var(--text-mid);line-height:1.6;margin-bottom:20px">
+        Follow the 5-minute setup below, then paste your Web App URL here to enable real-time sync between Douglas's laptop and Jamie's phone.
+      </div>
+      <div style="background:var(--surface2);border-radius:12px;padding:16px;margin-bottom:16px;font-size:13px;line-height:1.9">
+        <div style="font-weight:700;color:var(--teal);margin-bottom:8px">Setup Steps:</div>
+        <div><strong>1.</strong> Open <a href="https://sheets.google.com" target="_blank" style="color:var(--teal)">Google Sheets</a> → create a new sheet named <strong>Martinson Sync</strong></div>
+        <div><strong>2.</strong> Click <strong>Extensions → Apps Script</strong></div>
+        <div><strong>3.</strong> Delete all existing code and paste the script from the instructions document</div>
+        <div><strong>4.</strong> Click <strong>Deploy → New Deployment → Web App</strong></div>
+        <div><strong>5.</strong> Set "Who has access" to <strong>Anyone</strong> → Deploy</div>
+        <div><strong>6.</strong> Copy the Web App URL and paste it below</div>
+      </div>
+      <input type="text" id="sheet-url-input" placeholder="Paste your Web App URL here..." value="${SHEET_URL}"
+        style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font-family:var(--font-b);font-size:13px;margin-bottom:12px">
+      <div style="display:flex;gap:10px">
+        <button onclick="saveSyncURL()" style="flex:1;padding:12px;background:var(--teal);color:#000;border:none;border-radius:10px;font-family:var(--font-b);font-size:14px;font-weight:700;cursor:pointer">Save & Connect</button>
+        <button onclick="document.getElementById('sync-setup-overlay').remove()" style="padding:12px 18px;background:var(--surface2);color:var(--text-mid);border:none;border-radius:10px;font-family:var(--font-b);font-size:14px;cursor:pointer">Cancel</button>
+      </div>
+      <div style="margin-top:12px;font-size:11px;color:var(--text-soft);text-align:center">Need the Apps Script code? Download the setup doc from your Family Budget Drive folder.</div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function saveSyncURL() {
+  const url = document.getElementById('sheet-url-input').value.trim();
+  if (!url || !url.startsWith('https://')) { toast('Please enter a valid URL starting with https://'); return; }
+  SHEET_URL = url;
+  localStorage.setItem('m_sheet_url', url);
+  document.getElementById('sync-setup-overlay').remove();
+  toast('✓ Sync URL saved — connecting...');
+  syncAll().then(() => {
+    refreshAllUI();
+    toast('✓ Connected to Google Sheets!');
+    // Start auto-refresh every 30 seconds
+    setInterval(() => syncAll().then(refreshAllUI), 30000);
+  });
+}
+
+function refreshAllUI() {
+  renderDayCards();
+  renderCustomMealsList();
+  renderWeekHist();
+  updateJamieStrip();
+  syncJamieToDoug();
+  updateCCDisplay();
+  updateGoalsDisplay();
+  // NOTE: CSV data is NOT loaded here from localStorage
+  // Firebase is the ONLY source of truth for transactions
+  // applyKey('last_csv_data') handles all CSV loading directly from Firebase
+}
+
+// ══════ INIT
+document.addEventListener('DOMContentLoaded', async () => {
+  renderDonut();
+  updateProj();
+  renderMilestones();
+  renderFreedomChart();
+  document.getElementById('j-week-of').textContent = getWeekOf();
+  document.getElementById('j-gauge-week').textContent = 'Week ' + currentWeek;
+
+  // Phase 1: Load non-CSV data from localStorage instantly
+  // CSV is deliberately excluded — Firebase is the ONLY source of truth for transactions
+  // This prevents stale cached CSV from overwriting the correct Firebase version
+  const localKeys = ['custom_meals','hidden_meals','week_hist','meal_plan',
+                     'cc_balances','family_goals','financial_settings'];
+  localKeys.forEach(k => {
+    const local = localStorage.getItem('fb_' + k);
+    if (local) try { applyKey(k, JSON.parse(local)); } catch(e) {}
+  });
+  refreshAllUI();
+
+  // Phase 2: Full sync from Firebase — this sets the correct CSV
+  updateSyncBadge('syncing');
+  await syncAll();
+  refreshAllUI();
+
+  // Phase 3: Start live 5-second polling
+  startLiveSync();
+});
+
+function getWeekOf(){const n=new Date();const d=n.getDate()-n.getDay()+(n.getDay()===0?-6:1);const m=new Date(n.setDate(d));return m.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
+function fmt(n){return '$'+Math.abs(n).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,',');}
+function fmtD(n){return '$'+Math.abs(n).toFixed(2);}
+function gid(l=8){return Math.random().toString(36).substr(2,l);}
+
+// ══════ ENTRY PASSWORD
+function entryKey(k){
+  if(k==='back'){entryBuffer=entryBuffer.slice(0,-1);updateEntryDots();document.getElementById('entry-error').textContent='';return;}
+  if(k==='clear'){entryBuffer='';updateEntryDots();document.getElementById('entry-error').textContent='';return;}
+  if(entryBuffer.length>=4)return;
+  entryBuffer+=k;updateEntryDots();
+  if(entryBuffer.length===4){
+    if(entryBuffer===ENTRY_PASS){
+      document.getElementById('entry-screen').classList.add('hidden');
+      document.getElementById('who-screen').classList.remove('hidden');
+      entryBuffer='';updateEntryDots();
+    } else {
+      document.getElementById('entry-error').textContent='Wrong password. Try again.';
+      setTimeout(()=>{entryBuffer='';updateEntryDots();document.getElementById('entry-error').textContent='';},900);
+    }
+  }
+}
+function updateEntryDots(){for(let i=0;i<4;i++){document.getElementById('ed'+i).classList.toggle('filled',i<entryBuffer.length);}}
+
+// ══════ NAVIGATION
+function showWho(){
+  document.getElementById('who-screen').classList.remove('hidden');
+  document.getElementById('douglas-app').classList.add('hidden');
+  document.getElementById('jamie-app').classList.add('hidden');
+  document.getElementById('sunday-screen').classList.add('hidden');
+}
+function showSunday(){
+  document.getElementById('who-screen').classList.add('hidden');
+  document.getElementById('sunday-screen').classList.remove('hidden');
+  renderSunday();
+}
+function enterAs(who){
+  document.getElementById('who-screen').classList.add('hidden');
+  if(who==='douglas'){document.getElementById('douglas-app').classList.remove('hidden');dPage('overview',null);}
+  else{document.getElementById('jamie-app').classList.remove('hidden');jPage('meals',null);}
+}
+function showJamieFromDouglas(){document.getElementById('douglas-app').classList.add('hidden');document.getElementById('jamie-app').classList.remove('hidden');}
+
+// ══════ DOUGLAS TABS
+function dPage(id,btn){
+  document.querySelectorAll('#douglas-app .page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('#d-tabs .tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('d-'+id).classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(id==='projections')updateProj();
+}
+
+// ══════ JAMIE TABS
+function jPage(id,btn){
+  document.querySelectorAll('.j-page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.jn-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('j-'+id).classList.add('active');
+  if(btn)btn.classList.add('active');
+}
+
+// ══════ PIN
+function pinPrompt(target){pinTarget=target;pinBuffer='';updatePinDots();document.getElementById('pin-error').textContent='';document.getElementById('pin-overlay').classList.remove('hidden');}
+function pinCancel(){document.getElementById('pin-overlay').classList.add('hidden');pinBuffer='';}
+function pinKey(k){
+  if(k==='back'){pinBuffer=pinBuffer.slice(0,-1);updatePinDots();return;}
+  if(pinBuffer.length>=4)return;
+  pinBuffer+=k;updatePinDots();
+  if(pinBuffer.length===4){
+    if(pinBuffer===PIN){document.getElementById('pin-overlay').classList.add('hidden');enterAs(pinTarget);}
+    else{document.getElementById('pin-error').textContent='Wrong PIN. Try again.';pinBuffer='';updatePinDots();}
+  }
+}
+function updatePinDots(){for(let i=0;i<4;i++){const d=document.getElementById('pd'+i);d.classList.toggle('filled',i<pinBuffer.length);}}
+
+// ══════ TOAST
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+
+// ══════ CSV
+function categorize(d){const u=d.toUpperCase();for(const r of RULES){if(r.kw.some(k=>u.includes(k)))return r;}return RULES[RULES.length-1];}
+function onDragOver(e){e.preventDefault();document.getElementById('drop-zone').classList.add('drag-over');}
+function onDragLeave(){document.getElementById('drop-zone').classList.remove('drag-over');}
+function onDrop(e){
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag-over');
+  const f=e.dataTransfer.files[0];
+  if(!f) return;
+  if(f.name.endsWith('.csv')) processFile(f);
+  else if(f.type==='application/pdf'||f.name.endsWith('.pdf')) processPDF(f);
+  else toast('Please drop a CSV or PDF file');
+}
+function onFileSel(e){
+  const f=e.target.files[0];
+  if(!f) return;
+  if(f.name.endsWith('.csv')) processFile(f);
+  else if(f.type==='application/pdf'||f.name.endsWith('.pdf')) processPDF(f);
+}
+
+// PDF processing — sends to Apps Script which extracts transaction text via AI
+async function processPDF(file){
+  const dz=document.getElementById('drop-zone');
+  dz.classList.add('loaded');
+  // Disable invisible file input so buttons in loaded state work correctly
+  const dropInp=document.getElementById('drop-input');
+  if(dropInp) dropInp.style.pointerEvents='none';
+  document.getElementById('drop-content').innerHTML=`<div style="display:flex;align-items:center;justify-content:center;gap:10px">
+    <span class="scan-spinner" style="border-top-color:var(--teal)"></span>
+    <span style="font-size:14px;font-weight:600;color:var(--teal)">Reading PDF statement...</span>
+  </div><div style="font-size:12px;color:var(--text-mid);margin-top:8px;text-align:center">AI is extracting transactions — this takes about 15 seconds</div>`;
+  const reader=new FileReader();
+  reader.onload=async(e)=>{
+    const base64=e.target.result.split(',')[1];
+    try{
+      const res=await fetch(SHEET_URL,{
+        method:'POST',
+        headers:{'Content-Type':'text/plain'},
+        body:JSON.stringify({action:'parsePDF',pdfBase64:base64,filename:file.name})
+      });
+      const data=await res.json();
+      if(data.csvText){
+        parseCSV(data.csvText, file.name.replace('.pdf','.csv'));
+      } else {
+        throw new Error(data.message||'Could not extract transactions');
+      }
+    }catch(err){
+      dz.classList.remove('loaded');
+      document.getElementById('drop-content').innerHTML=`<div style="font-size:32px;margin-bottom:8px">📂</div><div style="font-size:15px;font-weight:600;margin-bottom:4px">Drop BofA CSV or PDF here — or click to browse</div><div style="font-size:12px;color:var(--text-mid)">BofA → Checking ...9289 → Download Transactions → CSV or PDF</div>`;
+      toast('Could not read PDF — try downloading as CSV instead');
+    }
+  };
+  reader.readAsDataURL(file);
+}
+function processFile(f){const r=new FileReader();r.onload=e=>parseCSV(e.target.result,f.name);r.readAsText(f);}
+function parseRow(l){const res=[];let cur='';let q=false;for(let i=0;i<l.length;i++){const c=l[i];if(c==='"'){q=!q;}else if(c===','&&!q){res.push(cur.trim());cur='';}else cur+=c;}res.push(cur.trim());return res;}
+function parseCSV(text,fname){
+  const lines=text.split('\n').map(l=>l.trim()).filter(l=>l);
+  const hi=lines.findIndex(l=>l.startsWith('Date,Description,Amount'));
+  if(hi===-1){alert('Could not read CSV');return;}
+  transactions=[];
+  for(let i=hi+1;i<lines.length;i++){
+    const row=parseRow(lines[i]);if(!row||row.length<3)continue;
+    const[date,desc,amtR]=row;if(!date||!desc||date==='Date')continue;
+    if(desc.includes('Beginning balance')||desc.includes('balance as of'))continue;
+    const amt=parseFloat((amtR||'').replace(/[",]/g,''));if(isNaN(amt)||amt===0)continue;
+    const rule=categorize(desc);
+    const d=new Date(date);
+    const month=d.toLocaleDateString('en-US',{month:'short',year:'numeric'});
+    transactions.push({date,desc,amount:amt,cat:rule.cat,color:rule.color,month});
+  }
+  if(!transactions.length){alert('No transactions found');return;}
+  transactions.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  // User loaded new data — clear the cleared flag and set timestamp
+  localStorage.removeItem('csv_cleared');
+  window._lastCsvTimestamp = Date.now();
+  fbSet('csv_cleared', { cleared:false, when:new Date().toISOString() });
+  const dz=document.getElementById('drop-zone');dz.classList.add('loaded');
+  const dates=transactions.map(t=>new Date(t.date)).filter(d=>!isNaN(d));
+  const mn=new Date(Math.min(...dates)).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  const mx=new Date(Math.max(...dates)).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  const loadedOn=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('drop-content').innerHTML=`<div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap">
+    <span class="loaded-badge">✓ ${transactions.length} transactions loaded</span>
+    <span style="font-size:12px;color:var(--text-mid)">${mn} – ${mx}</span>
+    <span id="tx-sync-status" style="font-size:12px;color:var(--gold)">⟳ Syncing to history...</span>
+    <span style="font-size:12px;color:var(--teal);cursor:pointer;text-decoration:underline" onclick="resetCSV(true)">Load different file</span>
+    <span style="font-size:12px;color:var(--red);cursor:pointer;text-decoration:underline;position:relative;z-index:10" onclick="event.stopPropagation();resetCSV(false)">✕ Clear</span>
+  </div>`;
+  // Disable invisible file input so it can't intercept button clicks
+  const dropInp=document.getElementById('drop-input');
+  if(dropInp) dropInp.style.pointerEvents='none';
+
+  // ── FULL SAME-DEVICE REFRESH ──────────────────────────────────────
+  // Update every visual that depends on transaction data
+  renderCatTable();
+  renderTx();
+  renderBVA();
+  updateDonutFromTransactions();
+  toast('✓ '+transactions.length+' transactions loaded — syncing...');
+
+  // ── CROSS-DEVICE SYNC: push processed data to Google Sheets ───────
+  // Build category totals from this CSV
+  const catTotals={};
+  transactions.filter(t=>t.amount<0&&t.cat!=='Transfers'&&t.cat!=='Income')
+    .forEach(t=>{catTotals[t.cat]=(catTotals[t.cat]||0)+Math.abs(t.amount);});
+
+  // Build compact transaction list for cross-device viewing
+  const txCompact=transactions.map(t=>({
+    date:t.date,desc:t.desc,amount:t.amount,cat:t.cat,month:t.month
+  }));
+
+  // Sync to Firebase so other devices see it immediately
+  const syncData={
+    catTotals,
+    txList: txCompact,
+    period: mn+' – '+mx,
+    loadedOn,
+    count: transactions.length,
+    uploadedAt: Date.now(), // timestamp so newest upload always wins
+    uploadedFrom: window.location.href.includes('phone') ? 'phone' : 'laptop'
+  };
+  localStorage.setItem('fb_last_csv_data', JSON.stringify(syncData));
+  fbSet('last_csv_data', syncData);
+  syncTransactionsToSheet(transactions, loadedOn);
+}
+
+async function syncTransactionsToSheet(txns, loadedOn) {
+  const el = document.getElementById('tx-sync-status');
+  try {
+    const result = await syncTransactionBatch(
+      txns.map(t => ({ date:t.date, desc:t.desc, amount:t.amount, category:t.cat, month:t.month, loadedOn })),
+      loadedOn
+    );
+    if (el) {
+      el.style.color = 'var(--teal)';
+      el.textContent = '✓ ' + result.added + ' transactions saved to history';
+    }
+    lastSyncTime = new Date();
+    updateSyncBadge('ok');
+  } catch(e) {
+    if (el) { el.style.color = 'var(--text-mid)'; el.textContent = '✓ Saved locally'; }
+  }
+}
+function resetCSV(openPicker){
+  transactions=[];
+  const dz=document.getElementById('drop-zone');
+  dz.classList.remove('loaded');
+
+  // Re-enable the invisible drop-input so clicking zone works again
+  const dropInp=document.getElementById('drop-input');
+  if(dropInp){ dropInp.style.pointerEvents='auto'; dropInp.value=''; }
+
+  document.getElementById('drop-content').innerHTML='<div style="font-size:32px;margin-bottom:8px">📂</div><div style="font-size:15px;font-weight:600;margin-bottom:4px">Drop BofA CSV or PDF here — or click to browse</div><div style="font-size:12px;color:var(--text-mid)">BofA → Checking ...9289 → Download → CSV or PDF</div><div style="margin-top:10px;font-size:11px;color:var(--text-soft)">After loading: use ✕ Clear to remove, or Load different file to replace.</div>';
+  document.getElementById('cat-empty').style.display='block';
+  document.getElementById('cat-table-wrap').style.display='none';
+  document.getElementById('tx-empty-state').style.display='block';
+  document.getElementById('tx-loaded').style.display='none';
+  document.getElementById('bva-empty').style.display='block';
+  document.getElementById('bva-loaded').style.display='none';
+
+  if(openPicker===true){
+    // Load different file — clear the flag so new file can load
+    localStorage.removeItem('csv_cleared');
+    fbDelete('csv_cleared');
+    setTimeout(()=>{
+      const fresh=document.createElement('input');
+      fresh.type='file';
+      fresh.accept='.csv,.pdf,application/pdf';
+      fresh.addEventListener('change',onFileSel);
+      document.body.appendChild(fresh);
+      fresh.click();
+      setTimeout(()=>{ if(fresh.parentNode)fresh.remove(); },5000);
+    },50);
+  } else {
+    // Pure clear — set flag so auto-sync never reloads this data
+    localStorage.setItem('csv_cleared','true');
+    // Also remove cached CSV data so it doesn't come back
+    localStorage.removeItem('m_last_csv_data');
+    // Tell the Sheet the user cleared — other devices respect this too
+    fbSet('csv_cleared', { cleared:true, when:new Date().toISOString() });
+    toast('✓ Cleared');
+  }
+}
+
+// ══════ CUSTOM MEALS
+function addCustomMealIngRow(){
+  cmfIngCount++;
+  const list=document.getElementById('cmf-ing-list');
+  const row=document.createElement('div');
+  row.className='cmf-ing-row';
+  row.id='cmf-ing-'+cmfIngCount;
+  row.innerHTML=`<input type="text" class="cmf-ing-name" placeholder="Ingredient name" id="cin-name-${cmfIngCount}">
+    <input type="number" class="cmf-ing-price" placeholder="Est $" id="cin-price-${cmfIngCount}" step="0.01" min="0">
+    <button class="cmf-ing-rm" onclick="document.getElementById('cmf-ing-${cmfIngCount}').remove()">×</button>`;
+  list.appendChild(row);
+}
+
+function saveCustomMeal(){
+  const name=document.getElementById('cmf-meal-name').value.trim();
+  if(!name){toast('Give the meal a name first');return;}
+  const items=[];
+  document.querySelectorAll('.cmf-ing-row').forEach(row=>{
+    const id=row.id.replace('cmf-ing-','');
+    const n=document.getElementById('cin-name-'+id)?.value.trim();
+    const e=parseFloat(document.getElementById('cin-price-'+id)?.value)||0;
+    if(n)items.push({n,s:'aldi',sec:'Other',e});
+  });
+  if(!items.length){toast('Add at least one ingredient');return;}
+  const meal={n:name,c:'custom',items,custom:true};
+  customMeals.push(meal);
+  fbSet('custom_meals', customMeals);
+  document.getElementById('cmf-meal-name').value='';
+  document.getElementById('cmf-ing-list').innerHTML='';
+  cmfIngCount=0;
+  renderCustomMealsList();
+  renderDayCards();
+  toast('✓ "'+name+'" saved to your meals!');
+}
+
+function renderCustomMealsList(){
+  const wrap=document.getElementById('custom-meals-display');
+  const list=document.getElementById('custom-meals-list');
+  if(!customMeals.length){wrap.style.display='none';return;}
+  wrap.style.display='block';
+  list.innerHTML=customMeals.map((m,i)=>`<div class="custom-meal-tag"><span class="cmt-name">🍽️ ${m.n}</span><button class="cmt-rm" onclick="deleteCustomMeal(${i})">✕</button></div>`).join('');
+}
+
+function deleteCustomMeal(i){
+  customMeals.splice(i,1);
+  fbSet('custom_meals', customMeals);
+  renderCustomMealsList();
+  renderDayCards();
+  toast('Meal removed');
+}
+
+// ══════ RECEIPT SCANNING
+// Uses Google Apps Script as a proxy to call Claude API
+// This bypasses browser CORS restrictions that block direct API calls
+function onReceiptDragOver(e){e.preventDefault();document.getElementById('receipt-zone').classList.add('drag-over');}
+function onReceiptDragLeave(){document.getElementById('receipt-zone').classList.remove('drag-over');}
+function onReceiptDrop(e){e.preventDefault();document.getElementById('receipt-zone').classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/'))scanReceipt(f);}
+function onReceiptSel(e){const f=e.target.files[0];if(f)scanReceipt(f);}
+
+function scanReceipt(file){
+  const zone=document.getElementById('receipt-zone');
+  zone.classList.add('scanning');
+  document.getElementById('receipt-content').innerHTML=`<div><span class="scan-spinner"></span><span style="font-size:14px;font-weight:600;color:var(--gold)">Reading your receipt...</span></div><div style="font-size:12px;color:var(--text-mid);margin-top:6px">This takes about 10 seconds</div>`;
+
+  const reader=new FileReader();
+  reader.onload=async(e)=>{
+    const base64=e.target.result.split(',')[1];
+    const mediaType=file.type;
+    try{
+      // Route through Google Apps Script proxy to avoid CORS issues
+      const response=await fetch(SHEET_URL,{
+        method:'POST',
+        headers:{'Content-Type':'text/plain'},
+        body:JSON.stringify({
+          action:'scanReceipt',
+          imageBase64:base64,
+          mediaType:mediaType
+        })
+      });
+      const data=await response.json();
+      let items=[];
+      if(data.items && data.items.length){
+        items=data.items;
+      } else if(data.text){
+        try{items=JSON.parse(data.text.replace(/```json|```/g,'').trim());}catch(e){items=[];}
+      }
+      if(!items.length){throw new Error('No items found');}
+      applyReceiptToList(items);
+      zone.classList.remove('scanning');
+      zone.classList.add('done');
+      document.getElementById('receipt-content').innerHTML=`<div style="font-size:22px;margin-bottom:4px">✅</div><div style="font-size:14px;font-weight:600;color:var(--sage)">${items.length} items read from receipt</div><div style="font-size:12px;color:var(--text-mid);margin-top:3px">Prices updated · new items added · <span style="color:var(--sage);cursor:pointer;text-decoration:underline" onclick="resetReceipt()">Scan another</span></div>`;
+      toast('✓ Receipt scanned — '+items.length+' items updated');
+    }catch(err){
+      zone.classList.remove('scanning');
+      document.getElementById('receipt-content').innerHTML=`<div style="font-size:22px;margin-bottom:4px">⚠️</div><div style="font-size:14px;font-weight:600;color:var(--red)">Could not read receipt</div><div style="font-size:12px;color:var(--text-mid);margin-top:3px">Make sure photo is clear and well-lit · <span style="color:var(--sage);cursor:pointer;text-decoration:underline" onclick="resetReceipt()">Try again</span></div>`;
+      toast('Receipt scan failed — try a clearer, well-lit photo');
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function applyReceiptToList(receiptItems){
+  receiptItems.forEach(ri=>{
+    const name=ri.item.toLowerCase();
+    const price=parseFloat(ri.price)||0;
+    // Try to match to existing grocery item
+    const match=grocItems.find(gi=>{
+      const giName=(gi.n||gi.name||'').toLowerCase();
+      return giName.includes(name)||name.includes(giName.split(' ')[0]);
+    });
+    if(match){
+      match.actual=price.toFixed(2);
+      match.checked=true;
+    } else {
+      // Add as new item
+      grocItems.push({id:gid(),n:ri.item,s:'custom',sec:'From Receipt',e:price,checked:true,actual:price.toFixed(2),custom:true});
+    }
+  });
+  renderGrocList();
+  updateCartTotal();
+}
+
+function resetReceipt(){
+  const zone=document.getElementById('receipt-zone');
+  zone.classList.remove('done','scanning');
+  document.getElementById('receipt-content').innerHTML=`<div style="font-size:24px;margin-bottom:6px">📸</div><div style="font-size:14px;font-weight:600;margin-bottom:3px">Scan Receipt</div><div style="font-size:12px;color:var(--text-mid)">Take a photo or upload a receipt image — AI reads it and updates your list automatically</div>`;
+  document.getElementById('receipt-inp').value='';
+}
+
+function renderCatTable(){
+  const tot={};transactions.filter(t=>t.amount<0&&t.cat!=='Transfers'&&t.cat!=='Income').forEach(t=>{tot[t.cat]=(tot[t.cat]||0)+Math.abs(t.amount);});
+  const sorted=Object.entries(tot).sort((a,b)=>b[1]-a[1]);const total=sorted.reduce((s,[,v])=>s+v,0);
+  document.getElementById('cat-table').innerHTML=`<thead><tr><th>Category</th><th style="text-align:right">Spent</th><th style="text-align:right">%</th></tr></thead><tbody>${sorted.map(([cat,amt])=>{const r=RULES.find(x=>x.cat===cat)||RULES[RULES.length-1];return`<tr><td><span class="cat-dot" style="background:${r.color}"></span>${cat}</td><td style="text-align:right;font-weight:600">${fmt(amt)}</td><td style="text-align:right;color:var(--text-mid)">${(amt/total*100).toFixed(1)}%</td></tr>`;}).join('')}<tr style="border-top:2px solid var(--border)"><td style="font-weight:700">TOTAL</td><td style="text-align:right;font-weight:700;color:var(--red)">${fmt(total)}</td><td></td></tr></tbody>`;
+  document.getElementById('cat-empty').style.display='none';document.getElementById('cat-table-wrap').style.display='block';
+}
+
+function renderTx(){
+  document.getElementById('tx-empty-state').style.display='none';document.getElementById('tx-loaded').style.display='block';
+  const cats=['All',...new Set(transactions.map(t=>t.cat))];
+  document.getElementById('tx-filters').innerHTML=cats.map(c=>`<button class="txf ${c==='All'?'active':''}" onclick="filterTx('${c}',this)">${c}</button>`).join('');
+  const dates=transactions.map(t=>new Date(t.date)).filter(d=>!isNaN(d));
+  const mn=new Date(Math.min(...dates)).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  const mx=new Date(Math.max(...dates)).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('tx-title').textContent=`Transactions · ${mn} – ${mx}`;
+  renderTxRows('All');
+}
+function filterTx(cat,btn){document.querySelectorAll('.txf').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderTxRows(cat);}
+function renderTxRows(cat){
+  const f=cat==='All'?transactions:transactions.filter(t=>t.cat===cat);
+  document.getElementById('tx-count').textContent=f.length+' transactions';
+  document.getElementById('tx-tbody').innerHTML=f.map(t=>{
+    const abs=Math.abs(t.amount);const isI=t.amount>0;const big=abs>=200&&!isI;
+    const cls=isI?'color:var(--teal);font-weight:600':big?'color:var(--red);font-weight:600':'font-weight:500';
+    const s=t.desc.length>50?t.desc.substring(0,50)+'…':t.desc;
+    return`<tr><td style="color:var(--text-mid);font-size:12px;white-space:nowrap">${t.date}</td><td style="font-size:12px">${s}</td><td style="font-size:12px"><span class="cat-dot" style="background:${t.color}"></span>${t.cat}</td><td style="text-align:right;${cls}">${isI?'+'+fmt(t.amount):'-'+fmt(t.amount)}</td></tr>`;
+  }).join('');
+}
+
+function renderBVA(){
+  document.getElementById('bva-empty').style.display='none';document.getElementById('bva-loaded').style.display='block';
+  const ct={};transactions.filter(t=>t.amount<0).forEach(t=>{ct[t.cat]=(ct[t.cat]||0)+Math.abs(t.amount);});
+  const rows=Object.entries(BUDGETS).map(([cat,budget])=>{const mapped=BVA_MAP[cat]||[cat];const actual=mapped.reduce((s,c)=>s+(ct[c]||0),0);return{cat,budget,actual};});
+  document.getElementById('bva-tbody').innerHTML=rows.map(r=>{
+    const diff=r.budget-r.actual;const hasA=r.actual>0;
+    const ds=hasA?(diff>=0?`<span style="color:var(--teal);font-weight:600">+${fmt(diff)}</span>`:`<span style="color:var(--red);font-weight:600">-${fmt(Math.abs(diff))}</span>`):'—';
+    const tag=!hasA?'<span class="tag tag-gray">No data</span>':diff>=0?'<span class="tag tag-green">Under ✓</span>':'<span class="tag tag-red">Over ⚠</span>';
+    return`<tr><td style="font-weight:500">${r.cat}</td><td style="text-align:right">${fmt(r.budget)}</td><td style="text-align:right;font-weight:600">${hasA?fmt(r.actual):'—'}</td><td style="text-align:right">${ds}</td><td>${tag}</td></tr>`;
+  }).join('');
+  const labels=rows.map(r=>r.cat);const bd=rows.map(r=>r.budget);const ad=rows.map(r=>r.actual||0);
+  if(charts.bar){charts.bar.data.labels=labels;charts.bar.data.datasets[0].data=bd;charts.bar.data.datasets[1].data=ad;charts.bar.update();}
+  else{const ctx=document.getElementById('bar-chart').getContext('2d');charts.bar=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Budget',data:bd,backgroundColor:'rgba(77,159,255,0.6)',borderRadius:4},{label:'Actual',data:ad,backgroundColor:'rgba(0,201,167,0.6)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8b92a8',font:{family:'DM Sans'},boxWidth:10}}},scales:{x:{ticks:{color:'#8b92a8',font:{size:10}},grid:{color:'rgba(42,48,69,0.4)'}},y:{ticks:{color:'#8b92a8',callback:v=>'$'+v.toLocaleString()},grid:{color:'rgba(42,48,69,0.4)'}}}}});}
+}
+
+// ══════ DONUT — updates from live transaction data when available
+function updateDonutFromTransactions(){
+  if(!transactions.length) return;
+  const ct={};
+  transactions.filter(t=>t.amount<0&&t.cat!=='Transfers'&&t.cat!=='Income')
+    .forEach(t=>{ct[t.cat]=(ct[t.cat]||0)+Math.abs(t.amount);});
+  const mortgage=ct['Mortgage']||0;
+  const bills=(ct['Utilities']||0)+(ct['Phone & Internet']||0)+(ct['Loan Payment']||0)+(ct['Insurance']||0);
+  const debt=ct['Debt Payments']||0;
+  const subs=ct['Subscriptions']||0;
+  const food=(ct['Food & Life']||0)+(ct['Groceries']||0)+(ct['Amazon']||0);
+  const misc=(ct['Home & Repairs']||0)+(ct['Health & Fitness']||0)+(ct['Venmo/Other']||0)+(ct['Other']||0);
+  const totalSpend=Object.values(ct).reduce((s,v)=>s+v,0);
+  const surplus=Math.max(0,9090-totalSpend);
+  if(charts.donut){
+    charts.donut.data.datasets[0].data=[mortgage+bills+debt+subs,food,800,surplus];
+    charts.donut.update();
+  }
+}
+
+// Load cross-device CSV data — always replaces whatever is currently loaded
+// The most recently uploaded file always wins across all devices
+function loadCrossDeviceCsvData(data){
+  if(!data||!data.txList||!data.txList.length) return;
+  // Fully replace transactions — no merging, no combining
+  transactions = data.txList.map(t=>({
+    ...t, color: (RULES.find(r=>r.cat===t.cat)||RULES[RULES.length-1]).color
+  }));
+  transactions.sort((a,b)=>new Date(b.date)-new Date(a.date));
+
+  // Update drop zone
+  const dz=document.getElementById('drop-zone');
+  dz.classList.add('loaded');
+  const dropInp=document.getElementById('drop-input');
+  if(dropInp) dropInp.style.pointerEvents='none';
+
+  // Show accurate count from actual transactions array (not stored count)
+  const actualCount = transactions.length;
+  const uploadedAt = data.uploadedAt ? new Date(data.uploadedAt).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) : data.loadedOn;
+
+  document.getElementById('drop-content').innerHTML=`<div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap">
+    <span class="loaded-badge">✓ ${actualCount} transactions</span>
+    <span style="font-size:12px;color:var(--text-mid)">${data.period||''}</span>
+    <span style="font-size:12px;color:var(--purple)">🔄 Synced · ${uploadedAt}</span>
+    <span style="font-size:12px;color:var(--red);cursor:pointer;text-decoration:underline;position:relative;z-index:10" onclick="event.stopPropagation();resetCSV(false)">✕ Clear</span>
+  </div>`;
+
+  // Refresh all visualizations with the correct data
+  renderCatTable();
+  renderTx();
+  renderBVA();
+  updateDonutFromTransactions();
+}
+
+// ══════ DONUT
+function renderDonut(){
+  const ctx=document.getElementById('donut-chart').getContext('2d');
+  charts.donut=new Chart(ctx,{type:'doughnut',data:{labels:['Bills & Mortgage','Food & Life','Savings','Surplus'],datasets:[{data:[5502,1940,400,393],backgroundColor:['#4d9fff','#a78bfa','#00c9a7','#ffc542'],borderWidth:0,hoverOffset:6}]},options:{cutout:'68%',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#8b92a8',font:{family:'DM Sans',size:11},padding:12,boxWidth:10}},tooltip:{callbacks:{label:c=>` ${fmt(c.raw)} (${(c.raw/9090*100).toFixed(1)}%)`}}}}});
+}
+
+// ══════ PROJECTIONS — CORRECT ENGINE
+// Critical fix: minimum payment must always >= monthly interest charged
+// Otherwise low minimums on high-APR cards cause balances to grow forever
+// Real credit cards work this way — your minimum adjusts as balance grows
+function calcPayoff(extra, strat) {
+  // Deep copy with current balances
+  let bal = CARDS.map(c => ({
+    name: c.name,
+    balance: +c.balance,
+    apr: +c.apr,
+    min: +c.min,
+    color: c.color
+  }));
+  const hist = [];
+  const MAX_MONTHS = 120; // 10 year cap — should never hit this with correct math
+
+  for (let mo = 0; mo < MAX_MONTHS; mo++) {
+    if (!bal.some(c => c.balance > 0.01)) break;
+
+    // Step 1: Apply monthly interest & compute effective minimum
+    // Effective minimum = max(stated minimum, monthly interest + $1)
+    // This prevents any card from growing — matches how real cards work
+    let totalEffectiveMin = 0;
+    bal.forEach(c => {
+      if (c.balance > 0.01) {
+        const monthlyInterest = c.balance * (c.apr / 12);
+        c.balance += monthlyInterest;
+        // Effective min must cover interest plus at least $1 principal
+        c.effectiveMin = Math.min(c.balance, Math.max(c.min, monthlyInterest + 1));
+        totalEffectiveMin += c.effectiveMin;
+      } else {
+        c.balance = 0;
+        c.effectiveMin = 0;
+      }
+    });
+
+    // Step 2: Total monthly payment budget
+    let budget = totalEffectiveMin + extra;
+
+    // Step 3: Pay effective minimum on every active card
+    bal.forEach(c => {
+      if (c.balance > 0.01) {
+        const pay = Math.min(c.effectiveMin, c.balance);
+        c.balance = Math.max(0, c.balance - pay);
+        budget -= pay;
+      }
+    });
+
+    // Step 4: Apply any remaining budget to target card (avalanche or snowball)
+    // Freed minimums from paid-off cards also flow here automatically
+    const targets = strat === 'avalanche'
+      ? [...bal].filter(c => c.balance > 0.01).sort((a, b) => b.apr - a.apr)
+      : [...bal].filter(c => c.balance > 0.01).sort((a, b) => a.balance - b.balance);
+
+    for (const t of targets) {
+      if (budget <= 0.005) break;
+      const card = bal.find(c => c.name === t.name);
+      const pay = Math.min(budget, card.balance);
+      card.balance = Math.max(0, card.balance - pay);
+      budget -= pay;
+    }
+
+    // Snapshot
+    const snap = {};
+    bal.forEach(c => snap[c.name] = Math.max(0, +c.balance.toFixed(2)));
+    snap._t = bal.reduce((s, c) => s + Math.max(0, c.balance), 0);
+    hist.push(snap);
+  }
+  return hist;
+}
+
+function mlabel(n){
+  const d=new Date(2026,3,1);
+  d.setMonth(d.getMonth()+n-1);
+  return d.toLocaleDateString('en-US',{month:'short',year:'numeric'});
+}
+function updateProj(){
+  const extra=+document.getElementById('extra-slider').value;
+  const strat=document.getElementById('proj-strat').value;
+  document.getElementById('extra-display').textContent='+$'+extra;
+  const sc=calcPayoff(extra,strat);const scB=calcPayoff(0,strat);
+  document.getElementById('payoff-cards').innerHTML=CARDS.map(c=>{
+    const mo=sc.findIndex(s=>s[c.name]<=0.01);const moB=scB.findIndex(s=>s[c.name]<=0.01);const sv=extra>0?moB-mo:0;
+    return`<div class="payoff-card"><div class="pc-name">${c.name}</div><div class="pc-mo" style="color:${c.color}">${mo>=0?'Mo '+(mo+1):'36+'}</div><div class="pc-date">${mo>=0?mlabel(mo+1):'—'}</div>${sv>0?`<div class="pc-saved">-${sv} mo faster</div>`:''}</div>`;
+  }).join('');
+  const labels=sc.map((_,i)=>i%3===0?mlabel(i+1):'');
+  const datasets=CARDS.map(c=>({label:c.name,data:sc.map(s=>+s[c.name].toFixed(0)),borderColor:c.color,backgroundColor:'transparent',borderWidth:2,tension:0.3,pointRadius:0}));
+  if(charts.payoff){charts.payoff.data.labels=labels;charts.payoff.data.datasets=datasets;charts.payoff.update();}
+  else{const ctx=document.getElementById('payoff-chart').getContext('2d');charts.payoff=new Chart(ctx,{type:'line',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#8b92a8',font:{family:'DM Sans'},boxWidth:10,padding:8}}},scales:{x:{ticks:{color:'#8b92a8',maxTicksLimit:10},grid:{color:'rgba(42,48,69,0.4)'}},y:{ticks:{color:'#8b92a8',callback:v=>'$'+v.toLocaleString()},grid:{color:'rgba(42,48,69,0.4)'}}}}});}
+  // Interest = total paid - original debt
+  // Total paid = months × total monthly payment (minimums + extra)
+  const startTotal = CARDS.reduce((s,c)=>s+c.balance,0);
+
+  // Base scenario: minimums only
+  const baseMonthlyPmt = CARDS.reduce((s,c)=>s+c.min,0);
+  const iB = Math.max(0, baseMonthlyPmt * scB.length - startTotal);
+
+  // Extra scenario: minimums + extra
+  const extraMonthlyPmt = baseMonthlyPmt + extra;
+  const iE = Math.max(0, extraMonthlyPmt * sc.length - startTotal);
+  const sv = Math.max(0, iB - iE);
+
+  document.getElementById('int-summary').innerHTML=`<div style="padding:12px;background:var(--surface2);border-radius:10px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-mid);margin-bottom:4px">Minimums only</div><div style="font-family:var(--font-d);font-size:22px;color:var(--red)">$${Math.round(iB).toLocaleString()}</div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">total interest · debt free ${mlabel(scB.length)}</div></div><div style="padding:12px;background:var(--surface2);border-radius:10px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-mid);margin-bottom:4px">With +$${extra}/mo extra</div><div style="font-family:var(--font-d);font-size:22px;color:${extra>0?'var(--teal)':'var(--red)'}">$${Math.round(iE).toLocaleString()}</div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">total interest · debt free ${mlabel(sc.length)}</div></div>${extra>0?`<div style="padding:12px;background:var(--teal-dim);border:1px solid rgba(0,201,167,0.2);border-radius:10px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--teal);margin-bottom:4px">You save</div><div style="font-family:var(--font-d);font-size:26px;color:var(--teal)">$${Math.round(sv).toLocaleString()}</div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">${scB.length-sc.length} months earlier</div></div>`:''}`;
+}
+
+// ══════ MILESTONES
+function renderMilestones(){
+  const sc=calcPayoff(0,'snowball');
+  const items=[
+    {icon:'🗂️',text:'Budget system launched',sub:'Excel + Power BI + this dashboard',date:'Mar 2026',done:true},
+    {icon:'🗑️',text:'DoorDash deleted',sub:'~$800/month saved permanently',date:'Mar 2026',done:true},
+    {icon:'💳',text:'US Bank 6925 — NEXT TARGET',sub:'$800 · kill it first',date:mlabel((sc.findIndex(s=>s['US Bank 6925']<=0.01)||0)+1),next:true},
+    {icon:'💳',text:'US Bank 2405 paid off',sub:'$1,679',date:mlabel((sc.findIndex(s=>s['US Bank 2405']<=0.01)||0)+1)},
+    {icon:'🛡️',text:'Emergency Fund $10K',sub:'Never panic about surprises',date:'Late 2026'},
+    {icon:'💳',text:'Best Buy paid off',sub:'$3,438 at 29.99%',date:mlabel((sc.findIndex(s=>s['Best Buy']<=0.01)||0)+1)},
+    {icon:'✈️',text:'First family vacation',sub:'Life Goals Fund makes it happen',date:'2027'},
+    {icon:'🎉',text:'All 5 cards at zero',sub:'$24,765 gone',date:mlabel(sc.length)},
+  ];
+  document.getElementById('milestone-list').innerHTML=items.map(m=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface2);border-radius:10px;border-left:3px solid ${m.done?'var(--teal)':m.next?'var(--gold)':'var(--border)'};margin-bottom:8px"><div style="font-size:16px;width:24px;text-align:center">${m.icon}</div><div style="flex:1"><div style="font-size:13px;font-weight:600">${m.text}</div><div style="font-size:11px;color:var(--text-mid);margin-top:1px">${m.sub}</div></div><div style="font-size:11px;color:${m.done?'var(--teal)':m.next?'var(--gold)':'var(--text-mid)'};font-weight:${m.next?'700':'400'};white-space:nowrap">${m.done?'✓ Done':m.date}</div></div>`).join('');
+}
+
+function renderFreedomChart(){
+  const sc=calcPayoff(0,'avalanche');const step=Math.max(1,Math.floor(sc.length/12));
+  const labels=sc.filter((_,i)=>i%step===0).map((_,i)=>mlabel(i*step+1));
+  const data=sc.filter((_,i)=>i%step===0).map(s=>+s._t.toFixed(0));
+  const ctx=document.getElementById('freedom-chart').getContext('2d');
+  charts.freedom=new Chart(ctx,{type:'line',data:{labels,datasets:[{label:'Total CC Debt',data,borderColor:'#ff6b6b',backgroundColor:'rgba(255,107,107,0.08)',fill:true,borderWidth:2,tension:0.4,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#8b92a8',maxTicksLimit:8},grid:{color:'rgba(42,48,69,0.4)'}},y:{ticks:{color:'#8b92a8',callback:v=>'$'+v.toLocaleString()},grid:{color:'rgba(42,48,69,0.4)'}}}}});
+}
+
+// ══════ SUNDAY MODE
+function renderSunday(){
+  const total=weekHist.reduce((s,w)=>s+w.t,0);
+  document.getElementById('sun-grocery').textContent=fmt(total);
+  document.getElementById('sun-grocery-sub').textContent='of $800 budget — '+(total<=800?'✓ On track':'⚠ Over');
+  const days=['Mon','Tue','Wed','Thu','Fri'];
+  const mealRows=days.map(d=>`<div class="ms-row"><div class="ms-day">${d}</div><div class="ms-meal">${mealPlan[d]?mealPlan[d].n:'<span style="color:var(--text-soft);font-style:italic">not planned</span>'}</div></div>`).join('');
+  document.getElementById('sun-meals').innerHTML=mealRows||'<div style="color:var(--text-mid);font-size:13px">No meals planned yet — Jamie sets this up on her side</div>';
+}
+
+// ══════ JAMIE MEALS
+function renderDayCards(){
+  const allMeals=[...MEALS,...customMeals].filter(m=>!hiddenMeals.includes(m.n));
+  document.getElementById('j-day-cards').innerHTML=DAYS.map(day=>{
+    const key=day.substr(0,3);const sel=mealPlan[key];
+    const chips=allMeals.map(m=>{
+      const isCustom=!!m.custom;
+      const isSel=sel&&sel.n===m.n;
+      const actionBtn=isCustom
+        ? `<button class="m-chip-rm" title="Delete meal" onclick="event.stopPropagation();deleteCustomMealByName('${encodeURIComponent(m.n)}')">🗑</button>`
+        : `<button class="m-chip-rm" title="Hide meal" onclick="event.stopPropagation();hideMeal('${encodeURIComponent(m.n)}')">✕</button>`;
+      return`<div class="m-chip-wrap">
+        <button class="m-chip ${isSel?'sel':''}" onclick="pickMeal('${key}','${encodeURIComponent(m.n)}')">${m.n}${m.custom?' ⭐':''} <span style="font-size:10px;opacity:0.65">${m.c}</span></button>
+        ${actionBtn}
+      </div>`;
+    }).join('');
+    return`<div class="day-card"><div class="day-head" onclick="toggleDay('${key}')"><span class="day-label">${day}</span><div style="display:flex;align-items:center;gap:8px">${sel?`<span class="day-meal-name">🍽️ ${sel.n}</span>`:'<span class="day-empty-txt">tap to pick</span>'}<span class="day-chev" id="dc-${key}">▼</span></div></div><div class="meal-chips" id="mc-${key}">${chips}${hiddenMeals.length?`<div style="width:100%;padding:6px 4px 2px;font-size:11px;color:var(--text-soft)">${hiddenMeals.length} meal${hiddenMeals.length>1?'s':''} hidden — <span style="color:var(--sage);cursor:pointer;text-decoration:underline" onclick="event.stopPropagation();showManageMeals()">manage</span></div>`:''}</div></div>`;
+  }).join('');
+}
+
+function hideMeal(encodedName){
+  const name=decodeURIComponent(encodedName);
+  if(!hiddenMeals.includes(name)){hiddenMeals.push(name);fbSet('hidden_meals', hiddenMeals);}
+  // If this meal was planned, remove it
+  Object.keys(mealPlan).forEach(k=>{if(mealPlan[k]&&mealPlan[k].n===name)delete mealPlan[k];});
+  renderDayCards();toast('"'+name+'" hidden — tap Manage to restore');
+}
+
+function deleteCustomMealByName(encodedName){
+  const name=decodeURIComponent(encodedName);
+  customMeals=customMeals.filter(m=>m.n!==name);
+  fbSet('custom_meals', customMeals);
+  Object.keys(mealPlan).forEach(k=>{if(mealPlan[k]&&mealPlan[k].n===name)delete mealPlan[k];});
+  renderDayCards();renderCustomMealsList();toast('"'+name+'" deleted');
+}
+
+function showManageMeals(){
+  if(!hiddenMeals.length){toast('No hidden meals');return;}
+  const list=hiddenMeals.map(name=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface2);border-radius:8px;margin-bottom:6px">
+      <span style="font-size:13px;font-weight:600;color:var(--text-mid)">👁‍🗨 ${name}</span>
+      <button style="background:var(--sage);border:none;color:#fff;border-radius:6px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-b)" onclick="unhideMeal('${encodeURIComponent(name)}')">Restore</button>
+    </div>`).join('');
+  // Show in a temporary overlay panel
+  const overlay=document.createElement('div');
+  overlay.id='manage-overlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:300;display:flex;align-items:center;justify-content:center;padding:24px';
+  overlay.innerHTML=`<div style="background:var(--surface);border-radius:16px;padding:24px;width:100%;max-width:400px;max-height:80vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-family:var(--font-d);font-size:20px">Hidden Meals</div>
+      <button onclick="document.getElementById('manage-overlay').remove()" style="background:var(--surface2);border:none;color:var(--text-mid);padding:6px 12px;border-radius:8px;cursor:pointer;font-family:var(--font-b)">Done</button>
+    </div>
+    <div style="font-size:13px;color:var(--text-mid);margin-bottom:14px">These meals are hidden from the picker. Tap Restore to bring them back.</div>
+    <div id="hidden-meals-list">${list}</div>
+  </div>`;
+  document.body.appendChild(overlay);
+}
+
+function unhideMeal(encodedName){
+  const name=decodeURIComponent(encodedName);
+  hiddenMeals=hiddenMeals.filter(n=>n!==name);
+  fbSet('hidden_meals', hiddenMeals);
+  // Refresh the list inside overlay
+  if(document.getElementById('manage-overlay')){
+    if(!hiddenMeals.length){document.getElementById('manage-overlay').remove();}
+    else{
+      document.getElementById('hidden-meals-list').innerHTML=hiddenMeals.map(n=>`
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface2);border-radius:8px;margin-bottom:6px">
+          <span style="font-size:13px;font-weight:600;color:var(--text-mid)">👁‍🗨 ${n}</span>
+          <button style="background:var(--sage);border:none;color:#fff;border-radius:6px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-b)" onclick="unhideMeal('${encodeURIComponent(n)}')">Restore</button>
+        </div>`).join('');
+    }
+  }
+  renderDayCards();toast('"'+name+'" restored');
+}
+function toggleDay(key){
+  const el=document.getElementById('mc-'+key);const ch=document.getElementById('dc-'+key);
+  const wasOpen=el.classList.contains('open');
+  document.querySelectorAll('.meal-chips').forEach(e=>e.classList.remove('open'));
+  document.querySelectorAll('.day-chev').forEach(e=>e.classList.remove('open'));
+  if(!wasOpen){el.classList.add('open');ch.classList.add('open');}
+}
+function pickMeal(key,encodedName){
+  const name=decodeURIComponent(encodedName);
+  const allMeals=[...MEALS,...customMeals];
+  mealPlan[key]=allMeals.find(m=>m.n===name);
+  document.querySelectorAll('.meal-chips').forEach(e=>e.classList.remove('open'));
+  document.querySelectorAll('.day-chev').forEach(e=>e.classList.remove('open'));
+  scheduleSave('meal_plan', mealPlan);
+  renderDayCards();toast('✓ '+name);
+}
+function clearMeals(){mealPlan={};fbSet('meal_plan',mealPlan);renderDayCards();toast('Meal plan cleared');}
+
+// ══════ JAMIE GROCERY
+function buildList(){
+  const planned=Object.values(mealPlan).filter(Boolean);
+  if(!planned.length){toast('Pick at least one meal first!');return;}
+  const map={};
+  STAPLES.forEach(s=>{map[s.n.toLowerCase()]={...s,id:gid(),checked:false,actual:'',custom:false};});
+  planned.forEach(meal=>{meal.items.forEach(item=>{const k=(item.n||item.name||'').toLowerCase();if(!map[k])map[k]={...item,n:item.n||item.name,id:gid(),checked:false,actual:'',custom:false};});});
+  grocItems=Object.values(map);
+  renderGrocList();document.getElementById('j-done-btn').style.display='block';
+  toast('✓ '+grocItems.length+' items · Shop ALDI first');
+  jPage('grocery',document.querySelector('.jn-item:nth-child(2)'));
+}
+function renderGrocList(){
+  const wrap=document.getElementById('j-groc-sections');const empty=document.getElementById('j-groc-empty');
+  if(!grocItems.length){empty.style.display='block';wrap.style.display='none';return;}
+  empty.style.display='none';wrap.style.display='block';
+  const aldiAll=grocItems.filter(i=>i.s!=='other'&&i.s!=='custom');
+  const otherAll=grocItems.filter(i=>i.s==='other'||i.s==='custom');
+  const aldiSecs={};aldiAll.forEach(i=>{const s=i.sec||'Other';if(!aldiSecs[s])aldiSecs[s]=[];aldiSecs[s].push(i);});
+  const otherSecs={};otherAll.forEach(i=>{const s=i.sec||'Other';if(!otherSecs[s])otherSecs[s]=[];otherSecs[s].push(i);});
+  let html='';
+  if(aldiAll.length){html+=`<div class="store-hdr aldi"><span class="s-badge aldi">ALDI First</span><span style="font-size:12px;color:var(--text-mid)">Best prices — shop here first</span></div>${Object.entries(aldiSecs).map(([sec,items])=>`<div class="sec-label">${sec}</div>${items.map(i=>giHTML(i)).join('')}`).join('')}`;}
+  if(otherAll.length){html+=`<div class="store-hdr other" style="margin-top:12px"><span class="s-badge other">Other / Custom</span><span style="font-size:12px;color:var(--text-mid)">Price Chopper · HyVee · Added items</span></div>${Object.entries(otherSecs).map(([sec,items])=>`<div class="sec-label">${sec}</div>${items.map(i=>giHTML(i)).join('')}`).join('')}`;}
+  wrap.innerHTML=html;updateCartTotal();
+}
+function giHTML(item){
+  const name=item.n||item.name||'Item';
+  const est=item.e||item.est||0;
+  return`<div class="g-item ${item.checked?'chk':''}" id="gi-${item.id}">
+    <div class="gi-cb" onclick="toggleGI('${item.id}')">${item.checked?'✓':''}</div>
+    <div style="flex:1;cursor:pointer" onclick="toggleGI('${item.id}')">
+      <div class="gi-name">${name}</div>
+      <div class="gi-est">Est. $${est.toFixed(2)}</div>
+    </div>
+    <input type="number" class="gi-price-inp" placeholder="$" value="${item.actual||''}" step="0.01" min="0" onclick="event.stopPropagation()" oninput="updateGIPrice('${item.id}',this.value)">
+  </div>`;
+}
+function toggleGI(id){const i=grocItems.find(x=>x.id===id);if(!i)return;i.checked=!i.checked;const el=document.getElementById('gi-'+id);if(el){el.classList.toggle('chk',i.checked);el.querySelector('.gi-cb').textContent=i.checked?'✓':'';}updateCartTotal();}
+function updateGIPrice(id,val){const i=grocItems.find(x=>x.id===id);if(i){i.actual=val;updateCartTotal();}}
+function addCustom(){const inp=document.getElementById('j-custom-inp');const name=inp.value.trim();if(!name)return;grocItems.push({id:gid(),n:name,s:'custom',sec:'Other',e:0,checked:false,actual:'',custom:true});inp.value='';renderGrocList();document.getElementById('j-done-btn').style.display='block';}
+function updateCartTotal(){
+  const total=grocItems.reduce((s,i)=>s+(parseFloat(i.actual)||0),0);
+  const rem=WEEKLY_BUDGET-total;
+  document.getElementById('j-cart-total').textContent=fmtD(total);
+  document.getElementById('j-cart-total').style.color=total>WEEKLY_BUDGET?'var(--red)':'var(--sage)';
+  document.getElementById('j-cart-rem').textContent=fmtD(Math.max(0,rem));
+  document.getElementById('j-cart-rem').style.color=rem>=0?'var(--sage)':'var(--red)';
+  updateJamieGauge(total);
+}
+function updateJamieGauge(spent){
+  const pct=Math.min(100,(spent/WEEKLY_BUDGET)*100);
+  const bar=document.getElementById('j-gauge-bar');
+  bar.style.width=pct+'%';bar.style.background=pct>100?'var(--red)':pct>85?'var(--gold)':'var(--sage)';
+  document.getElementById('j-gauge-spent').textContent=fmtD(spent);
+  const rem=WEEKLY_BUDGET-spent;
+  document.getElementById('j-gauge-rem').textContent=rem>=0?fmtD(rem)+' remaining':fmtD(Math.abs(rem))+' over budget';
+  document.getElementById('j-spent-val').textContent=fmtD(spent);
+  document.getElementById('j-left-val').textContent=fmtD(Math.max(0,rem));
+  document.getElementById('j-left-val').style.color=rem>=0?'var(--gold)':'var(--red)';
+  syncJamieToDoug(spent);
+}
+function updateJamieStrip(){
+  const thisWeek=weekHist.find(w=>w.wk===currentWeek);
+  const spent=thisWeek?thisWeek.t:0;
+  updateJamieGauge(spent);
+}
+
+function finishShop(){
+  const total=grocItems.reduce((s,i)=>s+(parseFloat(i.actual)||i.e||0),0);
+  weekHist.unshift({wk:currentWeek,label:'Week '+currentWeek,date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),t:+total.toFixed(2),budget:WEEKLY_BUDGET});
+  fbSet('week_hist', weekHist);
+  currentWeek++;
+  renderWeekHist();syncJamieToDoug();
+  toast('✓ Saved & syncing! Total: $'+total.toFixed(2));
+  grocItems=[];renderGrocList();document.getElementById('j-done-btn').style.display='none';
+}
+
+function renderWeekHist(){
+  const monthTotal=weekHist.reduce((s,w)=>s+w.t,0);
+  const monthRem=Math.max(0,800-monthTotal);
+  document.getElementById('j-month-spent').textContent=fmt(monthTotal);
+  document.getElementById('j-month-rem').textContent=fmt(monthRem);
+  const wrap=document.getElementById('j-hist-wrap');
+  if(!weekHist.length){wrap.innerHTML='<div class="empty-state"><div class="es-icon">🛒</div><p>No shopping trips logged yet.<br>Finish your first shop to see history here.</p></div>';return;}
+  wrap.innerHTML=weekHist.map(w=>{const u=w.t<=w.budget;const diff=Math.abs(w.budget-w.t).toFixed(2);return`<div class="hist-item"><div><div class="hi-week">${w.label}</div><div class="hi-date">${w.date}</div></div><div style="text-align:right"><div class="hi-amt" style="color:${u?'var(--sage)':'var(--red)'}">$${w.t.toFixed(2)}</div><span class="hi-status ${u?'hs-under':'hs-over'}">${u?'✓ $'+diff+' under':'⚠ $'+diff+' over'}</span></div></div>`;}).join('');
+}
+
+function updateCCDisplay(){
+  // Update Douglas's CC table with synced balances
+  const total=Object.values(ccBalances).reduce((s,v)=>s+v,0);
+  // Update projections with new balances
+  CARDS[0].balance=ccBalances.bofa||13567.18;
+  CARDS[1].balance=ccBalances.chase||5279.89;
+  CARDS[2].balance=ccBalances.bestbuy||3438.17;
+  CARDS[3].balance=ccBalances.usbank2405||1679.65;
+  CARDS[4].balance=ccBalances.usbank6925||800;
+}
+
+function updateGoalsDisplay(){
+  const ef=document.getElementById('d-ef-val');
+  if(ef)ef.textContent='$'+familyGoals.efund.toLocaleString();
+  const pct=(familyGoals.efund/10000*100).toFixed(1);
+  const lgP=document.getElementById('lg-prog');
+  if(lgP)lgP.style.width=(familyGoals.lgfund/3000*100)+'%';
+  const lgD=document.getElementById('lg-display');
+  if(lgD)lgD.textContent='$'+familyGoals.lgfund.toLocaleString()+' / $3K';
+}
+
+// Douglas updates CC balances — syncs to Jamie's view
+function updateCCBalance(card, value){
+  ccBalances[card] = parseFloat(value)||0;
+  fbSet('cc_balances', ccBalances);
+  updateCCDisplay();
+  toast('✓ Balance updated & syncing');
+}
+
+function syncJamieToDoug(liveSpent){
+  const monthTotal=weekHist.reduce((s,w)=>s+w.t,0)+(liveSpent||0);
+  const el=document.getElementById('d-jamie-grocery');
+  const sub=document.getElementById('d-jamie-grocery-sub');
+  if(el){el.textContent=fmt(monthTotal);}
+  if(sub){const rem=800-monthTotal;sub.textContent=`of $800 budget — ${rem>=0?fmt(rem)+' remaining':'$'+Math.abs(rem).toFixed(0)+' over'}`;}
+}
+</script>
+</body>
+</html>
