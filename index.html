@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Martinson Family Dashboard v23</title>
+<title>Martinson Family Dashboard v24</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -301,7 +301,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <!-- ENTRY SCREEN -->
 <div id="entry-screen">
   <div class="entry-logo">Martinson Family</div>
-  <div class="entry-sub">Kansas City, MO · Your Family Hub · v23</div>
+  <div class="entry-sub">Kansas City, MO · Your Family Hub · v24</div>
   <div class="entry-box">
     <div class="entry-title">🔒 Enter Password</div>
     <div class="entry-dots">
@@ -945,16 +945,16 @@ function startLiveSync() {
       if (csvCleared !== null && csvCleared.cleared === true) {
         transactions=[];
         localStorage.removeItem('fb_last_csv_data');
-        window._lastCsvTimestamp=0;
+        window._lastCsvTimestamp=-1;
+        localStorage.setItem('csv_sentinel','-1');
         clearCSVDisplay();
-        // Reset the cleared flag so it doesn't keep firing
         fbDelete('csv_cleared');
         changed=true;
       } else if (csvData === null && transactions.length>0 && window._lastCsvTimestamp>0) {
-        // Firebase has no CSV data but we're showing some — clear it
         transactions=[];
         localStorage.removeItem('fb_last_csv_data');
-        window._lastCsvTimestamp=0;
+        window._lastCsvTimestamp=-1;
+        localStorage.setItem('csv_sentinel','-1');
         clearCSVDisplay();
         changed=true;
       } else if (csvData !== null && csvData.uploadedAt) {
@@ -1179,9 +1179,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('j-week-of').textContent = getWeekOf();
   document.getElementById('j-gauge-week').textContent = 'Week ' + currentWeek;
 
+  // CRITICAL: Restore sentinel from localStorage FIRST before any sync runs
+  // This ensures cleared state survives hard refreshes (Ctrl+Shift+R)
+  const savedSentinel = localStorage.getItem('csv_sentinel');
+  if (savedSentinel === '-1') {
+    window._lastCsvTimestamp = -1; // user cleared — don't reload from Firebase
+  } else if (savedSentinel) {
+    window._lastCsvTimestamp = parseInt(savedSentinel) || 0;
+  }
+
   // Phase 1: Load non-CSV data from localStorage instantly
-  // CSV is deliberately excluded — Firebase is the ONLY source of truth for transactions
-  // This prevents stale cached CSV from overwriting the correct Firebase version
   const localKeys = ['custom_meals','hidden_meals','week_hist','meal_plan',
                      'cc_balances','family_goals','financial_settings'];
   localKeys.forEach(k => {
@@ -1190,7 +1197,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   refreshAllUI();
 
-  // Phase 2: Full sync from Firebase — this sets the correct CSV
+  // Phase 2: Full sync from Firebase
   updateSyncBadge('syncing');
   await syncAll();
   refreshAllUI();
@@ -1349,9 +1356,9 @@ function parseCSV(text,fname){
   }
   if(!transactions.length){alert('No transactions found');return;}
   transactions.sort((a,b)=>new Date(b.date)-new Date(a.date));
-  // User loaded new data — clear the cleared flag and set timestamp
   localStorage.removeItem('csv_cleared');
   window._lastCsvTimestamp = Date.now();
+  localStorage.setItem('csv_sentinel', String(window._lastCsvTimestamp));
   fbSet('csv_cleared', { cleared:false, when:new Date().toISOString() });
   const dz=document.getElementById('drop-zone');dz.classList.add('loaded');
   const dates=transactions.map(t=>new Date(t.date)).filter(d=>!isNaN(d));
@@ -1492,6 +1499,7 @@ function resetCSV(openPicker){
     transactions=[];
     window._lastCsvTimestamp=0;
     localStorage.removeItem('csv_cleared');
+    localStorage.removeItem('csv_sentinel');
     localStorage.removeItem('fb_last_csv_data');
     clearCSVDisplay();
     fbDelete('csv_cleared');
@@ -1508,7 +1516,8 @@ function resetCSV(openPicker){
   } else {
     // ── DEFINITIVE CLEAR ──────────────────────────────────────────
     // Step 1: Set sentinel BEFORE clearing so sync can't sneak in
-    window._lastCsvTimestamp = -1; // -1 = user explicitly cleared, NEVER reload
+    window._lastCsvTimestamp = -1;
+    localStorage.setItem('csv_sentinel', '-1'); // persists across refreshes
 
     // Step 2: Pause live sync so it can't interfere during the clear operation
     if(fbListener){ clearInterval(fbListener); fbListener=null; }
@@ -1713,11 +1722,10 @@ function renderBVA(){
 function updateDonutFromTransactions(){
   if(!transactions.length) return;
 
-  // CRITICAL: Exclude Debt Payments and Transfers from spending
-  // Debt Payments = CC bill payments from checking account
-  // These are NOT real spending — the debt is already tracked via CC balances
-  // Including them double-counts your expenses and makes surplus look negative
-  const EXCLUDE = ['Debt Payments','Transfers','Income'];
+  // Only exclude Transfers (internal account moves) and Income
+  // Debt Payments ARE real cash outflows — include them for accurate surplus
+  // Mortgage may appear as Transfer in BofA CSV — check both categories
+  const EXCLUDE = ['Transfers','Income'];
 
   const ct={};
   transactions.filter(t=>t.amount<0 && !EXCLUDE.includes(t.cat))
