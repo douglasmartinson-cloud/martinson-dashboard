@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Martinson Family Dashboard v21</title>
+<title>Martinson Family Dashboard v23</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -301,7 +301,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <!-- ENTRY SCREEN -->
 <div id="entry-screen">
   <div class="entry-logo">Martinson Family</div>
-  <div class="entry-sub">Kansas City, MO · Your Family Hub · v21</div>
+  <div class="entry-sub">Kansas City, MO · Your Family Hub · v23</div>
   <div class="entry-box">
     <div class="entry-title">🔒 Enter Password</div>
     <div class="entry-dots">
@@ -903,7 +903,8 @@ async function syncAll() {
     );
     allKeys.forEach((k, i) => {
       if (results[i] !== null && results[i] !== undefined) {
-        // Cache non-CSV keys in localStorage for instant load next time
+        // Never load CSV data if user explicitly cleared (sentinel = -1)
+        if (k === 'last_csv_data' && window._lastCsvTimestamp === -1) return;
         if (k !== 'last_csv_data') {
           localStorage.setItem('fb_' + k, JSON.stringify(results[i]));
         }
@@ -940,29 +941,29 @@ function startLiveSync() {
       if (wh !== null) { applyKey('week_hist', wh); localStorage.setItem('fb_week_hist', JSON.stringify(wh)); changed = true; }
       if (settings !== null) { applyKey('financial_settings', settings); localStorage.setItem('fb_financial_settings', JSON.stringify(settings)); changed = true; }
 
-      // Handle csv_cleared signal
+      // Handle clear signal — null from Firebase means data was deleted
       if (csvCleared !== null && csvCleared.cleared === true) {
-        // Clear signal received — wipe everything
-        transactions = [];
+        transactions=[];
         localStorage.removeItem('fb_last_csv_data');
-        window._lastCsvTimestamp = 0;
+        window._lastCsvTimestamp=0;
         clearCSVDisplay();
-        changed = true;
-      } else if (csvData === null && transactions.length > 0) {
-        // last_csv_data was deleted from Firebase — clear this device too
-        transactions = [];
+        // Reset the cleared flag so it doesn't keep firing
+        fbDelete('csv_cleared');
+        changed=true;
+      } else if (csvData === null && transactions.length>0 && window._lastCsvTimestamp>0) {
+        // Firebase has no CSV data but we're showing some — clear it
+        transactions=[];
         localStorage.removeItem('fb_last_csv_data');
-        window._lastCsvTimestamp = 0;
+        window._lastCsvTimestamp=0;
         clearCSVDisplay();
-        changed = true;
-      } else if (csvData !== null) {
-        // New CSV data available
-        const currentTimestamp = transactions.length > 0 ? (window._lastCsvTimestamp || 0) : 0;
-        const fbTimestamp = csvData.uploadedAt || 0;
-        if (fbTimestamp > currentTimestamp) {
-          window._lastCsvTimestamp = fbTimestamp;
-          applyKey('last_csv_data', csvData);
-          changed = true;
+        changed=true;
+      } else if (csvData !== null && csvData.uploadedAt) {
+        const fbTimestamp = csvData.uploadedAt||0;
+        // Only reload if: sentinel not set AND Firebase has newer data
+        if(window._lastCsvTimestamp !== -1 && fbTimestamp > (window._lastCsvTimestamp||0)){
+          window._lastCsvTimestamp=fbTimestamp;
+          applyKey('last_csv_data',csvData);
+          changed=true;
         }
       }
 
@@ -993,6 +994,8 @@ function applyKey(key, value) {
       }
       break;
     case 'last_csv_data':
+      // Never load if user explicitly cleared (sentinel = -1)
+      if(window._lastCsvTimestamp === -1) break;
       if (value && (value.txData || value.txList)) {
         window._lastCsvTimestamp = value.uploadedAt || 0;
         // Handle both new format (txData as string) and old format (txList as array)
@@ -1094,13 +1097,14 @@ function updateSyncBadge(status) {
 // scheduleSave defined above in Firebase engine
 
 async function forceSyncNow() {
-  // Clear any blocking flags
+  // Reset sentinel only if user is explicitly asking to sync fresh data
+  // (not after a clear — cleared state should persist until new file loaded)
+  if(window._lastCsvTimestamp !== -1){
+    window._lastCsvTimestamp = 0;
+  }
   localStorage.removeItem('csv_cleared');
-  window._lastCsvTimestamp = 0;
-  // Update badge
   updateSyncBadge('syncing');
   toast('⟳ Syncing...');
-  // Pull everything fresh from Firebase
   await syncAll();
   refreshAllUI();
   toast('✓ Sync complete');
@@ -1483,13 +1487,15 @@ function clearCSVDisplay(){
 }
 
 function resetCSV(openPicker){
-  transactions=[];
-  clearCSVDisplay();
-
   if(openPicker===true){
-    // Load different file — clear the flag so new file can load
+    // Load different file — reset everything and open picker
+    transactions=[];
+    window._lastCsvTimestamp=0;
     localStorage.removeItem('csv_cleared');
+    localStorage.removeItem('fb_last_csv_data');
+    clearCSVDisplay();
     fbDelete('csv_cleared');
+    fbDelete('last_csv_data');
     setTimeout(()=>{
       const fresh=document.createElement('input');
       fresh.type='file';
@@ -1500,15 +1506,33 @@ function resetCSV(openPicker){
       setTimeout(()=>{ if(fresh.parentNode)fresh.remove(); },5000);
     },50);
   } else {
-    // Pure clear — wipe from Firebase AND local
+    // ── DEFINITIVE CLEAR ──────────────────────────────────────────
+    // Step 1: Set sentinel BEFORE clearing so sync can't sneak in
+    window._lastCsvTimestamp = -1; // -1 = user explicitly cleared, NEVER reload
+
+    // Step 2: Pause live sync so it can't interfere during the clear operation
+    if(fbListener){ clearInterval(fbListener); fbListener=null; }
+
+    // Step 3: Clear all local data
+    transactions=[];
     localStorage.setItem('csv_cleared','true');
     localStorage.removeItem('fb_last_csv_data');
     localStorage.removeItem('m_last_csv_data');
-    // Delete last_csv_data from Firebase so other devices don't reload it
-    fbDelete('last_csv_data');
-    // Tell all devices the user cleared
-    fbSet('csv_cleared', { cleared:true, when:new Date().toISOString() });
-    toast('✓ Cleared');
+    clearCSVDisplay();
+
+    // Step 4: Wipe Firebase — both the data and any stale cleared flag
+    const clearedAt = Date.now();
+    Promise.all([
+      fbDelete('last_csv_data'),
+      fbSet('csv_cleared', { cleared:true, clearedAt, when:new Date().toISOString() })
+    ]).then(()=>{
+      toast('✓ Cleared on all devices');
+      // Step 5: Restart live sync after Firebase ops complete
+      setTimeout(startLiveSync, 1000);
+    }).catch(()=>{
+      toast('✓ Cleared locally');
+      setTimeout(startLiveSync, 1000);
+    });
   }
 }
 
@@ -1689,42 +1713,39 @@ function renderBVA(){
 function updateDonutFromTransactions(){
   if(!transactions.length) return;
 
-  // Calculate spending by category
+  // CRITICAL: Exclude Debt Payments and Transfers from spending
+  // Debt Payments = CC bill payments from checking account
+  // These are NOT real spending — the debt is already tracked via CC balances
+  // Including them double-counts your expenses and makes surplus look negative
+  const EXCLUDE = ['Debt Payments','Transfers','Income'];
+
   const ct={};
-  transactions.filter(t=>t.amount<0&&t.cat!=='Transfers'&&t.cat!=='Income')
+  transactions.filter(t=>t.amount<0 && !EXCLUDE.includes(t.cat))
     .forEach(t=>{ct[t.cat]=(ct[t.cat]||0)+Math.abs(t.amount);});
 
-  // IMPORTANT: Always use configured monthly income, NOT CSV sum
-  // CSV may cover multiple months (multiple paychecks) which would inflate the number
-  // Monthly income is your actual per-month take-home pay
-  const monthlyIncome = FINANCIAL.income; // $9,090.46
+  const monthlyIncome = FINANCIAL.income;
 
-  // Determine how many months the CSV covers for pro-rating
+  // How many months does the CSV cover?
   const txDates = transactions.map(t=>new Date(t.date)).filter(d=>!isNaN(d));
   const minDate = new Date(Math.min(...txDates));
   const maxDate = new Date(Math.max(...txDates));
-  const daysCovered = Math.max(1, (maxDate - minDate) / (1000*60*60*24));
-  const monthsCovered = Math.max(1, daysCovered / 30.44);
+  const daysCovered = Math.max(1,(maxDate-minDate)/(1000*60*60*24));
+  const monthsCovered = Math.max(1,daysCovered/30.44);
 
-  // Pro-rate spending to monthly equivalent if CSV covers more than ~5 weeks
-  const totalSpend = Object.values(ct).reduce((s,v)=>s+v,0);
-  const monthlySpend = monthsCovered > 1.2 ? totalSpend / monthsCovered : totalSpend;
+  // Pro-rate to monthly
+  const totalSpendRaw = Object.values(ct).reduce((s,v)=>s+v,0);
+  const monthlySpend = totalSpendRaw / monthsCovered;
 
-  // Surplus = monthly income minus monthly spending
-  const surplus = Math.max(0, monthlyIncome - monthlySpend);
+  // Surplus — can be negative (overspent) — show in red if so
+  const surplus = monthlyIncome - monthlySpend;
 
-  // Donut segments — monthly equivalent spending
-  const billsAndMortgage = ((ct['Mortgage']||0)+(ct['Utilities']||0)+(ct['Phone & Internet']||0)+(ct['Loan Payment']||0)+(ct['Insurance']||0)+(ct['Subscriptions']||0)) / monthsCovered;
-  const foodAndLife = ((ct['Food & Life']||0)+(ct['Groceries']||0)+(ct['Amazon']||0)) / monthsCovered;
-  const debtPayments = (ct['Debt Payments']||0) / monthsCovered;
+  // Donut segments
+  const bills = ((ct['Mortgage']||0)+(ct['Utilities']||0)+(ct['Phone & Internet']||0)+(ct['Loan Payment']||0)+(ct['Insurance']||0)+(ct['Subscriptions']||0)) / monthsCovered;
+  const food = ((ct['Food & Life']||0)+(ct['Groceries']||0)+(ct['Amazon']||0)) / monthsCovered;
+  const other = Math.max(0, monthlySpend - bills - food);
 
   if(charts.donut){
-    charts.donut.data.datasets[0].data=[
-      Math.round(billsAndMortgage+debtPayments),
-      Math.round(foodAndLife),
-      Math.round(monthlySpend - billsAndMortgage - foodAndLife - debtPayments),
-      Math.round(surplus)
-    ];
+    charts.donut.data.datasets[0].data=[Math.round(bills),Math.round(food),Math.round(other),Math.max(0,Math.round(surplus))];
     charts.donut.options.plugins.tooltip.callbacks.label = c=>`${fmt(c.raw)} (${(c.raw/monthlyIncome*100).toFixed(1)}%)`;
     charts.donut.update();
   }
@@ -1736,21 +1757,17 @@ function updateDonutFromTransactions(){
   const debtEl=document.getElementById('d-debt-val');
   const debtSubEl=document.getElementById('d-debt-sub');
 
-  if(surplusEl) surplusEl.textContent = fmt(surplus);
-  if(surplusSubEl){
-    const label = monthsCovered > 1.2
-      ? `Monthly avg · ${monthsCovered.toFixed(1)} months of data`
-      : 'After all bills & debt';
-    surplusSubEl.textContent = label;
+  if(surplusEl){
+    surplusEl.textContent=fmt(Math.abs(surplus));
+    surplusEl.style.color=surplus>=0?'var(--teal)':'var(--red)';
   }
-  // Income stays at configured monthly amount
-  if(incomeEl) incomeEl.textContent = fmt(monthlyIncome);
+  if(surplusSubEl) surplusSubEl.textContent=monthsCovered>1.2?`Monthly avg · ${monthsCovered.toFixed(1)}mo of data`:'After all bills & debt';
+  if(incomeEl) incomeEl.textContent=fmt(monthlyIncome);
 
-  // Update total CC debt display
-  const totalDebt = CARDS.reduce((s,c)=>s+c.balance,0);
-  const totalInterest = CARDS.reduce((s,c)=>s+(c.balance*(c.apr/12)),0);
-  if(debtEl) debtEl.textContent = fmt(totalDebt);
-  if(debtSubEl) debtSubEl.textContent = `${CARDS.length} cards · $${Math.round(totalInterest).toLocaleString()}/mo interest`;
+  const totalDebt=CARDS.reduce((s,c)=>s+c.balance,0);
+  const totalInterest=CARDS.reduce((s,c)=>s+(c.balance*(c.apr/12)),0);
+  if(debtEl) debtEl.textContent=fmt(totalDebt);
+  if(debtSubEl) debtSubEl.textContent=`${CARDS.length} cards · $${Math.round(totalInterest).toLocaleString()}/mo interest`;
 }
 
 // Load cross-device CSV data — always replaces whatever is currently loaded
