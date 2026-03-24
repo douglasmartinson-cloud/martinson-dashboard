@@ -840,17 +840,12 @@ async function fbGetAll() {
 
 // ── THE ONE RULE — server decides what to show ───────────────────
 // Called every time we get fresh data from Firebase
-// Debounce: skip if called within 500ms of a local clear
-let _lastLocalClearTime = 0;
+let _syncPaused = false; // true while a clear is in-flight
 function applyServerState(all) {
   if (!all) return;
+  if (_syncPaused) return; // clear in progress — ignore everything
 
-  // If we JUST cleared locally (within 2 seconds), ignore server state for CSV
-  // This prevents the SDK listener from re-loading stale data during the clear
-  const timeSinceClear = Date.now() - _lastLocalClearTime;
-  const justCleared = timeSinceClear < 2000;
-
-  // Apply non-CSV keys first
+  // Apply non-CSV keys always (meals, goals, settings, etc)
   const keys = ['meal_plan','week_hist','custom_meals','hidden_meals',
                  'financial_settings','cc_balances','family_goals'];
   keys.forEach(k => {
@@ -860,15 +855,21 @@ function applyServerState(all) {
     }
   });
 
-  // THE CORE RULE:
+  // THE CORE RULE — only for CSV data:
+  // Use BOTH server timestamps AND local cleared_at as authority
   const uploadedAt = all.last_csv_data?.uploadedAt || 0;
-  const clearedAt  = all.cleared_at || 0;
+  const serverClearedAt = all.cleared_at || 0;
+  const localClearedAt = parseInt(localStorage.getItem('local_cleared_at') || '0');
+  // Use whichever cleared_at is higher — local or server
+  const clearedAt = Math.max(serverClearedAt, localClearedAt);
 
-  if (!justCleared && uploadedAt > 0 && uploadedAt > clearedAt && all.last_csv_data) {
+  if (uploadedAt > 0 && uploadedAt > clearedAt && all.last_csv_data) {
     // Server has data newer than the last clear → show it
+    // Also clear the local cleared_at since server has newer data
+    if (localClearedAt > 0) localStorage.removeItem('local_cleared_at');
     loadCsvFromServer(all.last_csv_data);
   } else {
-    // Server has no data, or data is older than clear, or we just cleared → show empty
+    // Server says empty — clear locally if we have anything showing
     if (transactions.length > 0 || _loadedUploadedAt > 0) {
       transactions = [];
       _loadedUploadedAt = 0;
@@ -895,25 +896,41 @@ function loadCsvFromServer(data) {
   if(aiBtn) aiBtn.style.display = 'block';
 }
 
-// ── CLEAR — writes cleared_at timestamp AND deletes data from server ─
-// Two-layer guarantee:
-//   1. Set cleared_at = now + 1000ms safety margin (so it's always > uploadedAt)
-//   2. Delete last_csv_data entirely from Firebase
-// Any device polling will see either: no data, or cleared_at > uploadedAt → empty
+// ── CLEAR — nuclear option: pause sync, write to server, resume ──
+// Eliminates ALL race conditions by stopping listeners during the write.
 function clearCsvOnAllDevices() {
+  // 1. Pause ALL sync — no listeners can reload data
+  _syncPaused = true;
+
+  // 2. Clear locally — instant visual feedback
   transactions = [];
   _loadedUploadedAt = 0;
-  _lastLocalClearTime = Date.now(); // debounce guard — prevents SDK listener from re-loading
   clearCSVDisplay();
-  // Safety margin: cleared_at is 1 second in the future so it's ALWAYS > uploadedAt
-  // This eliminates the race where both timestamps are set within milliseconds
-  const clearTimestamp = Date.now() + 1000;
+
+  // 3. Stop the WebSocket listener and REST polling entirely
+  FB_ROOT.off('value');
+  if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
+  clearTimeout(_sdkDebounceTimer);
+
+  // 4. Persist cleared_at to localStorage — this is the PERMANENT guard
+  // Even if Firebase delete fails, this blocks reloading until new data arrives
+  const clearTimestamp = Date.now() + 1000; // +1s safety margin
+  localStorage.setItem('local_cleared_at', String(clearTimestamp));
+
+  // 5. Write to Firebase — try both set and delete
   Promise.all([
     fbSet('cleared_at', clearTimestamp),
     fbDelete('last_csv_data')
   ]).then(() => {
+    _syncPaused = false;
+    startSync();
     toast('✓ Cleared on all devices');
   }).catch(() => {
+    // Even if delete failed, cleared_at in localStorage blocks reload
+    setTimeout(() => {
+      _syncPaused = false;
+      startSync();
+    }, 2000);
     toast('✓ Cleared locally');
   });
 }
@@ -921,6 +938,8 @@ function clearCsvOnAllDevices() {
 // ── UPLOAD — writes data + resets cleared_at ─────────────────────
 // When uploading new data, set cleared_at=0 so it's always newer
 function uploadCsvToServer(syncData) {
+  _syncPaused = false; // lift any active clear pause
+  localStorage.removeItem('local_cleared_at'); // clear the local guard
   // Reset cleared_at to 0 first so new data is definitely shown
   return Promise.all([
     fbSet('last_csv_data', syncData),
@@ -952,6 +971,7 @@ function startSync() {
 
 // ── FORCE SYNC ────────────────────────────────────────────────────
 async function forceSyncNow() {
+  if (_syncPaused) { toast('⟳ Clear in progress...'); return; }
   updateSyncBadge('syncing');
   toast('⟳ Syncing...');
   const all = await fbGetAll();
