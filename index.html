@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Martinson Family Dashboard v30</title>
+<title>Martinson Family Dashboard v32</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <!-- Firebase JS SDK — WebSocket real-time sync (same tech as Notion, Figma, Linear) -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -304,7 +304,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <!-- ENTRY SCREEN -->
 <div id="entry-screen">
   <div class="entry-logo">Martinson Family</div>
-  <div class="entry-sub">Kansas City, MO · Your Family Hub · v30</div>
+  <div class="entry-sub">Kansas City, MO · Your Family Hub · v32</div>
   <div class="entry-box">
     <div class="entry-title">🔒 Enter Password</div>
     <div class="entry-dots">
@@ -790,12 +790,17 @@ let cmfIngCount = 0;
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxgssU1_z7Xkp-b-GyhG2ls75Uq_dpBn7owG_lvHJsr9SQGSpG803xba8Nh3rH_lodmww/exec';
 
 // ══════════════════════════════════════════════════════════════════
-// HYBRID SYNC ENGINE — Firebase SDK WebSocket + REST polling backup
+// SYNC ENGINE — Google Sheets architecture
 // ══════════════════════════════════════════════════════════════════
-// Strategy: Try Firebase SDK WebSocket first (instant push).
-// If SDK doesn't fire within 8 seconds, fall back to REST polling.
-// Both write paths use the SDK. Read paths use whichever works.
-// This guarantees sync works on every device and browser.
+// One rule: Firebase is always right. Whatever the server has,
+// every device shows. No local blocking. No sentinel. No flags.
+//
+// Two values in Firebase control CSV state:
+//   last_csv_data.uploadedAt  — timestamp when data was uploaded
+//   cleared_at                — timestamp when user last cleared
+//
+// Decision: if uploadedAt > cleared_at → show data. Else → show empty.
+// That's the entire sync logic. Server decides. Always.
 // ══════════════════════════════════════════════════════════════════
 
 const FB = 'https://martinson-family-default-rtdb.firebaseio.com';
@@ -804,20 +809,17 @@ const FBDB = firebase.database();
 const FB_ROOT = FBDB.ref('martinson');
 
 let lastSyncTime = null;
-let _fbListeners = [];
 let _pollTimer = null;
-let _sdkConnected = false;
 
-// ── WRITE — always use SDK ────────────────────────────────────────
+// ── WRITE ─────────────────────────────────────────────────────────
 function fbSet(key, value) {
   localStorage.setItem('fb_' + key, JSON.stringify(value));
-  return FB_ROOT.child(key).set(value).catch(() => {
-    // SDK write failed — try REST as backup
-    return fetch(`${FB}/martinson/${key}.json`, {
+  return FB_ROOT.child(key).set(value).catch(() =>
+    fetch(`${FB}/martinson/${key}.json`, {
       method:'PUT', headers:{'Content-Type':'application/json'},
       body: JSON.stringify(value)
-    });
-  });
+    })
+  );
 }
 
 // ── DELETE ────────────────────────────────────────────────────────
@@ -828,121 +830,98 @@ function fbDelete(key) {
   );
 }
 
-// ── READ ONCE — REST (always works) ──────────────────────────────
-async function fbGet(key) {
-  try {
-    const res = await fetch(`${FB}/martinson/${key}.json`);
-    if (!res.ok) return null;
-    return await res.json();
-  } catch(e) { return null; }
-}
-
-// ── READ ALL ONCE — REST ──────────────────────────────────────────
+// ── READ ALL — single REST call, always works ────────────────────
 async function fbGetAll() {
   try {
     const res = await fetch(`${FB}/martinson.json`);
-    if (!res.ok) return null;
-    return await res.json();
+    return res.ok ? await res.json() : null;
   } catch(e) { return null; }
 }
 
-// ── START SDK LISTENERS (WebSocket push) ─────────────────────────
-function startFirebaseListeners() {
-  _fbListeners.forEach(({ref, fn}) => ref.off('value', fn));
-  _fbListeners = [];
+// ── THE ONE RULE — server decides what to show ───────────────────
+// Called every time we get fresh data from Firebase
+function applyServerState(all) {
+  if (!all) return;
 
-  function listen(key, handler) {
-    const ref = FB_ROOT.child(key);
-    const fn = ref.on('value', snap => {
-      _sdkConnected = true;
-      handler(snap.val());
-      lastSyncTime = new Date();
-      updateSyncBadge('ok');
-    }, err => {
-      updateSyncBadge('error');
-    });
-    _fbListeners.push({ref, fn});
-  }
-
-  listen('last_csv_data', handleCsvData);
-  listen('csv_cleared', handleCsvCleared);
-
-  ['meal_plan','week_hist','custom_meals','hidden_meals',
-   'financial_settings','cc_balances','family_goals'].forEach(key => {
-    listen(key, data => {
-      if (data !== null && data !== undefined) {
-        localStorage.setItem('fb_' + key, JSON.stringify(data));
-        applyKey(key, data);
-        refreshAllUI();
-      }
-    });
+  // Apply non-CSV keys first
+  const keys = ['meal_plan','week_hist','custom_meals','hidden_meals',
+                 'financial_settings','cc_balances','family_goals'];
+  keys.forEach(k => {
+    if (all[k] !== undefined && all[k] !== null) {
+      localStorage.setItem('fb_' + k, JSON.stringify(all[k]));
+      applyKey(k, all[k]);
+    }
   });
 
-  // If SDK doesn't connect in 8 seconds, start REST polling as backup
-  setTimeout(() => {
-    if (!_sdkConnected) {
-      console.log('SDK not connected — starting REST polling fallback');
-      startPolling();
-    }
-  }, 8000);
-}
+  // THE CORE RULE:
+  const uploadedAt = all.last_csv_data?.uploadedAt || 0;
+  const clearedAt  = all.cleared_at || 0;
 
-// ── HANDLE CSV DATA (shared by SDK and polling) ───────────────────
-function handleCsvData(data) {
-  if (data === null) {
-    if (window._lastCsvTimestamp > 0 && window._lastCsvTimestamp !== -1) {
-      performLocalClear();
-      refreshAllUI();
-    }
-  } else if (data && data.uploadedAt) {
-    const fbTs = data.uploadedAt;
-    if (window._lastCsvTimestamp !== -1 && fbTs > (window._lastCsvTimestamp || 0)) {
-      window._lastCsvTimestamp = fbTs;
-      localStorage.setItem('csv_sentinel', String(fbTs));
-      applyKey('last_csv_data', data);
-      renderFromTransactions();
-      refreshAllUI();
-      const aiBtn = document.getElementById('ai-btn-wrap');
-      if(aiBtn) aiBtn.style.display = 'block';
+  if (uploadedAt > clearedAt && all.last_csv_data) {
+    // Server has data newer than the last clear → show it
+    loadCsvFromServer(all.last_csv_data);
+  } else {
+    // Server has no data, or data is older than clear → show empty
+    if (transactions.length > 0) {
+      transactions = [];
+      clearCSVDisplay();
     }
   }
+
+  lastSyncTime = new Date();
+  updateSyncBadge('ok');
+  refreshAllUI();
+  updateNetWorth();
+  updateDebtMetrics();
 }
 
-// ── HANDLE CLEAR SIGNAL ───────────────────────────────────────────
-function handleCsvCleared(data) {
-  if (data && data.cleared === true) {
-    const clearTs = data.clearedAt || 0;
-    const ourTs = window._lastCsvTimestamp;
-    if (ourTs > 0 && ourTs !== -1 && clearTs >= ourTs) {
-      performLocalClear();
-      refreshAllUI();
-    }
-  }
+// ── LOAD CSV FROM SERVER ─────────────────────────────────────────
+let _loadedUploadedAt = 0;
+function loadCsvFromServer(data) {
+  // Don't reload if we already have this exact version
+  if (data.uploadedAt === _loadedUploadedAt && transactions.length > 0) return;
+  _loadedUploadedAt = data.uploadedAt;
+  applyKey('last_csv_data', data);
+  renderFromTransactions();
+  const aiBtn = document.getElementById('ai-btn-wrap');
+  if(aiBtn) aiBtn.style.display = 'block';
 }
 
-// ── REST POLLING FALLBACK — fires every 4 seconds ────────────────
-// Used when WebSocket isn't available (some corporate/mobile networks)
-// Simple, reliable, proven — same approach that powered v19-v26
-function startPolling() {
+// ── CLEAR — writes cleared_at timestamp to server ────────────────
+// No local sentinel. The server timestamp is the source of truth.
+function clearCsvOnAllDevices() {
+  transactions = [];
+  _loadedUploadedAt = 0;
+  clearCSVDisplay();
+  // Tell the server: "cleared at this moment"
+  // Any data with uploadedAt < this timestamp will be treated as cleared
+  fbSet('cleared_at', Date.now());
+  toast('✓ Cleared on all devices');
+}
+
+// ── UPLOAD — writes data + resets cleared_at ─────────────────────
+// When uploading new data, set cleared_at=0 so it's always newer
+function uploadCsvToServer(syncData) {
+  // Reset cleared_at to 0 first so new data is definitely shown
+  return Promise.all([
+    fbSet('last_csv_data', syncData),
+    fbSet('cleared_at', 0)
+  ]);
+}
+
+// ── START SYNC ───────────────────────────────────────────────────
+// Uses SDK WebSocket for instant push + REST polling every 4s as backup
+function startSync() {
+  // 1. SDK listener — instant push when anything changes
+  FB_ROOT.on('value', snap => {
+    applyServerState(snap.val());
+  }, () => updateSyncBadge('error'));
+
+  // 2. REST polling every 4 seconds — bulletproof fallback
   if (_pollTimer) clearInterval(_pollTimer);
   _pollTimer = setInterval(async () => {
-    try {
-      const all = await fbGetAll();
-      if (!all) return;
-      // Process each key
-      if (all.last_csv_data !== undefined) handleCsvData(all.last_csv_data);
-      if (all.csv_cleared !== undefined) handleCsvCleared(all.csv_cleared);
-      ['meal_plan','week_hist','custom_meals','hidden_meals',
-       'financial_settings','cc_balances','family_goals'].forEach(k => {
-        if (all[k] !== undefined && all[k] !== null) {
-          localStorage.setItem('fb_' + k, JSON.stringify(all[k]));
-          applyKey(k, all[k]);
-        }
-      });
-      lastSyncTime = new Date();
-      updateSyncBadge('ok');
-      refreshAllUI();
-    } catch(e) { updateSyncBadge('error'); }
+    const all = await fbGetAll();
+    if (all) applyServerState(all);
   }, 4000);
 }
 
@@ -950,21 +929,9 @@ function startPolling() {
 async function forceSyncNow() {
   updateSyncBadge('syncing');
   toast('⟳ Syncing...');
-  // Immediate REST fetch for instant result
   const all = await fbGetAll();
   if (all) {
-    if (all.last_csv_data !== undefined) handleCsvData(all.last_csv_data);
-    if (all.csv_cleared !== undefined) handleCsvCleared(all.csv_cleared);
-    ['meal_plan','week_hist','custom_meals','hidden_meals',
-     'financial_settings','cc_balances','family_goals'].forEach(k => {
-      if (all[k] !== null && all[k] !== undefined) {
-        localStorage.setItem('fb_' + k, JSON.stringify(all[k]));
-        applyKey(k, all[k]);
-      }
-    });
-    lastSyncTime = new Date();
-    updateSyncBadge('ok');
-    refreshAllUI();
+    applyServerState(all);
     toast('✓ Synced');
   } else {
     toast('⚠ Could not reach Firebase');
@@ -974,39 +941,16 @@ async function forceSyncNow() {
 
 // ── INITIAL LOAD ──────────────────────────────────────────────────
 async function syncAll() {
+  // Load non-CSV keys from localStorage instantly (no network)
   ['custom_meals','hidden_meals','week_hist','meal_plan',
    'cc_balances','family_goals','financial_settings'].forEach(k => {
     const v = localStorage.getItem('fb_' + k);
     if (v) try { applyKey(k, JSON.parse(v)); } catch(e) {}
   });
   updateSyncBadge('syncing');
-
-  // Immediate REST fetch for fast initial load
-  try {
-    const all = await fbGetAll();
-    if (all) {
-      if (all.last_csv_data !== undefined) handleCsvData(all.last_csv_data);
-      if (all.csv_cleared !== undefined) handleCsvCleared(all.csv_cleared);
-      ['meal_plan','week_hist','custom_meals','hidden_meals',
-       'financial_settings','cc_balances','family_goals'].forEach(k => {
-        if (all[k] !== null && all[k] !== undefined) {
-          localStorage.setItem('fb_' + k, JSON.stringify(all[k]));
-          applyKey(k, all[k]);
-        }
-      });
-      lastSyncTime = new Date();
-      updateSyncBadge('ok');
-    }
-  } catch(e) { updateSyncBadge('error'); }
-}
-
-// ── PERFORM LOCAL CLEAR ───────────────────────────────────────────
-function performLocalClear() {
-  transactions = [];
-  window._lastCsvTimestamp = -1;
-  localStorage.setItem('csv_sentinel', '-1');
-  localStorage.removeItem('fb_last_csv_data');
-  clearCSVDisplay();
+  // Fetch everything from server
+  const all = await fbGetAll();
+  if (all) applyServerState(all);
 }
 
 // ── DEBOUNCED SAVE ────────────────────────────────────────────────
@@ -1016,7 +960,7 @@ function scheduleSave(key, value) {
   _saveTimers[key] = setTimeout(() => fbSet(key, value), 800);
 }
 
-// ── APPLY KEY — map Firebase data to local app state ──────────────
+// ── APPLY KEY — map server data to local app state ────────────────
 function applyKey(key, value) {
   if (value === null || value === undefined) return;
   switch(key) {
@@ -1034,13 +978,8 @@ function applyKey(key, value) {
       }
       break;
     case 'last_csv_data':
-      // Never load if user explicitly cleared (sentinel = -1)
-      if(window._lastCsvTimestamp === -1) break;
       if (value && (value.txData || value.txList)) {
-        window._lastCsvTimestamp = value.uploadedAt || 0;
-        // Handle both new format (txData as string) and old format (txList as array)
         if (value.txData && typeof value.txData === 'string') {
-          // New format: decode the string-encoded transaction list
           try {
             const txArr = JSON.parse(value.txData);
             const catTotals = value.cats ? JSON.parse(value.cats) : {};
@@ -1048,40 +987,22 @@ function applyKey(key, value) {
               txList: txArr.map(t=>({
                 date: t.d||t.date||'',
                 desc: t.n||t.desc||'',
-                // CRITICAL: use explicit check — negative numbers are falsy in JS
-                // t.a || t.amount would return 0 for negative amounts like -87.43
                 amount: (t.a !== undefined && t.a !== null) ? Number(t.a) : Number(t.amount||0),
                 cat: t.c||t.cat||'Other',
                 month: t.m||t.month||'',
                 color:(RULES.find(r=>r.cat===(t.c||t.cat))||RULES[RULES.length-1]).color
               })),
-              catTotals,
-              period: value.period,
-              loadedOn: value.loadedOn,
-              count: value.count,
-              uploadedAt: value.uploadedAt
+              catTotals, period:value.period, loadedOn:value.loadedOn,
+              count:value.count, uploadedAt:value.uploadedAt
             };
             loadCrossDeviceCsvData(decoded);
           } catch(e) {}
         } else if (value.txList && Array.isArray(value.txList)) {
-          // Old format: txList already an array
           loadCrossDeviceCsvData(value);
         }
       }
       break;
-    case 'csv_cleared':
-      if (value && value.cleared === true) {
-        const clearTime = value.clearedAt || 0;
-        const ourLoadTime = window._lastCsvTimestamp || 0;
-        if (ourLoadTime > 0 && clearTime >= ourLoadTime) {
-          transactions = [];
-          localStorage.removeItem('csv_cleared');
-          window._lastCsvTimestamp = -1;
-          localStorage.setItem('csv_sentinel', '-1');
-          clearCSVDisplay();
-        }
-      }
-      break;
+    case 'csv_cleared': break; // handled by applyServerState now
   }
 }
 
@@ -1139,20 +1060,6 @@ function updateSyncBadge(status) {
 }
 
 // scheduleSave defined above in Firebase engine
-
-async function forceSyncNow() {
-  // Reset sentinel only if user is explicitly asking to sync fresh data
-  // (not after a clear — cleared state should persist until new file loaded)
-  if(window._lastCsvTimestamp !== -1){
-    window._lastCsvTimestamp = 0;
-  }
-  localStorage.removeItem('csv_cleared');
-  updateSyncBadge('syncing');
-  toast('⟳ Syncing...');
-  await syncAll();
-  refreshAllUI();
-  toast('✓ Sync complete');
-}
 
 function showSyncSetup() {
   const existing = document.getElementById('sync-setup-overlay');
@@ -1232,11 +1139,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('j-week-of').textContent = getWeekOf();
   document.getElementById('j-gauge-week').textContent = 'Week ' + currentWeek;
 
-  // Restore sentinel FIRST — before any network activity
-  const saved = localStorage.getItem('csv_sentinel');
-  window._lastCsvTimestamp = saved === '-1' ? -1 : (parseInt(saved) || 0);
-
-  // Load non-CSV state from localStorage instantly
+  // Load non-CSV state from localStorage for instant startup
   ['custom_meals','hidden_meals','week_hist','meal_plan',
    'cc_balances','family_goals','financial_settings'].forEach(k => {
     const v = localStorage.getItem('fb_' + k);
@@ -1246,18 +1149,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   updateNetWorth();
   updateDebtMetrics();
 
-  // Start hybrid sync:
-  // 1. Immediate REST fetch for fast initial data
-  // 2. SDK WebSocket listeners for push updates
-  // 3. REST polling kicks in after 8s if SDK doesn't connect
+  // Start Google-style sync: server is always right
+  // 1. REST fetch immediately for fast initial load
+  // 2. SDK WebSocket listener for instant push updates
+  // 3. REST polling every 4s as bulletproof backup
   updateSyncBadge('syncing');
   await syncAll();
   refreshAllUI();
   updateNetWorth();
   updateDebtMetrics();
-  startFirebaseListeners();
-  // Always also start polling — runs alongside SDK for maximum reliability
-  startPolling();
+  startSync();
 });
 
 function getWeekOf(){const n=new Date();const d=n.getDate()-n.getDay()+(n.getDay()===0?-6:1);const m=new Date(n.setDate(d));return m.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
@@ -1410,10 +1311,8 @@ function parseCSV(text,fname){
   }
   if(!transactions.length){alert('No transactions found');return;}
   transactions.sort((a,b)=>new Date(b.date)-new Date(a.date));
-  localStorage.removeItem('csv_cleared');
-  window._lastCsvTimestamp = Date.now();
-  localStorage.setItem('csv_sentinel', String(window._lastCsvTimestamp));
-  fbSet('csv_cleared', { cleared:false, when:new Date().toISOString() });
+  // Reset loaded tracker so new data will be accepted
+  _loadedUploadedAt = 0;
   const dz=document.getElementById('drop-zone');dz.classList.add('loaded');
   const dates=transactions.map(t=>new Date(t.date)).filter(d=>!isNaN(d));
   const mn=new Date(Math.min(...dates)).toLocaleDateString('en-US',{month:'short',day:'numeric'});
@@ -1469,13 +1368,11 @@ function parseCSV(text,fname){
   const el = document.getElementById('tx-sync-status');
   if(el){ el.style.color='var(--text-mid)'; el.textContent='⟳ Syncing to all devices...'; }
 
-  fbSet('last_csv_data', syncData)
+  uploadCsvToServer(syncData)
     .then(() => {
       lastSyncTime = new Date();
       updateSyncBadge('ok');
-      if(el){ el.style.color='var(--teal)'; el.textContent='✓ Synced to all devices — check your phone'; }
-      // Also clear any stale cleared flag
-      fbSet('csv_cleared', { cleared:false, clearedAt:0, when:new Date().toISOString() });
+      if(el){ el.style.color='var(--teal)'; el.textContent='✓ Synced to all devices'; }
     })
     .catch(err => {
       if(el){ el.style.color='var(--red)'; el.textContent='⚠ Sync error: ' + err.message; }
@@ -1539,12 +1436,11 @@ function clearCSVDisplay(){
 
 function resetCSV(openPicker){
   if(openPicker===true){
-    // Load different file — reset sentinel and open file picker
-    performLocalClear();
-    window._lastCsvTimestamp = 0;
-    localStorage.setItem('csv_sentinel','0');
-    fbDelete('csv_cleared');
-    fbDelete('last_csv_data');
+    // Load different file — clear locally and open picker
+    // Server will receive new data when file loads
+    transactions=[];
+    _loadedUploadedAt=0;
+    clearCSVDisplay();
     setTimeout(()=>{
       const fresh=document.createElement('input');
       fresh.type='file'; fresh.accept='.csv,.pdf,application/pdf';
@@ -1553,24 +1449,11 @@ function resetCSV(openPicker){
       setTimeout(()=>{ if(fresh.parentNode)fresh.remove(); },5000);
     },50);
   } else {
-    // ── DEFINITIVE CLEAR ─────────────────────────────────────────
-    // Set sentinel FIRST — Firebase listener won't reload data if sentinel=-1
-    window._lastCsvTimestamp = -1;
-    localStorage.setItem('csv_sentinel','-1');
-    transactions=[];
-    localStorage.removeItem('fb_last_csv_data');
-    clearCSVDisplay();
+    // CLEAR — tell the server "cleared at this moment"
+    // Every device polling will see uploadedAt < cleared_at and show empty
+    clearCsvOnAllDevices();
     updateNetWorth();
     updateDebtMetrics();
-
-    const clearedAt = Date.now();
-    // Delete data + write clear signal atomically
-    // Firebase SDK pushes the null value to ALL devices instantly via WebSocket
-    Promise.all([
-      fbDelete('last_csv_data'),
-      fbSet('csv_cleared',{cleared:true, clearedAt})
-    ]).then(()=>toast('✓ Cleared on all devices'))
-      .catch(()=>toast('✓ Cleared'));
   }
 }
 
