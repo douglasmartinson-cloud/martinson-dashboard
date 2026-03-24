@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Martinson Family Dashboard v33</title>
+<title>Martinson Family Dashboard v34</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <!-- Firebase JS SDK — WebSocket real-time sync (same tech as Notion, Figma, Linear) -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -304,7 +304,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <!-- ENTRY SCREEN -->
 <div id="entry-screen">
   <div class="entry-logo">Martinson Family</div>
-  <div class="entry-sub">Kansas City, MO · Your Family Hub · v33</div>
+  <div class="entry-sub">Kansas City, MO · Your Family Hub · v34</div>
   <div class="entry-box">
     <div class="entry-title">🔒 Enter Password</div>
     <div class="entry-dots">
@@ -792,15 +792,19 @@ const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxgssU1_z7Xkp-b-GyhG2
 // ══════════════════════════════════════════════════════════════════
 // SYNC ENGINE — Google Sheets architecture
 // ══════════════════════════════════════════════════════════════════
-// One rule: Firebase is always right. Whatever the server has,
-// every device shows. No local blocking. No sentinel. No flags.
+// ══════════════════════════════════════════════════════════════════
+// FIREBASE SYNC ENGINE — v34
 //
-// Two values in Firebase control CSV state:
-//   last_csv_data.uploadedAt  — timestamp when data was uploaded
-//   cleared_at                — timestamp when user last cleared
+// One key controls everything: martinson/last_csv_data
 //
-// Decision: if uploadedAt > cleared_at → show data. Else → show empty.
-// That's the entire sync logic. Server decides. Always.
+// Upload: fbSet('last_csv_data', {txData:..., uploadedAt:..., ...})
+// Clear:  fbSet('last_csv_data', {cleared:true, clearedAt:...})
+//
+// Decision: if last_csv_data has txData and !cleared → show data.
+//           Otherwise → show empty. That's it.
+//
+// Clear uses direct REST PUT (not SDK) for maximum reliability.
+// localStorage caches the cleared marker as a fallback guard.
 // ══════════════════════════════════════════════════════════════════
 
 const FB = 'https://martinson-family-default-rtdb.firebaseio.com';
@@ -840,12 +844,12 @@ async function fbGetAll() {
 
 // ── THE ONE RULE — server decides what to show ───────────────────
 // Called every time we get fresh data from Firebase
-let _syncPaused = false; // true while a clear is in-flight
+let _syncPaused = false;
 function applyServerState(all) {
   if (!all) return;
-  if (_syncPaused) return; // clear in progress — ignore everything
+  if (_syncPaused) return;
 
-  // Apply non-CSV keys always (meals, goals, settings, etc)
+  // Apply non-CSV keys always
   const keys = ['meal_plan','week_hist','custom_meals','hidden_meals',
                  'financial_settings','cc_balances','family_goals'];
   keys.forEach(k => {
@@ -855,21 +859,22 @@ function applyServerState(all) {
     }
   });
 
-  // THE CORE RULE — only for CSV data:
-  // Use BOTH server timestamps AND local cleared_at as authority
-  const uploadedAt = all.last_csv_data?.uploadedAt || 0;
-  const serverClearedAt = all.cleared_at || 0;
-  const localClearedAt = parseInt(localStorage.getItem('local_cleared_at') || '0');
-  // Use whichever cleared_at is higher — local or server
-  const clearedAt = Math.max(serverClearedAt, localClearedAt);
+  // CSV DECISION: check server data, with localStorage as tiebreaker
+  const csv = all.last_csv_data;
 
-  if (uploadedAt > 0 && uploadedAt > clearedAt && all.last_csv_data) {
-    // Server has data newer than the last clear → show it
-    // Also clear the local cleared_at since server has newer data
-    if (localClearedAt > 0) localStorage.removeItem('local_cleared_at');
-    loadCsvFromServer(all.last_csv_data);
+  // Also check what localStorage thinks — if we cleared locally but
+  // the server hasn't caught up yet, localStorage has {cleared:true}
+  let localCleared = false;
+  try {
+    const cached = JSON.parse(localStorage.getItem('fb_last_csv_data') || '{}');
+    localCleared = !!cached.cleared;
+  } catch(e) {}
+
+  // Show data ONLY if: server has real tx data AND it's not the cleared marker
+  // AND localStorage doesn't think we just cleared
+  if (csv && !csv.cleared && !localCleared && csv.uploadedAt && (csv.txData || csv.txList)) {
+    loadCsvFromServer(csv);
   } else {
-    // Server says empty — clear locally if we have anything showing
     if (transactions.length > 0 || _loadedUploadedAt > 0) {
       transactions = [];
       _loadedUploadedAt = 0;
@@ -896,55 +901,67 @@ function loadCsvFromServer(data) {
   if(aiBtn) aiBtn.style.display = 'block';
 }
 
-// ── CLEAR — nuclear option: pause sync, write to server, resume ──
-// Eliminates ALL race conditions by stopping listeners during the write.
+// ── CLEAR — overwrites last_csv_data with a cleared marker ───────
+// Uses DIRECT REST PUT as the primary write (same mechanism that
+// makes uploads work). SDK is fallback. This is the most reliable
+// write path available — a simple HTTP PUT to a known URL.
 function clearCsvOnAllDevices() {
-  // 1. Pause ALL sync — no listeners can reload data
+  // 1. Pause sync
   _syncPaused = true;
 
-  // 2. Clear locally — instant visual feedback
+  // 2. Clear locally — instant
   transactions = [];
   _loadedUploadedAt = 0;
   clearCSVDisplay();
 
-  // 3. Stop the WebSocket listener and REST polling entirely
+  // 3. Stop all listeners so nothing can fight us
   FB_ROOT.off('value');
   if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
   clearTimeout(_sdkDebounceTimer);
 
-  // 4. Persist cleared_at to localStorage — this is the PERMANENT guard
-  // Even if Firebase delete fails, this blocks reloading until new data arrives
-  const clearTimestamp = Date.now() + 1000; // +1s safety margin
-  localStorage.setItem('local_cleared_at', String(clearTimestamp));
+  // 4. Build the cleared marker
+  const marker = { cleared: true, clearedAt: Date.now() };
 
-  // 5. Write to Firebase — try both set and delete
-  Promise.all([
-    fbSet('cleared_at', clearTimestamp),
-    fbDelete('last_csv_data')
-  ]).then(() => {
+  // 5. Write to localStorage immediately (survives if network fails)
+  localStorage.setItem('fb_last_csv_data', JSON.stringify(marker));
+
+  // 6. Write to Firebase via DIRECT REST PUT — most reliable path
+  fetch(`${FB}/martinson/last_csv_data.json`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(marker)
+  })
+  .then(res => {
+    if (!res.ok) throw new Error('REST PUT failed: ' + res.status);
+    // REST succeeded — restart sync
     _syncPaused = false;
     startSync();
     toast('✓ Cleared on all devices');
-  }).catch(() => {
-    // Even if delete failed, cleared_at in localStorage blocks reload
-    setTimeout(() => {
-      _syncPaused = false;
-      startSync();
-    }, 2000);
-    toast('✓ Cleared locally');
+  })
+  .catch(() => {
+    // REST failed — try SDK as fallback
+    FB_ROOT.child('last_csv_data').set(marker)
+      .then(() => {
+        _syncPaused = false;
+        startSync();
+        toast('✓ Cleared on all devices');
+      })
+      .catch(() => {
+        // Both failed — resume sync anyway, localStorage has the marker
+        _syncPaused = false;
+        startSync();
+        toast('⚠ Clear saved locally — will sync when online');
+      });
   });
 }
 
-// ── UPLOAD — writes data + resets cleared_at ─────────────────────
-// When uploading new data, set cleared_at=0 so it's always newer
+// ── UPLOAD — writes new CSV data to server ───────────────────────
+// New data replaces the cleared marker. Clear the localStorage guard.
 function uploadCsvToServer(syncData) {
-  _syncPaused = false; // lift any active clear pause
-  localStorage.removeItem('local_cleared_at'); // clear the local guard
-  // Reset cleared_at to 0 first so new data is definitely shown
-  return Promise.all([
-    fbSet('last_csv_data', syncData),
-    fbSet('cleared_at', 0)
-  ]);
+  _syncPaused = false;
+  // Clear the localStorage cleared marker so applyServerState accepts new data
+  localStorage.setItem('fb_last_csv_data', JSON.stringify(syncData));
+  return fbSet('last_csv_data', syncData);
 }
 
 // ── START SYNC ───────────────────────────────────────────────────
@@ -1023,6 +1040,8 @@ function applyKey(key, value) {
       }
       break;
     case 'last_csv_data':
+      // GUARD: ignore cleared markers — they have no transaction data
+      if (value && value.cleared) break;
       if (value && (value.txData || value.txList)) {
         if (value.txData && typeof value.txData === 'string') {
           try {
@@ -1100,7 +1119,7 @@ function updateSyncBadge(status) {
     badge.title = 'Tap to sync now';
     badge.onclick = status === 'unconfigured'
       ? showSyncSetup
-      : async () => { await syncAll(); refreshAllUI(); toast('✓ Synced'); };
+      : () => forceSyncNow();
   });
 }
 
@@ -1138,6 +1157,7 @@ function showSyncSetup() {
   document.body.appendChild(overlay);
 }
 
+let _sheetSyncTimer = null;
 function saveSyncURL() {
   const url = document.getElementById('sheet-url-input').value.trim();
   if (!url || !url.startsWith('https://')) { toast('Please enter a valid URL starting with https://'); return; }
@@ -1148,8 +1168,9 @@ function saveSyncURL() {
   syncAll().then(() => {
     refreshAllUI();
     toast('✓ Connected to Google Sheets!');
-    // Start auto-refresh every 30 seconds
-    setInterval(() => syncAll().then(refreshAllUI), 30000);
+    // Auto-refresh every 30 seconds — clear any existing timer first
+    if (_sheetSyncTimer) clearInterval(_sheetSyncTimer);
+    _sheetSyncTimer = setInterval(() => syncAll().then(refreshAllUI), 30000);
   });
 }
 
@@ -1494,8 +1515,7 @@ function resetCSV(openPicker){
       setTimeout(()=>{ if(fresh.parentNode)fresh.remove(); },5000);
     },50);
   } else {
-    // CLEAR — tell the server "cleared at this moment"
-    // Every device polling will see uploadedAt < cleared_at and show empty
+    // CLEAR — overwrite server data with cleared marker
     clearCsvOnAllDevices();
     updateNetWorth();
     updateDebtMetrics();
@@ -1796,6 +1816,7 @@ function loadCrossDeviceCsvData(data){
 
 // ══════ DONUT
 function renderDonut(){
+  if(charts.donut){charts.donut.destroy();charts.donut=null;}
   const ctx=document.getElementById('donut-chart').getContext('2d');
   charts.donut=new Chart(ctx,{type:'doughnut',data:{labels:['Bills & Mortgage','Food & Life','Savings','Surplus'],datasets:[{data:[5502,1940,400,393],backgroundColor:['#4d9fff','#a78bfa','#00c9a7','#ffc542'],borderWidth:0,hoverOffset:6}]},options:{cutout:'68%',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#8b92a8',font:{family:'DM Sans',size:11},padding:12,boxWidth:10}},tooltip:{callbacks:{label:c=>` ${fmt(c.raw)} (${(c.raw/9090*100).toFixed(1)}%)`}}}}});
 }
@@ -1925,6 +1946,7 @@ function renderFreedomChart(){
   const sc=calcPayoff(0,'avalanche');const step=Math.max(1,Math.floor(sc.length/12));
   const labels=sc.filter((_,i)=>i%step===0).map((_,i)=>mlabel(i*step+1));
   const data=sc.filter((_,i)=>i%step===0).map(s=>+s._t.toFixed(0));
+  if(charts.freedom){charts.freedom.destroy();charts.freedom=null;}
   const ctx=document.getElementById('freedom-chart').getContext('2d');
   charts.freedom=new Chart(ctx,{type:'line',data:{labels,datasets:[{label:'Total CC Debt',data,borderColor:'#ff6b6b',backgroundColor:'rgba(255,107,107,0.08)',fill:true,borderWidth:2,tension:0.4,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#8b92a8',maxTicksLimit:8},grid:{color:'rgba(42,48,69,0.4)'}},y:{ticks:{color:'#8b92a8',callback:v=>'$'+v.toLocaleString()},grid:{color:'rgba(42,48,69,0.4)'}}}}});
 }
