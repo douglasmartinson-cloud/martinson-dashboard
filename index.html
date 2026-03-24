@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Martinson Family Dashboard v32</title>
+<title>Martinson Family Dashboard v33</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <!-- Firebase JS SDK — WebSocket real-time sync (same tech as Notion, Figma, Linear) -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -304,7 +304,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <!-- ENTRY SCREEN -->
 <div id="entry-screen">
   <div class="entry-logo">Martinson Family</div>
-  <div class="entry-sub">Kansas City, MO · Your Family Hub · v32</div>
+  <div class="entry-sub">Kansas City, MO · Your Family Hub · v33</div>
   <div class="entry-box">
     <div class="entry-title">🔒 Enter Password</div>
     <div class="entry-dots">
@@ -840,8 +840,15 @@ async function fbGetAll() {
 
 // ── THE ONE RULE — server decides what to show ───────────────────
 // Called every time we get fresh data from Firebase
+// Debounce: skip if called within 500ms of a local clear
+let _lastLocalClearTime = 0;
 function applyServerState(all) {
   if (!all) return;
+
+  // If we JUST cleared locally (within 2 seconds), ignore server state for CSV
+  // This prevents the SDK listener from re-loading stale data during the clear
+  const timeSinceClear = Date.now() - _lastLocalClearTime;
+  const justCleared = timeSinceClear < 2000;
 
   // Apply non-CSV keys first
   const keys = ['meal_plan','week_hist','custom_meals','hidden_meals',
@@ -857,13 +864,14 @@ function applyServerState(all) {
   const uploadedAt = all.last_csv_data?.uploadedAt || 0;
   const clearedAt  = all.cleared_at || 0;
 
-  if (uploadedAt > clearedAt && all.last_csv_data) {
+  if (!justCleared && uploadedAt > 0 && uploadedAt > clearedAt && all.last_csv_data) {
     // Server has data newer than the last clear → show it
     loadCsvFromServer(all.last_csv_data);
   } else {
-    // Server has no data, or data is older than clear → show empty
-    if (transactions.length > 0) {
+    // Server has no data, or data is older than clear, or we just cleared → show empty
+    if (transactions.length > 0 || _loadedUploadedAt > 0) {
       transactions = [];
+      _loadedUploadedAt = 0;
       clearCSVDisplay();
     }
   }
@@ -889,14 +897,27 @@ function loadCsvFromServer(data) {
 
 // ── CLEAR — writes cleared_at timestamp to server ────────────────
 // No local sentinel. The server timestamp is the source of truth.
+// ── CLEAR — writes cleared_at timestamp AND deletes data from server ─
+// Two-layer guarantee:
+//   1. Set cleared_at = now + 1000ms safety margin (so it's always > uploadedAt)
+//   2. Delete last_csv_data entirely from Firebase
+// Any device polling will see either: no data, or cleared_at > uploadedAt → empty
 function clearCsvOnAllDevices() {
   transactions = [];
   _loadedUploadedAt = 0;
+  _lastLocalClearTime = Date.now(); // debounce guard — prevents SDK listener from re-loading
   clearCSVDisplay();
-  // Tell the server: "cleared at this moment"
-  // Any data with uploadedAt < this timestamp will be treated as cleared
-  fbSet('cleared_at', Date.now());
-  toast('✓ Cleared on all devices');
+  // Safety margin: cleared_at is 1 second in the future so it's ALWAYS > uploadedAt
+  // This eliminates the race where both timestamps are set within milliseconds
+  const clearTimestamp = Date.now() + 1000;
+  Promise.all([
+    fbSet('cleared_at', clearTimestamp),
+    fbDelete('last_csv_data')
+  ]).then(() => {
+    toast('✓ Cleared on all devices');
+  }).catch(() => {
+    toast('✓ Cleared locally');
+  });
 }
 
 // ── UPLOAD — writes data + resets cleared_at ─────────────────────
@@ -910,19 +931,25 @@ function uploadCsvToServer(syncData) {
 }
 
 // ── START SYNC ───────────────────────────────────────────────────
-// Uses SDK WebSocket for instant push + REST polling every 4s as backup
+// Uses SDK WebSocket for instant push + REST polling every 8s as backup
+// SDK fires on EVERY write — debounce to prevent rapid re-apply
+let _sdkDebounceTimer = null;
 function startSync() {
-  // 1. SDK listener — instant push when anything changes
+  // 1. SDK listener — instant push when anything changes (debounced)
   FB_ROOT.on('value', snap => {
-    applyServerState(snap.val());
+    clearTimeout(_sdkDebounceTimer);
+    _sdkDebounceTimer = setTimeout(() => {
+      applyServerState(snap.val());
+    }, 300); // 300ms debounce — lets multiple writes settle
   }, () => updateSyncBadge('error'));
 
-  // 2. REST polling every 4 seconds — bulletproof fallback
+  // 2. REST polling every 8 seconds — bulletproof fallback
+  // Increased from 4s to 8s since SDK handles instant sync already
   if (_pollTimer) clearInterval(_pollTimer);
   _pollTimer = setInterval(async () => {
     const all = await fbGetAll();
     if (all) applyServerState(all);
-  }, 4000);
+  }, 8000);
 }
 
 // ── FORCE SYNC ────────────────────────────────────────────────────
