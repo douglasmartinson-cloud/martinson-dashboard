@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Martinson Family Dashboard v35</title>
+<title>Martinson Family Dashboard v36</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script src="https://unpkg.com/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
@@ -355,7 +355,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <!-- ENTRY SCREEN -->
 <div id="entry-screen">
   <div class="entry-logo">Martinson Family</div>
-  <div class="entry-sub">Kansas City, MO · Your Family Hub · v35</div>
+  <div class="entry-sub">Kansas City, MO · Your Family Hub · v36</div>
   <div class="entry-box">
     <div class="entry-title">🔒 Enter Password</div>
     <div class="entry-dots">
@@ -899,7 +899,7 @@ const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxgssU1_z7Xkp-b-GyhG2
 // SYNC ENGINE — Google Sheets architecture
 // ══════════════════════════════════════════════════════════════════
 // ══════════════════════════════════════════════════════════════════
-// FIREBASE SYNC ENGINE — v35
+// FIREBASE SYNC ENGINE — v36
 //
 // One key controls everything: martinson/last_csv_data
 //
@@ -915,6 +915,9 @@ const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxgssU1_z7Xkp-b-GyhG2
 // v35 additions:
 //   - Money Flow (Sankey) tab: D3.js Sankey diagram from CSV data
 //   - AI Assistant: floating chat panel, personality per user role
+// v36 fix:
+//   - AI calls routed through Apps Script proxy (fixes CORS block)
+//   - Shared callClaudeProxy() helper for all AI features
 // ══════════════════════════════════════════════════════════════════
 
 const FB = 'https://martinson-family-default-rtdb.firebaseio.com';
@@ -2332,6 +2335,30 @@ function updateDebtMetrics(){
   if(debtSub) debtSub.textContent = `${CARDS.length} cards · $${Math.round(monthlyInterest).toLocaleString()}/mo interest`;
 }
 
+// ── AI PROXY — routes all Claude API calls through Apps Script ────
+// Browser → Apps Script (SHEET_URL) → Anthropic API → response back
+// This bypasses CORS restrictions that block direct browser→API calls.
+// The API key lives in Apps Script, never exposed to the browser.
+async function callClaudeProxy(opts) {
+  const res = await fetch(SHEET_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({
+      action: 'aiChat',
+      model: opts.model || 'claude-sonnet-4-20250514',
+      max_tokens: opts.max_tokens || 400,
+      system: opts.system || '',
+      messages: opts.messages || []
+    })
+  });
+  const data = await res.json();
+  // Apps Script returns {text: "..."} or {content: [{text: "..."}]}
+  if (data.text) return data.text;
+  if (data.content && data.content[0] && data.content[0].text) return data.content[0].text;
+  if (data.error) throw new Error(data.error);
+  throw new Error('No response from AI');
+}
+
 // ── AI INSIGHTS ───────────────────────────────────────────────────
 async function getAIInsights(){
   if(!transactions.length){ toast('Load a CSV first'); return; }
@@ -2365,22 +2392,15 @@ Provide 3 specific, actionable insights in plain language. Be direct and encoura
 Format as: "1. [insight]" on separate lines. Max 120 words total. No jargon.`;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:200,
-        messages:[{role:'user',content:prompt}]
-      })
+    const text = await callClaudeProxy({
+      max_tokens: 200,
+      messages: [{ role: 'user', content: prompt }]
     });
-    const data = await res.json();
-    const text = data.content?.[0]?.text || '';
     content.innerHTML = '<div style="font-size:11px;font-weight:700;color:var(--teal);margin-bottom:6px">✨ AI Insights</div>' +
       text.split('\n').filter(l=>l.trim()).map(l=>`<div style="margin-bottom:6px;color:var(--text)">${l}</div>`).join('');
     if(btn){btn.style.display='block';btn.querySelector('button').textContent='↻ Refresh Insights';}
   } catch(e) {
-    content.innerHTML='<div style="color:var(--text-mid);font-size:12px">Insights unavailable — check API key in Google Keep</div>';
+    content.innerHTML='<div style="color:var(--text-mid);font-size:12px">Insights unavailable — make sure aiChat action is deployed in your Apps Script</div>';
     if(btn) btn.style.display='block';
   }
 }
@@ -2857,18 +2877,11 @@ Rules: Keep it simple and warm. Use plain language. Celebrate wins. If she's ove
   const recentHistory=aiChatHistory.slice(-20);
 
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:400,
-        system:systemPrompt,
-        messages:recentHistory
-      })
+    const reply = await callClaudeProxy({
+      max_tokens: 400,
+      system: systemPrompt,
+      messages: recentHistory
     });
-    const data=await res.json();
-    const reply=data.content?.[0]?.text||'Sorry, I couldn\'t process that. Try again?';
 
     // Remove thinking indicator
     thinking.remove();
@@ -2887,7 +2900,7 @@ Rules: Keep it simple and warm. Use plain language. Celebrate wins. If she's ove
     thinking.remove();
     const errorMsg=document.createElement('div');
     errorMsg.className='ai-msg error';
-    errorMsg.textContent='Could not reach AI — check your API key configuration. The API key should be set in your browser\'s Anthropic session.';
+    errorMsg.textContent='Could not reach AI — make sure the aiChat action is deployed in your Apps Script. Error: ' + (e.message||'unknown');
     msgs.appendChild(errorMsg);
   }
 
