@@ -859,22 +859,19 @@ function applyServerState(all) {
     }
   });
 
-  // CSV DECISION: check server data, with localStorage as tiebreaker
+  // CSV DECISION: server is the sole source of truth.
+  // If server has real tx data (not cleared marker) → show it
+  // If server has cleared marker or no data → show empty
+  // _syncPaused prevents race conditions during the clear write.
   const csv = all.last_csv_data;
 
-  // Also check what localStorage thinks — if we cleared locally but
-  // the server hasn't caught up yet, localStorage has {cleared:true}
-  let localCleared = false;
-  try {
-    const cached = JSON.parse(localStorage.getItem('fb_last_csv_data') || '{}');
-    localCleared = !!cached.cleared;
-  } catch(e) {}
-
-  // Show data ONLY if: server has real tx data AND it's not the cleared marker
-  // AND localStorage doesn't think we just cleared
-  if (csv && !csv.cleared && !localCleared && csv.uploadedAt && (csv.txData || csv.txList)) {
+  if (csv && !csv.cleared && csv.uploadedAt && (csv.txData || csv.txList)) {
+    // Server has real data → show it, update localStorage to match
+    localStorage.setItem('fb_last_csv_data', JSON.stringify({uploadedAt: csv.uploadedAt}));
     loadCsvFromServer(csv);
   } else {
+    // Server says cleared or empty → clear locally
+    localStorage.setItem('fb_last_csv_data', JSON.stringify({cleared: true}));
     if (transactions.length > 0 || _loadedUploadedAt > 0) {
       transactions = [];
       _loadedUploadedAt = 0;
