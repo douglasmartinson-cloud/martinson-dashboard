@@ -3,8 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Martinson Family Dashboard v34</title>
+<title>Martinson Family Dashboard v35</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://unpkg.com/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
 <!-- Firebase JS SDK — WebSocket real-time sync (same tech as Notion, Figma, Linear) -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
@@ -297,6 +299,55 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .jn-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;background:none;border:none;font-family:var(--font-b);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;color:var(--text-soft);padding:4px;transition:color 0.2s}
 .jn-item.active{color:var(--sage)}
 .jn-icon{font-size:20px}
+
+/* ── SANKEY / MONEY FLOW ── */
+.sankey-wrap{position:relative;width:100%;overflow-x:auto}
+.sankey-wrap svg{display:block;width:100%;min-width:600px}
+.sankey-wrap .node rect{cursor:pointer;transition:opacity 0.2s}
+.sankey-wrap .node text{font-family:var(--font-b);font-size:11px;fill:var(--text);pointer-events:none}
+.sankey-wrap .link{fill:none;stroke-opacity:0.25;transition:stroke-opacity 0.2s}
+.sankey-wrap .link:hover,.sankey-wrap .link.highlighted{stroke-opacity:0.55}
+.sankey-tooltip{position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--text);pointer-events:none;z-index:100;box-shadow:var(--sh);opacity:0;transition:opacity 0.15s;max-width:240px}
+.sankey-tooltip.visible{opacity:1}
+.sankey-tooltip .st-label{font-weight:700;color:var(--teal);margin-bottom:4px;font-size:13px}
+.sankey-tooltip .st-amount{font-family:var(--font-d);font-size:18px;margin-bottom:2px}
+.sankey-tooltip .st-pct{color:var(--text-mid);font-size:11px}
+
+/* ── AI ASSISTANT ── */
+.ai-fab{position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--blue));color:#fff;border:none;font-size:24px;cursor:pointer;z-index:90;box-shadow:0 4px 20px rgba(0,201,167,0.35);transition:all 0.3s;display:flex;align-items:center;justify-content:center}
+.ai-fab:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(0,201,167,0.45)}
+.ai-fab:active{transform:scale(0.96)}
+.ai-fab.jamie-fab{background:linear-gradient(135deg,var(--sage),#3d8b6e)}
+#jamie-app .ai-fab{bottom:80px}
+
+.ai-panel{position:fixed;bottom:0;right:0;width:400px;max-width:100vw;height:70vh;max-height:600px;background:var(--surface);border:1px solid var(--border);border-radius:20px 20px 0 0;box-shadow:0 -4px 40px rgba(0,0,0,0.4);z-index:100;display:flex;flex-direction:column;transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);overflow:hidden}
+.ai-panel.open{transform:translateY(0)}
+@media(max-width:500px){.ai-panel{width:100%;height:80vh;max-height:none;border-radius:20px 20px 0 0}}
+
+.ai-panel-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);background:var(--surface2);flex-shrink:0}
+.ai-panel-title{font-family:var(--font-d);font-size:18px;display:flex;align-items:center;gap:8px}
+.ai-panel-close{background:none;border:none;color:var(--text-mid);font-size:20px;cursor:pointer;padding:4px 8px;border-radius:6px;transition:background 0.15s}
+.ai-panel-close:hover{background:var(--surface)}
+
+.ai-messages{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.ai-msg{max-width:88%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.6;animation:msgIn 0.25s ease-out}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.ai-msg.user{align-self:flex-end;background:var(--teal-dim);border:1px solid rgba(0,201,167,0.2);color:var(--text)}
+.ai-msg.user.jamie-msg{background:var(--sage-dim);border-color:rgba(90,158,138,0.2)}
+.ai-msg.assistant{align-self:flex-start;background:var(--surface2);border:1px solid var(--border);color:var(--text)}
+.ai-msg.thinking{color:var(--text-mid);font-style:italic}
+.ai-msg.error{color:var(--red);background:var(--red-dim);border:1px solid rgba(255,107,107,0.2)}
+
+.ai-input-row{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--border);background:var(--surface);flex-shrink:0}
+.ai-input{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:12px;background:var(--bg);color:var(--text);font-family:var(--font-b);font-size:13px;resize:none;min-height:40px;max-height:80px}
+.ai-input:focus{outline:none;border-color:var(--teal)}
+.ai-input.jamie-input:focus{border-color:var(--sage)}
+.ai-send{padding:10px 16px;background:var(--teal);color:#fff;border:none;border-radius:12px;font-family:var(--font-b);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:opacity 0.2s}
+.ai-send:disabled{opacity:0.4;cursor:not-allowed}
+.ai-send.jamie-send{background:var(--sage)}
+.ai-quick-chips{display:flex;gap:6px;flex-wrap:wrap;padding:0 20px 12px}
+.ai-chip{padding:6px 12px;border-radius:100px;border:1px solid var(--border);background:transparent;color:var(--text-mid);font-size:11px;font-weight:500;cursor:pointer;font-family:var(--font-b);transition:all 0.2s;white-space:nowrap}
+.ai-chip:hover{border-color:var(--teal);color:var(--teal)}
 </style>
 </head>
 <body>
@@ -304,7 +355,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <!-- ENTRY SCREEN -->
 <div id="entry-screen">
   <div class="entry-logo">Martinson Family</div>
-  <div class="entry-sub">Kansas City, MO · Your Family Hub · v34</div>
+  <div class="entry-sub">Kansas City, MO · Your Family Hub · v35</div>
   <div class="entry-box">
     <div class="entry-title">🔒 Enter Password</div>
     <div class="entry-dots">
@@ -412,6 +463,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
     <button class="tab active" onclick="dPage('overview',this)">Overview</button>
     <button class="tab" onclick="dPage('transactions',this)">Transactions</button>
     <button class="tab" onclick="dPage('budget',this)">Budget vs Actual</button>
+    <button class="tab" onclick="dPage('moneyflow',this)">Money Flow</button>
     <button class="tab" onclick="dPage('projections',this)">Projections</button>
     <button class="tab" onclick="dPage('goals',this)">Goals</button>
   </div>
@@ -511,6 +563,31 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         <div class="panel" style="margin-bottom:16px"><div class="panel-title"><span class="dot d-gold"></span>Budget vs Actual — from CSV</div>
         <table class="tbl"><thead><tr><th>Category</th><th style="text-align:right">Budget</th><th style="text-align:right">Actual</th><th style="text-align:right">Diff</th><th>Status</th></tr></thead><tbody id="bva-tbody"></tbody></table></div>
         <div class="panel"><div class="panel-title"><span class="dot d-blue"></span>Visual</div><div class="chart-wrap" style="height:280px"><canvas id="bar-chart"></canvas></div></div>
+      </div>
+    </div>
+
+    <!-- MONEY FLOW (Sankey) -->
+    <div class="page" id="d-moneyflow">
+      <div id="mf-empty" class="empty-state"><div class="es-icon">🌊</div><p style="font-size:13px">Drop a CSV on Overview to see your money flow</p><p style="font-size:12px;color:var(--text-soft);margin-top:6px">Interactive Sankey diagram showing Income → Category → Subcategory</p></div>
+      <div id="mf-loaded" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+          <div style="font-family:var(--font-d);font-size:22px">Money Flow</div>
+          <div style="font-size:12px;color:var(--text-mid)" id="mf-period"></div>
+        </div>
+        <div class="panel" style="padding:24px;overflow:hidden">
+          <div class="panel-title"><span class="dot d-teal"></span>Income → Category → Where It Goes</div>
+          <div class="sankey-wrap" id="sankey-container"></div>
+        </div>
+        <div class="grid-2" style="margin-top:16px">
+          <div class="panel">
+            <div class="panel-title"><span class="dot d-gold"></span>Top Flows</div>
+            <div id="mf-top-flows"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-title"><span class="dot d-blue"></span>Flow Summary</div>
+            <div id="mf-summary"></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -708,6 +785,32 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<!-- SANKEY TOOLTIP -->
+<div class="sankey-tooltip" id="sankey-tooltip">
+  <div class="st-label" id="st-label"></div>
+  <div class="st-amount" id="st-amount"></div>
+  <div class="st-pct" id="st-pct"></div>
+</div>
+
+<!-- AI ASSISTANT FAB -->
+<button class="ai-fab hidden" id="ai-fab" onclick="toggleAIPanel()">✨</button>
+
+<!-- AI ASSISTANT PANEL -->
+<div class="ai-panel" id="ai-panel">
+  <div class="ai-panel-header">
+    <div class="ai-panel-title"><span id="ai-panel-icon">✨</span> <span id="ai-panel-name">AI Assistant</span></div>
+    <button class="ai-panel-close" onclick="toggleAIPanel()">✕</button>
+  </div>
+  <div class="ai-messages" id="ai-messages">
+    <div class="ai-msg assistant" id="ai-welcome"></div>
+  </div>
+  <div class="ai-quick-chips" id="ai-quick-chips"></div>
+  <div class="ai-input-row">
+    <textarea class="ai-input" id="ai-input" placeholder="Ask me anything about your finances..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAIMessage()}" oninput="this.style.height='40px';this.style.height=Math.min(80,this.scrollHeight)+'px'"></textarea>
+    <button class="ai-send" id="ai-send" onclick="sendAIMessage()">Send</button>
+  </div>
+</div>
+
 <script>
 // ══════ CONFIG
 const ENTRY_PASS = "5626"; // Entry password — change this anytime
@@ -786,6 +889,9 @@ let pinBuffer = '';
 let pinTarget = '';
 let entryBuffer = '';
 let cmfIngCount = 0;
+let currentUser = ''; // 'douglas' or 'jamie' — controls AI personality
+let aiChatHistory = []; // conversation history for AI panel
+let aiPanelOpen = false;
 // ALWAYS use this URL — Apps Script for receipt scanning and PDF only
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxgssU1_z7Xkp-b-GyhG2ls75Uq_dpBn7owG_lvHJsr9SQGSpG803xba8Nh3rH_lodmww/exec';
 
@@ -793,7 +899,7 @@ const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxgssU1_z7Xkp-b-GyhG2
 // SYNC ENGINE — Google Sheets architecture
 // ══════════════════════════════════════════════════════════════════
 // ══════════════════════════════════════════════════════════════════
-// FIREBASE SYNC ENGINE — v34
+// FIREBASE SYNC ENGINE — v35
 //
 // One key controls everything: martinson/last_csv_data
 //
@@ -805,6 +911,10 @@ const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxgssU1_z7Xkp-b-GyhG2
 //
 // Clear uses direct REST PUT (not SDK) for maximum reliability.
 // localStorage caches the cleared marker as a fallback guard.
+//
+// v35 additions:
+//   - Money Flow (Sankey) tab: D3.js Sankey diagram from CSV data
+//   - AI Assistant: floating chat panel, personality per user role
 // ══════════════════════════════════════════════════════════════════
 
 const FB = 'https://martinson-family-default-rtdb.firebaseio.com';
@@ -1191,6 +1301,8 @@ function renderFromTransactions() {
   updateProj();
   renderMilestones();
   renderFreedomChart();
+  // v35: update Money Flow tab
+  renderSankey();
 }
 
 // ══════ INIT
@@ -1254,6 +1366,9 @@ function showWho(){
   document.getElementById('douglas-app').classList.add('hidden');
   document.getElementById('jamie-app').classList.add('hidden');
   document.getElementById('sunday-screen').classList.add('hidden');
+  document.getElementById('ai-fab').classList.add('hidden');
+  closeAIPanel();
+  currentUser = '';
 }
 function showSunday(){
   document.getElementById('who-screen').classList.add('hidden');
@@ -1262,10 +1377,18 @@ function showSunday(){
 }
 function enterAs(who){
   document.getElementById('who-screen').classList.add('hidden');
+  currentUser = who;
   if(who==='douglas'){document.getElementById('douglas-app').classList.remove('hidden');dPage('overview',null);}
   else{document.getElementById('jamie-app').classList.remove('hidden');jPage('meals',null);}
+  // Show AI fab and configure for user
+  initAIForUser(who);
 }
-function showJamieFromDouglas(){document.getElementById('douglas-app').classList.add('hidden');document.getElementById('jamie-app').classList.remove('hidden');}
+function showJamieFromDouglas(){
+  document.getElementById('douglas-app').classList.add('hidden');
+  document.getElementById('jamie-app').classList.remove('hidden');
+  currentUser='jamie';
+  initAIForUser('jamie');
+}
 
 // ══════ DOUGLAS TABS
 function dPage(id,btn){
@@ -1274,6 +1397,7 @@ function dPage(id,btn){
   document.getElementById('d-'+id).classList.add('active');
   if(btn)btn.classList.add('active');
   if(id==='projections')updateProj();
+  if(id==='moneyflow'&&transactions.length)renderSankey();
 }
 
 // ══════ JAMIE TABS
@@ -1495,6 +1619,13 @@ function clearCSVDisplay(){
   updateProj();
   // Reset milestones
   renderMilestones();
+  // v35: Reset Sankey
+  const mfEmpty=document.getElementById('mf-empty');
+  const mfLoaded=document.getElementById('mf-loaded');
+  if(mfEmpty) mfEmpty.style.display='block';
+  if(mfLoaded) mfLoaded.style.display='none';
+  const sankeyC=document.getElementById('sankey-container');
+  if(sankeyC) sankeyC.innerHTML='';
 }
 
 function resetCSV(openPicker){
@@ -2287,6 +2418,481 @@ function syncJamieToDoug(liveSpent){
   const sub=document.getElementById('d-jamie-grocery-sub');
   if(el){el.textContent=fmt(monthTotal);}
   if(sub){const rem=800-monthTotal;sub.textContent=`of $800 budget — ${rem>=0?fmt(rem)+' remaining':'$'+Math.abs(rem).toFixed(0)+' over'}`;}
+}
+
+// ══════════════════════════════════════════════════════════════════
+// v35 FEATURE 1: MONEY FLOW — Interactive Sankey Diagram
+// ══════════════════════════════════════════════════════════════════
+function renderSankey(){
+  if(!transactions.length){
+    const mfEmpty=document.getElementById('mf-empty');
+    const mfLoaded=document.getElementById('mf-loaded');
+    if(mfEmpty) mfEmpty.style.display='block';
+    if(mfLoaded) mfLoaded.style.display='none';
+    return;
+  }
+
+  const mfEmpty=document.getElementById('mf-empty');
+  const mfLoaded=document.getElementById('mf-loaded');
+  if(mfEmpty) mfEmpty.style.display='none';
+  if(mfLoaded) mfLoaded.style.display='block';
+
+  const EXCLUDE=['Transfers','Income'];
+  const txDates=transactions.map(t=>new Date(t.date)).filter(d=>!isNaN(d));
+  const days=txDates.length>1?(Math.max(...txDates)-Math.min(...txDates))/(86400000):30;
+  const months=Math.max(1,days/30.44);
+
+  // Period label
+  const mn=new Date(Math.min(...txDates)).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  const mx=new Date(Math.max(...txDates)).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  const pfx=months>1.2?'Monthly avg · ':'';
+  document.getElementById('mf-period').textContent=pfx+mn+' – '+mx;
+
+  // Build category totals (monthly)
+  const catTotals={};
+  const descTotals={}; // track top descriptions per category for subcategory
+  transactions.filter(t=>t.amount<0 && !EXCLUDE.includes(t.cat)).forEach(t=>{
+    const cat=t.cat;
+    const amt=Math.abs(t.amount)/months;
+    catTotals[cat]=(catTotals[cat]||0)+amt;
+    if(!descTotals[cat]) descTotals[cat]={};
+    // Group by cleaned description (first 3 words)
+    const key=t.desc.replace(/[#\d]+/g,'').trim().split(/\s+/).slice(0,3).join(' ').substring(0,25);
+    descTotals[cat][key]=(descTotals[cat][key]||0)+amt;
+  });
+
+  const totalSpend=Object.values(catTotals).reduce((s,v)=>s+v,0);
+  const income=FINANCIAL.income;
+  const surplus=Math.max(0,income-totalSpend);
+
+  // Build Sankey nodes and links
+  // Layer 0: Income source
+  // Layer 1: Categories
+  // Layer 2: Top subcategories (top 3 per category)
+  const nodes=[];
+  const links=[];
+  const nodeMap={};
+
+  function getNode(name){
+    if(nodeMap[name]===undefined){
+      nodeMap[name]=nodes.length;
+      nodes.push({name});
+    }
+    return nodeMap[name];
+  }
+
+  // Income node
+  getNode('Income ($'+Math.round(income).toLocaleString()+'/mo)');
+
+  // Sort categories by amount descending
+  const sortedCats=Object.entries(catTotals).sort((a,b)=>b[1]-a[1]);
+
+  // Category colors from RULES
+  const catColors={};
+  RULES.forEach(r=>{catColors[r.cat]=r.color;});
+
+  sortedCats.forEach(([cat,total])=>{
+    const catIdx=getNode(cat);
+    links.push({source:0,target:catIdx,value:Math.round(total)});
+
+    // Top subcategories (max 4 per cat, merge remainder into "Other")
+    const subs=Object.entries(descTotals[cat]||{}).sort((a,b)=>b[1]-a[1]);
+    const topSubs=subs.slice(0,4);
+    const remainder=subs.slice(4).reduce((s,[,v])=>s+v,0);
+
+    topSubs.forEach(([desc,val])=>{
+      if(val<5) return; // skip tiny amounts
+      const subIdx=getNode(desc+' ('+cat+')');
+      links.push({source:catIdx,target:subIdx,value:Math.round(val)});
+    });
+    if(remainder>5){
+      const otherIdx=getNode('Other '+cat);
+      links.push({source:catIdx,target:otherIdx,value:Math.round(remainder)});
+    }
+  });
+
+  // Surplus node
+  if(surplus>50){
+    const surpIdx=getNode('Surplus');
+    links.push({source:0,target:surpIdx,value:Math.round(surplus)});
+  }
+
+  // Clear container and build SVG
+  const container=document.getElementById('sankey-container');
+  container.innerHTML='';
+
+  const width=Math.max(700,container.clientWidth||700);
+  const height=Math.max(400,Math.min(600,nodes.length*28));
+
+  const svg=d3.select('#sankey-container').append('svg')
+    .attr('viewBox',`0 0 ${width} ${height}`)
+    .attr('preserveAspectRatio','xMidYMid meet');
+
+  const sankey=d3.sankey()
+    .nodeWidth(18)
+    .nodePadding(12)
+    .nodeAlign(d3.sankeyLeft)
+    .extent([[1,1],[width-1,height-6]]);
+
+  // Filter out zero-value links
+  const validLinks=links.filter(l=>l.value>0);
+
+  let graph;
+  try {
+    graph=sankey({
+      nodes:nodes.map(d=>Object.assign({},d)),
+      links:validLinks.map(d=>Object.assign({},d))
+    });
+  } catch(e){
+    container.innerHTML='<div class="empty-state"><div class="es-icon">⚠️</div><p>Could not render flow diagram</p></div>';
+    return;
+  }
+
+  // Colors for nodes
+  function nodeColor(d){
+    if(d.name.startsWith('Income')) return '#00c9a7';
+    if(d.name==='Surplus') return '#ffc542';
+    // Check if it's a category node
+    const catName=d.name.replace(/ \(.+\)/,'');
+    if(catColors[catName]) return catColors[catName];
+    // Subcategory — match parent category color
+    const parentLink=graph.links.find(l=>l.target===d);
+    if(parentLink && catColors[parentLink.source.name]) return catColors[parentLink.source.name];
+    return '#4a5168';
+  }
+
+  // Draw links
+  const link=svg.append('g')
+    .selectAll('.link')
+    .data(graph.links)
+    .join('path')
+    .attr('class','link')
+    .attr('d',d3.sankeyLinkHorizontal())
+    .attr('stroke',d=>nodeColor(d.source))
+    .attr('stroke-width',d=>Math.max(1,d.width))
+    .on('mouseover',function(event,d){
+      d3.select(this).classed('highlighted',true);
+      showSankeyTooltip(event,d.source.name.replace(/ \(\$.+/,'')+' → '+d.target.name.replace(/ \(.+\)/,''),d.value,totalSpend);
+    })
+    .on('mousemove',function(event){moveSankeyTooltip(event);})
+    .on('mouseout',function(){
+      d3.select(this).classed('highlighted',false);
+      hideSankeyTooltip();
+    });
+
+  // Draw nodes
+  const node=svg.append('g')
+    .selectAll('.node')
+    .data(graph.nodes)
+    .join('g')
+    .attr('class','node');
+
+  node.append('rect')
+    .attr('x',d=>d.x0)
+    .attr('y',d=>d.y0)
+    .attr('height',d=>Math.max(1,d.y1-d.y0))
+    .attr('width',sankey.nodeWidth())
+    .attr('fill',d=>nodeColor(d))
+    .attr('rx',3)
+    .on('mouseover',function(event,d){
+      // Highlight all connected links
+      svg.selectAll('.link').each(function(l){
+        d3.select(this).classed('highlighted',l.source===d||l.target===d);
+      });
+      const val=d.value||0;
+      showSankeyTooltip(event,d.name.replace(/ \(\$.+/,'').replace(/ \(.+\)/,''),val,totalSpend);
+    })
+    .on('mousemove',function(event){moveSankeyTooltip(event);})
+    .on('mouseout',function(){
+      svg.selectAll('.link').classed('highlighted',false);
+      hideSankeyTooltip();
+    });
+
+  // Node labels
+  node.append('text')
+    .attr('x',d=>d.x0<width/2?d.x1+8:d.x0-8)
+    .attr('y',d=>(d.y0+d.y1)/2)
+    .attr('dy','0.35em')
+    .attr('text-anchor',d=>d.x0<width/2?'start':'end')
+    .text(d=>{
+      const name=d.name.replace(/ \(.+\)/,'');
+      const val=d.value||0;
+      return name.length>22?name.substring(0,22)+'…'+' $'+Math.round(val).toLocaleString():name+' $'+Math.round(val).toLocaleString();
+    })
+    .style('font-size','10px')
+    .style('fill','var(--text-mid)');
+
+  // Top flows sidebar
+  renderTopFlows(sortedCats,totalSpend,months);
+  renderFlowSummary(totalSpend,income,surplus,sortedCats.length);
+}
+
+function showSankeyTooltip(event,label,value,total){
+  const tip=document.getElementById('sankey-tooltip');
+  document.getElementById('st-label').textContent=label;
+  document.getElementById('st-amount').textContent='$'+Math.round(value).toLocaleString()+'/mo';
+  document.getElementById('st-pct').textContent=total>0?((value/total)*100).toFixed(1)+'% of total spending':'';
+  tip.classList.add('visible');
+  moveSankeyTooltip(event);
+}
+function moveSankeyTooltip(event){
+  const tip=document.getElementById('sankey-tooltip');
+  tip.style.left=Math.min(event.clientX+12,window.innerWidth-260)+'px';
+  tip.style.top=(event.clientY-60)+'px';
+}
+function hideSankeyTooltip(){document.getElementById('sankey-tooltip').classList.remove('visible');}
+
+function renderTopFlows(sortedCats,total,months){
+  const wrap=document.getElementById('mf-top-flows');
+  if(!wrap) return;
+  wrap.innerHTML=sortedCats.slice(0,6).map(([cat,amt])=>{
+    const pct=total>0?((amt/total)*100).toFixed(1):0;
+    const color=RULES.find(r=>r.cat===cat)?.color||'#8b92a8';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(42,48,69,0.4)">
+      <span class="cat-dot" style="background:${color};width:8px;height:8px;flex-shrink:0"></span>
+      <span style="flex:1;font-size:13px;font-weight:500">${cat}</span>
+      <span style="font-family:var(--font-d);font-size:14px;font-weight:600">${fmt(amt)}</span>
+      <span style="font-size:11px;color:var(--text-mid);width:40px;text-align:right">${pct}%</span>
+    </div>`;
+  }).join('');
+}
+
+function renderFlowSummary(totalSpend,income,surplus,catCount){
+  const wrap=document.getElementById('mf-summary');
+  if(!wrap) return;
+  const debtPct=totalSpend>0?((CARDS.reduce((s,c)=>s+c.min,0)/totalSpend)*100).toFixed(1):0;
+  wrap.innerHTML=`
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="padding:12px;background:var(--surface2);border-radius:10px">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-mid);margin-bottom:4px">Total Monthly Outflow</div>
+        <div style="font-family:var(--font-d);font-size:22px;color:var(--red)">${fmt(totalSpend)}</div>
+      </div>
+      <div style="padding:12px;background:var(--surface2);border-radius:10px">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-mid);margin-bottom:4px">Monthly Surplus</div>
+        <div style="font-family:var(--font-d);font-size:22px;color:${surplus>0?'var(--teal)':'var(--red)'}">${surplus>0?'+':''}${fmt(surplus)}</div>
+      </div>
+      <div style="padding:12px;background:var(--surface2);border-radius:10px">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-mid);margin-bottom:4px">Spending Categories</div>
+        <div style="font-family:var(--font-d);font-size:22px;color:var(--blue)">${catCount}</div>
+      </div>
+      <div style="padding:12px;background:var(--surface2);border-radius:10px">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-mid);margin-bottom:4px">Debt Share of Spend</div>
+        <div style="font-family:var(--font-d);font-size:22px;color:var(--gold)">${debtPct}%</div>
+      </div>
+    </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// v35 FEATURE 2: AI ASSISTANT — Floating Chat Panel
+// ══════════════════════════════════════════════════════════════════
+function initAIForUser(who){
+  const fab=document.getElementById('ai-fab');
+  const panel=document.getElementById('ai-panel');
+  fab.classList.remove('hidden');
+
+  // Style fab for user
+  if(who==='jamie'){
+    fab.classList.add('jamie-fab');
+    document.getElementById('ai-input').classList.add('jamie-input');
+    document.getElementById('ai-send').classList.add('jamie-send');
+  } else {
+    fab.classList.remove('jamie-fab');
+    document.getElementById('ai-input').classList.remove('jamie-input');
+    document.getElementById('ai-send').classList.remove('jamie-send');
+  }
+
+  // Reset chat
+  aiChatHistory=[];
+  const msgs=document.getElementById('ai-messages');
+  msgs.innerHTML='';
+
+  // Welcome message
+  const welcome=document.createElement('div');
+  welcome.className='ai-msg assistant';
+  if(who==='douglas'){
+    document.getElementById('ai-panel-icon').textContent='📊';
+    document.getElementById('ai-panel-name').textContent='Financial Analyst';
+    welcome.innerHTML="Hey Douglas. I've got your full financial picture loaded — income, debt, spending categories, and payoff projections. Ask me anything about your money flow, and I'll give you the data-backed answer.";
+    renderQuickChips([
+      'Where am I overspending?',
+      'Fastest path to debt freedom?',
+      'Break down my subscriptions',
+      'What if I add $200/mo extra?'
+    ]);
+  } else {
+    document.getElementById('ai-panel-icon').textContent='💚';
+    document.getElementById('ai-panel-name').textContent='Family Helper';
+    welcome.innerHTML="Hey Jamie! 👋 I'm here to help with anything — meal ideas, grocery budget tips, or just figuring out how the family finances are doing. Ask me anything, no question is too simple!";
+    renderQuickChips([
+      'Am I on budget this week?',
+      'Quick meal ideas under $12',
+      'How are we doing on debt?',
+      'Help me plan this week'
+    ]);
+  }
+  msgs.appendChild(welcome);
+}
+
+function renderQuickChips(prompts){
+  const wrap=document.getElementById('ai-quick-chips');
+  wrap.innerHTML=prompts.map(p=>`<button class="ai-chip" onclick="sendQuickPrompt('${p.replace(/'/g,"\\'")}')">${p}</button>`).join('');
+}
+
+function sendQuickPrompt(text){
+  document.getElementById('ai-input').value=text;
+  document.getElementById('ai-quick-chips').innerHTML='';
+  sendAIMessage();
+}
+
+function toggleAIPanel(){
+  const panel=document.getElementById('ai-panel');
+  const fab=document.getElementById('ai-fab');
+  aiPanelOpen=!aiPanelOpen;
+  panel.classList.toggle('open',aiPanelOpen);
+  fab.style.display=aiPanelOpen?'none':'flex';
+  if(aiPanelOpen){
+    setTimeout(()=>document.getElementById('ai-input').focus(),350);
+  }
+}
+function closeAIPanel(){
+  const panel=document.getElementById('ai-panel');
+  const fab=document.getElementById('ai-fab');
+  aiPanelOpen=false;
+  panel.classList.remove('open');
+}
+
+function buildFinancialContext(){
+  const EXCL=['Transfers','Income'];
+  let spendingSummary='No transaction data loaded.';
+  let mealContext='';
+
+  if(transactions.length){
+    const ct={};
+    const txDates=transactions.map(t=>new Date(t.date)).filter(d=>!isNaN(d));
+    const days=txDates.length>1?(Math.max(...txDates)-Math.min(...txDates))/(86400000):30;
+    const months=Math.max(1,days/30.44);
+    transactions.filter(t=>t.amount<0&&!EXCL.includes(t.cat))
+      .forEach(t=>{ct[t.cat]=(ct[t.cat]||0)+Math.abs(t.amount);});
+    const monthly=Object.entries(ct).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${k}: $${(v/months).toFixed(0)}/mo`).join(', ');
+    const totalSpend=Object.values(ct).reduce((s,v)=>s+v,0)/months;
+    spendingSummary=`Monthly spending breakdown: ${monthly}. Total monthly spending: $${totalSpend.toFixed(0)}.`;
+  }
+
+  const totalDebt=CARDS.reduce((s,c)=>s+c.balance,0);
+  const cardDetails=CARDS.map(c=>`${c.name}: $${c.balance.toFixed(0)} at ${(c.apr*100).toFixed(2)}% APR, min $${c.min}`).join('; ');
+  const sc=calcPayoff(0,'avalanche');
+  const surplus=FINANCIAL.income-Object.values(BUDGETS).reduce((s,v)=>s+v,0);
+  const grocerySpent=weekHist.reduce((s,w)=>s+w.t,0);
+
+  // Meal context for Jamie
+  const plannedMeals=DAYS.map(d=>{const k=d.substr(0,3);return mealPlan[k]?`${d}: ${mealPlan[k].n}`:`${d}: not planned`;}).join(', ');
+  mealContext=`This week's meals: ${plannedMeals}. Grocery budget: $200/week, $800/month. Spent this month on groceries: $${grocerySpent.toFixed(0)}.`;
+
+  return `FAMILY FINANCIAL DATA (real, current):
+Income: $${FINANCIAL.income}/mo net (SymphonyAI, Kansas City).
+${spendingSummary}
+Budget surplus: $${surplus}/mo.
+Credit card debt: $${totalDebt.toFixed(0)} across ${CARDS.length} cards. Details: ${cardDetails}.
+Debt-free estimate: ${sc.length} months (avalanche method, minimums only).
+Emergency fund: $${familyGoals.efund}. Life goals fund: $${familyGoals.lgfund}. Retirement: $158,540 (Merrill IRRA).
+Net worth: $${(158540+familyGoals.efund+familyGoals.lgfund-totalDebt).toFixed(0)}.
+${mealContext}
+Available meals in system: ${[...MEALS,...customMeals].map(m=>m.n).join(', ')}.`;
+}
+
+async function sendAIMessage(){
+  const input=document.getElementById('ai-input');
+  const text=input.value.trim();
+  if(!text) return;
+
+  // Add user message
+  const msgs=document.getElementById('ai-messages');
+  const userMsg=document.createElement('div');
+  userMsg.className='ai-msg user'+(currentUser==='jamie'?' jamie-msg':'');
+  userMsg.textContent=text;
+  msgs.appendChild(userMsg);
+  input.value='';
+  input.style.height='40px';
+
+  // Remove quick chips
+  document.getElementById('ai-quick-chips').innerHTML='';
+
+  // Disable send button
+  const sendBtn=document.getElementById('ai-send');
+  sendBtn.disabled=true;
+
+  // Thinking indicator
+  const thinking=document.createElement('div');
+  thinking.className='ai-msg assistant thinking';
+  thinking.textContent=currentUser==='jamie'?'Thinking...':'Analyzing...';
+  msgs.appendChild(thinking);
+  msgs.scrollTop=msgs.scrollHeight;
+
+  // Build system prompt based on user
+  const financialCtx=buildFinancialContext();
+  let systemPrompt;
+
+  if(currentUser==='douglas'){
+    systemPrompt=`You are a sharp, data-driven financial analyst assistant for Douglas Martinson, a Senior Manager at SymphonyAI in Kansas City. You have access to his REAL family financial data below.
+
+Be direct, analytical, and encouraging. Use specific numbers from the data. Reference actual card names, APR rates, and spending categories. Think like a Bloomberg terminal that can talk. If he asks about projections, do the math. If he asks about optimization, model the scenarios. Be concise — Douglas respects efficiency.
+
+${financialCtx}
+
+Rules: Be specific with numbers. Never make up data — use only what's provided. Keep responses under 200 words unless he asks for detail. Use $ formatting for all amounts.`;
+  } else {
+    systemPrompt=`You are a warm, supportive family finance helper for Jamie Martinson, a stay-at-home mom with 3 kids in Kansas City. You're like a smart, encouraging friend who happens to know a lot about money and cooking.
+
+Jamie is NOT technical. Never use financial jargon. Speak warmly, use emojis occasionally, and make her feel good about the progress the family is making. If she asks about meals, suggest from the available recipes. If she asks about budget, give simple clear answers.
+
+${financialCtx}
+
+Rules: Keep it simple and warm. Use plain language. Celebrate wins. If she's over budget, be gentle and constructive. Keep responses under 150 words. Use emojis sparingly but naturally.`;
+  }
+
+  // Build messages array for API
+  aiChatHistory.push({role:'user',content:text});
+
+  // Keep only last 10 exchanges to stay within token limits
+  const recentHistory=aiChatHistory.slice(-20);
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:400,
+        system:systemPrompt,
+        messages:recentHistory
+      })
+    });
+    const data=await res.json();
+    const reply=data.content?.[0]?.text||'Sorry, I couldn\'t process that. Try again?';
+
+    // Remove thinking indicator
+    thinking.remove();
+
+    // Add assistant response
+    const assistantMsg=document.createElement('div');
+    assistantMsg.className='ai-msg assistant';
+    // Simple markdown-like formatting
+    assistantMsg.innerHTML=reply
+      .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+      .replace(/\n/g,'<br>');
+    msgs.appendChild(assistantMsg);
+
+    aiChatHistory.push({role:'assistant',content:reply});
+  } catch(e){
+    thinking.remove();
+    const errorMsg=document.createElement('div');
+    errorMsg.className='ai-msg error';
+    errorMsg.textContent='Could not reach AI — check your API key configuration. The API key should be set in your browser\'s Anthropic session.';
+    msgs.appendChild(errorMsg);
+  }
+
+  sendBtn.disabled=false;
+  msgs.scrollTop=msgs.scrollHeight;
 }
 </script>
 </body>
