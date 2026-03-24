@@ -895,8 +895,6 @@ function loadCsvFromServer(data) {
   if(aiBtn) aiBtn.style.display = 'block';
 }
 
-// ── CLEAR — writes cleared_at timestamp to server ────────────────
-// No local sentinel. The server timestamp is the source of truth.
 // ── CLEAR — writes cleared_at timestamp AND deletes data from server ─
 // Two-layer guarantee:
 //   1. Set cleared_at = now + 1000ms safety margin (so it's always > uploadedAt)
@@ -1179,7 +1177,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Start Google-style sync: server is always right
   // 1. REST fetch immediately for fast initial load
   // 2. SDK WebSocket listener for instant push updates
-  // 3. REST polling every 4s as bulletproof backup
+  // 3. REST polling every 8s as bulletproof backup
   updateSyncBadge('syncing');
   await syncAll();
   refreshAllUI();
