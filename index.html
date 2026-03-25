@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Martinson Family Dashboard v36</title>
+<title>Martinson Family Dashboard v37</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script src="https://unpkg.com/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
@@ -355,7 +355,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <!-- ENTRY SCREEN -->
 <div id="entry-screen">
   <div class="entry-logo">Martinson Family</div>
-  <div class="entry-sub">Kansas City, MO · Your Family Hub · v36</div>
+  <div class="entry-sub">Kansas City, MO · Your Family Hub · v37</div>
   <div class="entry-box">
     <div class="entry-title">🔒 Enter Password</div>
     <div class="entry-dots">
@@ -471,6 +471,21 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 
     <!-- OVERVIEW -->
     <div class="page active" id="d-overview">
+      <!-- BANK SYNC BAR -->
+      <div id="bank-sync-bar" style="margin-bottom:12px;padding:14px 20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div id="bank-sync-content" style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:20px">🏦</span>
+          <div>
+            <div id="bank-sync-label" style="font-size:13px;font-weight:600;color:var(--text)">Connect Your Bank</div>
+            <div id="bank-sync-sub" style="font-size:11px;color:var(--text-mid)">Automatic transactions — no more CSV downloads</div>
+          </div>
+        </div>
+        <div id="bank-sync-actions" style="display:flex;gap:8px;align-items:center">
+          <button id="bank-connect-btn" onclick="showBankConnect()" style="padding:8px 16px;background:var(--teal);color:#000;border:none;border-radius:8px;font-family:var(--font-b);font-size:12px;font-weight:700;cursor:pointer">Connect Bank</button>
+          <button id="bank-sync-btn" onclick="syncFromBank()" style="display:none;padding:8px 16px;background:var(--teal);color:#000;border:none;border-radius:8px;font-family:var(--font-b);font-size:12px;font-weight:700;cursor:pointer">Sync Now</button>
+          <button id="bank-disconnect-btn" onclick="disconnectBank()" style="display:none;padding:8px 16px;background:var(--surface2);color:var(--text-mid);border:1px solid var(--border);border-radius:8px;font-family:var(--font-b);font-size:12px;cursor:pointer">Disconnect</button>
+        </div>
+      </div>
       <div class="drop-zone" id="drop-zone" ondragover="onDragOver(event)" ondragleave="onDragLeave()" ondrop="onDrop(event)">
         <input type="file" id="drop-input" class="drop-input" accept=".csv,.pdf,application/pdf" onchange="onFileSel(event)">
         <div id="drop-content">
@@ -892,6 +907,7 @@ let cmfIngCount = 0;
 let currentUser = ''; // 'douglas' or 'jamie' — controls AI personality
 let aiChatHistory = []; // conversation history for AI panel
 let aiPanelOpen = false;
+let simplefinConnected = false; // whether SimpleFIN bank is linked
 // ALWAYS use this URL — Apps Script for receipt scanning and PDF only
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw0q-7XhX6OztGR54bXX5_iFnUCYeaRVyfxbhoDdaIuWSeDZF7U-KYxqYXfaM4eKcJD/exec';
 
@@ -899,7 +915,7 @@ const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw0q-7XhX6OztGR54bXX5
 // SYNC ENGINE — Google Sheets architecture
 // ══════════════════════════════════════════════════════════════════
 // ══════════════════════════════════════════════════════════════════
-// FIREBASE SYNC ENGINE — v36
+// FIREBASE SYNC ENGINE — v37
 //
 // One key controls everything: martinson/last_csv_data
 //
@@ -912,12 +928,9 @@ const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw0q-7XhX6OztGR54bXX5
 // Clear uses direct REST PUT (not SDK) for maximum reliability.
 // localStorage caches the cleared marker as a fallback guard.
 //
-// v35 additions:
-//   - Money Flow (Sankey) tab: D3.js Sankey diagram from CSV data
-//   - AI Assistant: floating chat panel, personality per user role
-// v36 fix:
-//   - AI calls routed through Apps Script proxy (fixes CORS block)
-//   - Shared callClaudeProxy() helper for all AI features
+// v35: Money Flow (Sankey), AI Assistant panel
+// v36: AI calls routed through Apps Script proxy (CORS fix)
+// v37: SimpleFIN bank integration — auto-pull transactions, no CSV
 // ══════════════════════════════════════════════════════════════════
 
 const FB = 'https://martinson-family-default-rtdb.firebaseio.com';
@@ -1337,6 +1350,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   updateNetWorth();
   updateDebtMetrics();
   startSync();
+  updateBankSyncBar();
 });
 
 function getWeekOf(){const n=new Date();const d=n.getDate()-n.getDay()+(n.getDay()===0?-6:1);const m=new Date(n.setDate(d));return m.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
@@ -2906,6 +2920,267 @@ Rules: Keep it simple and warm. Use plain language. Celebrate wins. If she's ove
 
   sendBtn.disabled=false;
   msgs.scrollTop=msgs.scrollHeight;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// v37 FEATURE: SimpleFIN Bank Integration
+// ══════════════════════════════════════════════════════════════════
+// Flow: User signs up at SimpleFIN ($1.50/mo) → connects BofA →
+// creates Setup Token → pastes into dashboard → we claim it via
+// Apps Script → store Access URL → fetch transactions on demand.
+// No more CSV downloads.
+// ══════════════════════════════════════════════════════════════════
+
+function updateBankSyncBar(){
+  const connected = localStorage.getItem('simplefin_connected') === 'true';
+  simplefinConnected = connected;
+  const label = document.getElementById('bank-sync-label');
+  const sub = document.getElementById('bank-sync-sub');
+  const connectBtn = document.getElementById('bank-connect-btn');
+  const syncBtn = document.getElementById('bank-sync-btn');
+  const disconnectBtn = document.getElementById('bank-disconnect-btn');
+  if(!label) return;
+
+  if(connected){
+    const lastSync = localStorage.getItem('simplefin_last_sync');
+    label.textContent = '\u2705 Bank Connected';
+    label.style.color = 'var(--teal)';
+    sub.textContent = lastSync ? 'Last synced: ' + lastSync : 'Tap Sync Now to pull transactions';
+    connectBtn.style.display = 'none';
+    syncBtn.style.display = 'inline-block';
+    disconnectBtn.style.display = 'inline-block';
+  } else {
+    label.textContent = 'Connect Your Bank';
+    label.style.color = 'var(--text)';
+    sub.textContent = 'Automatic transactions \u2014 no more CSV downloads';
+    connectBtn.style.display = 'inline-block';
+    syncBtn.style.display = 'none';
+    disconnectBtn.style.display = 'none';
+  }
+}
+
+function showBankConnect(){
+  const existing = document.getElementById('bank-connect-overlay');
+  if(existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'bank-connect-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:400;display:flex;align-items:center;justify-content:center;padding:24px';
+  overlay.innerHTML = `
+    <div style="background:var(--surface);border-radius:20px;padding:28px;width:100%;max-width:520px;box-shadow:var(--sh);max-height:90vh;overflow-y:auto">
+      <div style="font-family:var(--font-d);font-size:22px;margin-bottom:8px">\uD83C\uDFE6 Connect Your Bank</div>
+      <div style="font-size:13px;color:var(--text-mid);line-height:1.6;margin-bottom:20px">
+        Connect Bank of America to your dashboard. Transactions sync automatically \u2014 no more downloading CSV files.
+      </div>
+      <div style="background:var(--surface2);border-radius:12px;padding:16px;margin-bottom:16px;font-size:13px;line-height:1.9">
+        <div style="font-weight:700;color:var(--teal);margin-bottom:8px">One-Time Setup (5 minutes):</div>
+        <div><strong>1.</strong> Go to <a href="https://beta-bridge.simplefin.org/" target="_blank" style="color:var(--teal)">SimpleFIN Bridge</a> and create an account ($1.50/month)</div>
+        <div><strong>2.</strong> Click <strong>Financial Institutions \u2192 New Connection</strong></div>
+        <div><strong>3.</strong> Search for <strong>Bank of America</strong> and log in with your BofA credentials</div>
+        <div><strong>4.</strong> Go to <strong>Apps \u2192 New Connection</strong> \u2192 name it "Martinson Dashboard"</div>
+        <div><strong>5.</strong> Click <strong>Create Setup Token</strong></div>
+        <div><strong>6.</strong> Copy the token and paste it below</div>
+      </div>
+      <textarea id="simplefin-token-input" placeholder="Paste your SimpleFIN Setup Token here..."
+        style="width:100%;height:80px;padding:12px;border:1.5px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font-family:var(--font-b);font-size:13px;margin-bottom:12px;resize:none"></textarea>
+      <div id="simplefin-status" style="font-size:12px;min-height:20px;margin-bottom:12px;color:var(--text-mid)"></div>
+      <div style="display:flex;gap:10px">
+        <button onclick="claimSimpleFINToken()" style="flex:1;padding:12px;background:var(--teal);color:#000;border:none;border-radius:10px;font-family:var(--font-b);font-size:14px;font-weight:700;cursor:pointer">\uD83D\uDD17 Connect</button>
+        <button onclick="document.getElementById('bank-connect-overlay').remove()" style="padding:12px 18px;background:var(--surface2);color:var(--text-mid);border:none;border-radius:10px;font-family:var(--font-b);font-size:14px;cursor:pointer">Cancel</button>
+      </div>
+      <div style="margin-top:12px;font-size:11px;color:var(--text-soft);text-align:center">\uD83D\uDD12 Your bank credentials are stored by SimpleFIN, never by this dashboard. You can revoke access anytime.</div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+async function claimSimpleFINToken(){
+  const tokenInput = document.getElementById('simplefin-token-input');
+  const status = document.getElementById('simplefin-status');
+  const token = tokenInput.value.trim();
+  if(!token){status.textContent = 'Please paste your Setup Token';status.style.color='var(--red)';return;}
+
+  status.textContent = '\u23F3 Connecting to your bank...';
+  status.style.color = 'var(--gold)';
+
+  try {
+    const res = await fetch(SHEET_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'simplefinSetup', setupToken: token })
+    });
+    const data = await res.json();
+
+    if(data.error){
+      status.textContent = 'Error: ' + data.error;
+      status.style.color = 'var(--red)';
+      return;
+    }
+
+    if(data.status === 'ok' && data.accounts){
+      localStorage.setItem('simplefin_connected', 'true');
+      simplefinConnected = true;
+      status.textContent = '\u2705 Connected! Found ' + data.accounts + ' account(s). Syncing transactions...';
+      status.style.color = 'var(--teal)';
+      toast('\u2705 Bank connected! Syncing transactions...');
+      // Close overlay after 1.5s and sync
+      setTimeout(() => {
+        document.getElementById('bank-connect-overlay')?.remove();
+        updateBankSyncBar();
+        syncFromBank();
+      }, 1500);
+    } else {
+      status.textContent = 'Unexpected response. Try again or check your token.';
+      status.style.color = 'var(--red)';
+    }
+  } catch(e){
+    status.textContent = 'Failed to connect: ' + (e.message||'network error');
+    status.style.color = 'var(--red)';
+  }
+}
+
+async function syncFromBank(){
+  if(!simplefinConnected && localStorage.getItem('simplefin_connected') !== 'true'){
+    toast('Connect your bank first');
+    return;
+  }
+
+  const syncBtn = document.getElementById('bank-sync-btn');
+  const sub = document.getElementById('bank-sync-sub');
+  if(syncBtn) syncBtn.textContent = '\u23F3 Syncing...';
+  if(sub) sub.textContent = 'Pulling transactions from BofA...';
+
+  try {
+    const res = await fetch(SHEET_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'simplefinSync' })
+    });
+    const data = await res.json();
+
+    if(data.error){
+      toast('\u26A0 Bank sync error: ' + data.error);
+      if(syncBtn) syncBtn.textContent = 'Sync Now';
+      if(sub) sub.textContent = 'Sync failed \u2014 try again';
+      // If auth failed, mark as disconnected
+      if(data.error.includes('403') || data.error.includes('auth')){
+        localStorage.removeItem('simplefin_connected');
+        simplefinConnected = false;
+        updateBankSyncBar();
+        toast('Bank connection expired \u2014 reconnect to continue');
+      }
+      return;
+    }
+
+    if(data.transactions && data.transactions.length > 0){
+      processSimpleFINTransactions(data.transactions, data.balance);
+      const now = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+      localStorage.setItem('simplefin_last_sync', now);
+      toast('\u2705 ' + data.transactions.length + ' transactions synced from bank');
+    } else {
+      toast('No new transactions found');
+    }
+
+    if(syncBtn) syncBtn.textContent = 'Sync Now';
+    updateBankSyncBar();
+
+  } catch(e){
+    toast('\u26A0 Could not reach bank \u2014 try again');
+    if(syncBtn) syncBtn.textContent = 'Sync Now';
+  }
+}
+
+function processSimpleFINTransactions(txns, balance){
+  // Convert SimpleFIN format to our internal transaction format
+  // SimpleFIN: {posted: unixTimestamp, amount: "-8.88", description: "GROCERY STORE", id: "..."}
+  // Ours: {date, desc, amount, cat, month, color}
+  transactions = [];
+  txns.forEach(t => {
+    const d = new Date(t.posted * 1000);
+    if(isNaN(d.getTime())) return;
+    const date = (d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear();
+    const desc = (t.description||'').trim();
+    const amount = parseFloat(t.amount)||0;
+    if(amount === 0 || desc.includes('Beginning balance') || desc.includes('balance as of')) return;
+    const rule = categorize(desc);
+    const month = d.toLocaleDateString('en-US',{month:'short',year:'numeric'});
+    transactions.push({date, desc, amount, cat:rule.cat, color:rule.color, month});
+  });
+
+  if(!transactions.length){toast('No valid transactions found');return;}
+  transactions.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  _loadedUploadedAt = 0;
+
+  // Update drop zone to show loaded state
+  const dz = document.getElementById('drop-zone');
+  dz.classList.add('loaded');
+  const dropInp = document.getElementById('drop-input');
+  if(dropInp) dropInp.style.pointerEvents = 'none';
+
+  const dates = transactions.map(t=>new Date(t.date)).filter(d=>!isNaN(d));
+  const mn = new Date(Math.min(...dates)).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  const mx = new Date(Math.max(...dates)).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  const now = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+
+  document.getElementById('drop-content').innerHTML = `<div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap">
+    <span class="loaded-badge">\uD83C\uDFE6 ${transactions.length} transactions from bank</span>
+    <span style="font-size:12px;color:var(--text-mid)">${mn} \u2013 ${mx}</span>
+    <span style="font-size:12px;color:var(--purple)">\uD83D\uDD04 Synced \u00B7 ${now}</span>
+    <span style="font-size:12px;color:var(--red);cursor:pointer;text-decoration:underline;position:relative;z-index:10" onclick="event.stopPropagation();resetCSV(false)">\u2715 Clear</span>
+  </div>`;
+
+  // Run the full rendering pipeline — same as CSV
+  renderCatTable();
+  renderTx();
+  renderBVA();
+  updateDonutFromTransactions();
+  updateProj();
+  renderMilestones();
+  renderFreedomChart();
+  renderSankey();
+  toast('\u2705 ' + transactions.length + ' transactions loaded from bank');
+
+  // Sync to Firebase so Jamie sees it on her phone
+  const EXCL_SYNC = ['Transfers','Income'];
+  const catTotals = {};
+  transactions.filter(t=>t.amount<0&&!EXCL_SYNC.includes(t.cat))
+    .forEach(t=>{catTotals[t.cat]=(catTotals[t.cat]||0)+Math.abs(t.amount);});
+
+  function sfSan(s){ return String(s||'').replace(/[\x00-\x1F\x7F]/g,' ').trim(); }
+  const txCompact = transactions.map(t=>({
+    d:sfSan(t.date), n:sfSan(t.desc).substring(0,50),
+    a:isFinite(t.amount)?t.amount:0, c:sfSan(t.cat), m:sfSan(t.month)
+  }));
+
+  const syncData = {
+    txData: JSON.stringify(txCompact),
+    cats: JSON.stringify(catTotals),
+    period: sfSan(mn + ' \u2013 ' + mx),
+    loadedOn: sfSan(new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})),
+    count: transactions.length,
+    uploadedAt: Date.now(),
+    source: 'simplefin'
+  };
+
+  uploadCsvToServer(syncData)
+    .then(()=>{lastSyncTime=new Date();updateSyncBadge('ok');})
+    .catch(()=>{updateSyncBadge('error');});
+
+  const aiBtn = document.getElementById('ai-btn-wrap');
+  if(aiBtn) aiBtn.style.display = 'block';
+}
+
+function disconnectBank(){
+  if(!confirm('Disconnect your bank? You can reconnect anytime with a new token.')) return;
+  // Tell Apps Script to clear stored access URL
+  fetch(SHEET_URL, {
+    method:'POST', headers:{'Content-Type':'text/plain'},
+    body:JSON.stringify({action:'simplefinDisconnect'})
+  }).catch(()=>{});
+  localStorage.removeItem('simplefin_connected');
+  localStorage.removeItem('simplefin_last_sync');
+  simplefinConnected = false;
+  updateBankSyncBar();
+  toast('Bank disconnected');
 }
 </script>
 </body>
