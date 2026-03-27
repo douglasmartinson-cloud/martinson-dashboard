@@ -3480,10 +3480,7 @@ async function claimSimpleFINToken(){
 }
 
 async function syncFromBank(){
-  if(!simplefinConnected && localStorage.getItem('simplefin_connected') !== 'true'){
-    toast('Connect your bank first');
-    return;
-  }
+  // v39a: Always try sync - server will tell us if not connected
 
   const syncBtn = document.getElementById('bank-sync-btn');
   const sub = document.getElementById('bank-sync-sub');
