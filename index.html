@@ -2559,9 +2559,9 @@ function openManageStores() {
       <div id="msb-store-list">
         ${groceryStores.map((s, i) => `
           <div class="msb-store" data-index="${i}">
-            <button class="msb-emoji-btn" onclick="cycleStoreEmoji(${i})" title="Change icon">${s.emoji}</button>
-            <input type="text" class="msb-name-inp" value="${s.name}" onchange="updateStoreName(${i}, this.value)">
-            <button class="msb-del" onclick="deleteStore(${i})" title="Delete store">🗑</button>
+            <button class="msb-emoji-btn" data-action="emoji" data-idx="${i}" title="Change icon">${s.emoji}</button>
+            <input type="text" class="msb-name-inp" data-idx="${i}" value="${s.name}">
+            <button class="msb-del" data-action="delete" data-idx="${i}" title="Delete store">🗑</button>
           </div>
         `).join('')}
       </div>
@@ -2571,6 +2571,31 @@ function openManageStores() {
   `;
 
   document.body.appendChild(overlay);
+  
+  // Event delegation for buttons
+  overlay.addEventListener('click', function(e) {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    
+    const action = btn.dataset.action;
+    const idx = parseInt(btn.dataset.idx);
+    
+    if (action === 'delete') {
+      e.preventDefault();
+      e.stopPropagation();
+      deleteStore(idx);
+    } else if (action === 'emoji') {
+      cycleStoreEmoji(idx);
+    }
+  });
+  
+  // Event delegation for name changes
+  overlay.addEventListener('change', function(e) {
+    if (e.target.classList.contains('msb-name-inp')) {
+      const idx = parseInt(e.target.dataset.idx);
+      updateStoreName(idx, e.target.value);
+    }
+  });
 }
 
 function closeManageStores() {
@@ -2604,8 +2629,8 @@ function deleteStore(index) {
     toast('Need at least one store!');
     return;
   }
-  if (!confirm('Delete "' + groceryStores[index].name + '" and all its items?')) return;
-
+  
+  const storeName = groceryStores[index].name;
   const storeId = groceryStores[index].id;
   
   // Remove store items
@@ -2622,6 +2647,8 @@ function deleteStore(index) {
   // Re-render the overlay
   closeManageStores();
   openManageStores();
+  
+  toast('🗑 Deleted "' + storeName + '"');
 }
 
 function addNewStore() {
