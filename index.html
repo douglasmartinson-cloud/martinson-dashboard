@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Martinson Family Dashboard v38</title>
+<title>Martinson Family Dashboard v39</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script src="https://unpkg.com/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
@@ -406,7 +406,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <!-- ENTRY SCREEN -->
 <div id="entry-screen">
   <div class="entry-logo">Martinson Family</div>
-  <div class="entry-sub">Kansas City, MO · Your Family Hub · v38</div>
+  <div class="entry-sub">Kansas City, MO · Your Family Hub · v39</div>
   <div class="entry-box">
     <div class="entry-title">🔒 Enter Password</div>
     <div class="entry-dots">
@@ -996,7 +996,7 @@ const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw0q-7XhX6OztGR54bXX5
 // SYNC ENGINE — Google Sheets architecture
 // ══════════════════════════════════════════════════════════════════
 // ══════════════════════════════════════════════════════════════════
-// FIREBASE SYNC ENGINE — v38
+// FIREBASE SYNC ENGINE — v39
 //
 // One key controls everything: martinson/last_csv_data
 //
@@ -3513,12 +3513,16 @@ async function syncFromBank(){
     }
 
     if(data.transactions && data.transactions.length > 0){
-      processSimpleFINTransactions(data.transactions, data.balance);
+      // v39: Process with new format including accountBalances
+      processSimpleFINTransactions(data.transactions, data.accountBalances, data.newCount);
       const now = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
       localStorage.setItem('simplefin_last_sync', now);
-      toast('\u2705 ' + data.transactions.length + ' transactions synced from bank');
+      
+      // v39: Show new vs total count
+      const newMsg = data.newCount > 0 ? data.newCount + ' new, ' : '';
+      toast('\u2705 ' + newMsg + data.transactions.length + ' total transactions');
     } else {
-      toast('No new transactions found');
+      toast('No transactions found');
     }
 
     if(syncBtn) syncBtn.textContent = 'Sync Now';
@@ -3530,26 +3534,69 @@ async function syncFromBank(){
   }
 }
 
-function processSimpleFINTransactions(txns, balance){
-  // Convert SimpleFIN format to our internal transaction format
-  // SimpleFIN: {posted: unixTimestamp, amount: "-8.88", description: "GROCERY STORE", id: "..."}
-  // Ours: {date, desc, amount, cat, month, color}
+function processSimpleFINTransactions(txns, accountBalances, newCount){
+  // v39: Transactions now come pre-categorized from Apps Script (AI + learned mappings)
+  // Format: {date, description, amount, category, merchant, accountId, accountName, fingerprint, source}
   transactions = [];
+  
   txns.forEach(t => {
-    const d = new Date(t.posted * 1000);
-    if(isNaN(d.getTime())) return;
-    const date = (d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear();
-    const desc = (t.description||'').trim();
-    const amount = parseFloat(t.amount)||0;
+    // Handle both old format (posted timestamp) and new format (date string)
+    let dateStr = t.date;
+    if (t.posted && !t.date) {
+      const d = new Date(t.posted * 1000);
+      if(isNaN(d.getTime())) return;
+      dateStr = (d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear();
+    }
+    
+    const desc = (t.description || t.merchant || '').trim();
+    const amount = parseFloat(t.amount) || 0;
     if(amount === 0 || desc.includes('Beginning balance') || desc.includes('balance as of')) return;
-    const rule = categorize(desc);
-    const month = d.toLocaleDateString('en-US',{month:'short',year:'numeric'});
-    transactions.push({date, desc, amount, cat:rule.cat, color:rule.color, month});
+    
+    // v39: Use AI-provided category, fallback to rule-based
+    const cat = t.category || categorize(desc).cat;
+    const rule = RULES.find(r => r.cat === cat) || RULES[RULES.length - 1];
+    
+    const d = new Date(dateStr);
+    const month = d.toLocaleDateString('en-US', {month:'short', year:'numeric'});
+    
+    transactions.push({
+      date: dateStr,
+      desc: desc,
+      amount: amount,
+      cat: cat,
+      color: rule.color,
+      month: month,
+      merchant: t.merchant || null,
+      accountId: t.accountId,
+      accountName: t.accountName,
+      fingerprint: t.fingerprint,
+      source: t.source || 'rules'
+    });
   });
 
-  if(!transactions.length){toast('No valid transactions found');return;}
-  transactions.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  if(!transactions.length){ toast('No valid transactions found'); return; }
+  transactions.sort((a,b) => new Date(b.date) - new Date(a.date));
   _loadedUploadedAt = 0;
+
+  // v39: Update account balances if provided
+  if (accountBalances) {
+    // Savings → Emergency Fund
+    if (accountBalances.savings) {
+      familyGoals.efund = Math.round(accountBalances.savings.balance);
+      fbSet('family_goals', familyGoals);
+      updateGoalsDisplay();
+    }
+    
+    // BofA Credit Card
+    if (accountBalances.bofaCC) {
+      ccBalances.bofa = Math.abs(accountBalances.bofaCC.balance);
+      fbSet('cc_balances', ccBalances);
+      updateCCDisplay();
+    }
+    
+    // Store balances for display
+    localStorage.setItem('account_balances', JSON.stringify(accountBalances));
+  }
 
   // Update drop zone to show loaded state
   const dz = document.getElementById('drop-zone');
@@ -3557,19 +3604,25 @@ function processSimpleFINTransactions(txns, balance){
   const dropInp = document.getElementById('drop-input');
   if(dropInp) dropInp.style.pointerEvents = 'none';
 
-  const dates = transactions.map(t=>new Date(t.date)).filter(d=>!isNaN(d));
-  const mn = new Date(Math.min(...dates)).toLocaleDateString('en-US',{month:'short',day:'numeric'});
-  const mx = new Date(Math.max(...dates)).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-  const now = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  const dates = transactions.map(t => new Date(t.date)).filter(d => !isNaN(d));
+  const mn = new Date(Math.min(...dates)).toLocaleDateString('en-US', {month:'short', day:'numeric'});
+  const mx = new Date(Math.max(...dates)).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+  const now = new Date().toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'});
+  
+  // v39: Show new count if available
+  const newBadge = (newCount && newCount > 0) 
+    ? `<span style="font-size:11px;background:var(--teal);color:#000;padding:2px 8px;border-radius:100px;font-weight:600">${newCount} new</span>` 
+    : '';
 
   document.getElementById('drop-content').innerHTML = `<div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap">
-    <span class="loaded-badge">\uD83C\uDFE6 ${transactions.length} transactions from bank</span>
+    <span class="loaded-badge">\uD83C\uDFE6 ${transactions.length} transactions</span>
+    ${newBadge}
     <span style="font-size:12px;color:var(--text-mid)">${mn} \u2013 ${mx}</span>
-    <span style="font-size:12px;color:var(--purple)">\uD83D\uDD04 Synced \u00B7 ${now}</span>
+    <span style="font-size:12px;color:var(--purple)">\uD83D\uDD04 ${now}</span>
     <span style="font-size:12px;color:var(--red);cursor:pointer;text-decoration:underline;position:relative;z-index:10" onclick="event.stopPropagation();resetCSV(false)">\u2715 Clear</span>
   </div>`;
 
-  // Run the full rendering pipeline — same as CSV
+  // Run the full rendering pipeline
   renderCatTable();
   renderTx();
   renderBVA();
@@ -3578,33 +3631,37 @@ function processSimpleFINTransactions(txns, balance){
   renderMilestones();
   renderFreedomChart();
   renderSankey();
-  toast('\u2705 ' + transactions.length + ' transactions loaded from bank');
+  toast('\u2705 ' + transactions.length + ' transactions loaded');
 
   // Sync to Firebase so Jamie sees it on her phone
   const EXCL_SYNC = ['Transfers','Income'];
   const catTotals = {};
-  transactions.filter(t=>t.amount<0&&!EXCL_SYNC.includes(t.cat))
-    .forEach(t=>{catTotals[t.cat]=(catTotals[t.cat]||0)+Math.abs(t.amount);});
+  transactions.filter(t => t.amount < 0 && !EXCL_SYNC.includes(t.cat))
+    .forEach(t => { catTotals[t.cat] = (catTotals[t.cat] || 0) + Math.abs(t.amount); });
 
   function sfSan(s){ return String(s||'').replace(/[\x00-\x1F\x7F]/g,' ').trim(); }
-  const txCompact = transactions.map(t=>({
-    d:sfSan(t.date), n:sfSan(t.desc).substring(0,50),
-    a:isFinite(t.amount)?t.amount:0, c:sfSan(t.cat), m:sfSan(t.month)
+  const txCompact = transactions.map(t => ({
+    d: sfSan(t.date), 
+    n: sfSan(t.desc).substring(0, 50),
+    a: isFinite(t.amount) ? t.amount : 0, 
+    c: sfSan(t.cat), 
+    m: sfSan(t.month),
+    fp: t.fingerprint || null
   }));
 
   const syncData = {
     txData: JSON.stringify(txCompact),
     cats: JSON.stringify(catTotals),
     period: sfSan(mn + ' \u2013 ' + mx),
-    loadedOn: sfSan(new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})),
+    loadedOn: sfSan(new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})),
     count: transactions.length,
     uploadedAt: Date.now(),
-    source: 'simplefin'
+    source: 'simplefin_v39'
   };
 
   uploadCsvToServer(syncData)
-    .then(()=>{lastSyncTime=new Date();updateSyncBadge('ok');})
-    .catch(()=>{updateSyncBadge('error');});
+    .then(() => { lastSyncTime = new Date(); updateSyncBadge('ok'); })
+    .catch(() => { updateSyncBadge('error'); });
 
   const aiBtn = document.getElementById('ai-btn-wrap');
   if(aiBtn) aiBtn.style.display = 'block';
