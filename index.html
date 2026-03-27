@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Martinson Family Dashboard v37</title>
+<title>Martinson Family Dashboard v38</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script src="https://unpkg.com/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
@@ -195,6 +195,57 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .empty-state{text-align:center;padding:40px 20px;color:var(--text-mid)}
 .es-icon{font-size:36px;margin-bottom:10px}
 
+/* ── MULTI-STORE GROCERY TABS (v38) ── */
+.store-tabs-wrap{display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.store-tabs{display:flex;gap:6px;overflow-x:auto;flex:1;scrollbar-width:none}
+.store-tabs::-webkit-scrollbar{display:none}
+.store-tab{flex-shrink:0;padding:8px 14px;border-radius:100px;border:1.5px solid var(--border);background:transparent;color:var(--text-mid);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-b);transition:all 0.2s;display:flex;align-items:center;gap:6px}
+.store-tab.active{background:var(--sage);border-color:var(--sage);color:#fff}
+.store-tab-emoji{font-size:14px}
+.store-manage-btn{flex-shrink:0;width:36px;height:36px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);color:var(--text-mid);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+.store-manage-btn:hover{background:var(--surface);color:var(--text)}
+.store-list-wrap{min-height:200px}
+.store-list-empty{text-align:center;padding:40px 20px;color:var(--text-mid)}
+.store-list-empty .es-icon{font-size:32px;margin-bottom:8px}
+.store-item{display:flex;align-items:center;gap:10px;padding:12px;background:var(--surface);border-radius:10px;margin-bottom:6px;border:1px solid var(--border);transition:all 0.2s}
+.store-item.checked{opacity:0.5;background:var(--surface2)}
+.store-item.checked .si-name{text-decoration:line-through;color:var(--text-soft)}
+.si-cb{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--surface2);cursor:pointer;transition:all 0.15s;font-size:12px}
+.store-item.checked .si-cb{background:var(--sage);border-color:var(--sage);color:#fff}
+.si-name{flex:1;font-size:14px;font-weight:600;cursor:pointer}
+.si-price{width:70px;padding:6px 8px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px;font-weight:600;text-align:right;font-family:var(--font-b)}
+.si-price:focus{outline:none;border-color:var(--sage)}
+.si-del{width:28px;height:28px;border-radius:6px;background:transparent;border:none;color:var(--text-soft);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.si-del:hover{background:var(--red-dim);color:var(--red)}
+.store-add-row{display:flex;gap:8px;margin-bottom:16px}
+.store-add-inp{flex:1;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font-family:var(--font-b);font-size:14px}
+.store-add-inp:focus{outline:none;border-color:var(--sage)}
+.store-add-btn{padding:12px 18px;background:var(--sage);color:#fff;border:none;border-radius:10px;font-family:var(--font-b);font-size:14px;font-weight:700;cursor:pointer;transition:opacity 0.2s}
+.store-add-btn:active{opacity:0.8}
+.store-budget-bar{background:var(--surface);border-radius:var(--r);padding:14px;margin-bottom:14px}
+.sbb-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.sbb-label{font-size:12px;color:var(--text-mid);font-weight:600}
+.sbb-val{font-family:var(--font-d);font-size:18px}
+.sbb-progress{background:var(--surface2);border-radius:100px;height:8px;overflow:hidden}
+.sbb-fill{height:100%;border-radius:100px;transition:width 0.4s,background 0.3s}
+
+/* Manage Stores Overlay */
+.manage-stores-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.manage-stores-box{background:var(--surface);border-radius:16px;padding:24px;width:100%;max-width:400px;max-height:85vh;overflow-y:auto}
+.msb-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.msb-title{font-family:var(--font-d);font-size:20px}
+.msb-close{background:var(--surface2);border:none;color:var(--text-mid);padding:6px 12px;border-radius:8px;cursor:pointer;font-family:var(--font-b);font-size:13px}
+.msb-store{display:flex;align-items:center;gap:10px;padding:12px;background:var(--surface2);border-radius:10px;margin-bottom:8px}
+.msb-emoji-btn{width:40px;height:40px;border-radius:10px;background:var(--surface);border:1px solid var(--border);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.msb-emoji-btn:hover{background:var(--border)}
+.msb-name-inp{flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-family:var(--font-b);font-size:14px;font-weight:600}
+.msb-name-inp:focus{outline:none;border-color:var(--sage)}
+.msb-del{width:36px;height:36px;border-radius:8px;background:transparent;border:none;color:var(--text-soft);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.msb-del:hover{background:var(--red-dim);color:var(--red)}
+.msb-add-btn{width:100%;padding:12px;background:var(--surface2);border:2px dashed var(--border);border-radius:10px;color:var(--text-mid);font-family:var(--font-b);font-size:14px;font-weight:600;cursor:pointer;margin-top:8px;transition:all 0.2s}
+.msb-add-btn:hover{border-color:var(--sage);color:var(--sage)}
+.msb-save-btn{width:100%;padding:14px;background:var(--sage);color:#fff;border:none;border-radius:10px;font-family:var(--font-b);font-size:15px;font-weight:700;cursor:pointer;margin-top:16px}
+
 /* history */
 .hist-item{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--surface);border-radius:10px;margin-bottom:8px;border:1px solid var(--border)}
 .hi-week{font-size:13px;font-weight:600}.hi-date{font-size:11px;color:var(--text-mid);margin-top:1px}
@@ -355,7 +406,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <!-- ENTRY SCREEN -->
 <div id="entry-screen">
   <div class="entry-logo">Martinson Family</div>
-  <div class="entry-sub">Kansas City, MO · Your Family Hub · v37</div>
+  <div class="entry-sub">Kansas City, MO · Your Family Hub · v38</div>
   <div class="entry-box">
     <div class="entry-title">🔒 Enter Password</div>
     <div class="entry-dots">
@@ -704,32 +755,50 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
     <button class="btn btn-outline" onclick="clearMeals()">Clear & Start Over</button>
   </div>
 
-  <!-- GROCERY -->
+  <!-- GROCERY (v38 - Multi-Store Tabs) -->
   <div class="j-page" id="j-grocery">
-    <div class="spend-summary">
-      <div class="ss-row"><span class="ss-label">💰 Budget</span><span class="ss-val" style="color:var(--text-mid)">$200.00</span></div>
-      <div class="ss-row"><span class="ss-label">🛒 In Cart</span><span class="ss-val" id="j-cart-total" style="color:var(--sage)">$0.00</span></div>
-      <div class="ss-row" style="margin-bottom:0"><span class="ss-label">✅ Remaining</span><span class="ss-val" id="j-cart-rem" style="color:var(--sage)">$200.00</span></div>
-    </div>
-    <div class="add-row">
-      <input type="text" class="add-inp" id="j-custom-inp" placeholder="Add item...">
-      <button class="add-btn-go" onclick="addCustom()">Add</button>
-    </div>
-
-    <!-- RECEIPT UPLOAD -->
-    <div class="receipt-zone" id="receipt-zone" ondragover="onReceiptDragOver(event)" ondragleave="onReceiptDragLeave()" ondrop="onReceiptDrop(event)">
-      <input type="file" class="receipt-inp" id="receipt-inp" accept="image/*" capture="environment" onchange="onReceiptSel(event)">
-      <div id="receipt-content">
-        <div style="font-size:24px;margin-bottom:6px">📸</div>
-        <div style="font-size:14px;font-weight:600;margin-bottom:3px">Scan Receipt</div>
-        <div style="font-size:12px;color:var(--text-mid)">Take a photo or upload a receipt image — AI reads it and updates your list automatically</div>
+    <!-- Budget Summary -->
+    <div class="store-budget-bar">
+      <div class="sbb-row">
+        <span class="sbb-label">Weekly Budget</span>
+        <span class="sbb-val" style="color:var(--text)">$200.00</span>
+      </div>
+      <div class="sbb-row">
+        <span class="sbb-label">Total Across All Stores</span>
+        <span class="sbb-val" id="store-total-spent" style="color:var(--sage)">$0.00</span>
+      </div>
+      <div class="sbb-row" style="margin-bottom:10px">
+        <span class="sbb-label">Remaining</span>
+        <span class="sbb-val" id="store-total-remaining" style="color:var(--gold)">$200.00</span>
+      </div>
+      <div class="sbb-progress">
+        <div class="sbb-fill" id="store-budget-fill" style="width:0%;background:var(--sage)"></div>
       </div>
     </div>
-    <div id="j-grocery-wrap">
-      <div class="empty-state" id="j-groc-empty"><div class="es-icon">🍽️</div><p>Plan meals first, then tap<br><strong>Build My Grocery List</strong></p></div>
-      <div id="j-groc-sections" style="display:none"></div>
+
+    <!-- Store Tabs -->
+    <div class="store-tabs-wrap">
+      <div class="store-tabs" id="store-tabs"></div>
+      <button class="store-manage-btn" onclick="openManageStores()" title="Manage Stores">⚙️</button>
     </div>
-    <button class="btn btn-primary" id="j-done-btn" style="display:none;margin-top:8px" onclick="finishShop()">✅ Done Shopping — Save Total</button>
+
+    <!-- Add Item Row -->
+    <div class="store-add-row">
+      <input type="text" class="store-add-inp" id="store-add-inp" placeholder="Add item to this store..." onkeydown="if(event.key==='Enter')addStoreItem()">
+      <button class="store-add-btn" onclick="addStoreItem()">Add</button>
+    </div>
+
+    <!-- Current Store's List -->
+    <div class="store-list-wrap" id="store-list-wrap">
+      <div class="store-list-empty" id="store-list-empty">
+        <div class="es-icon">🛒</div>
+        <p>No items yet — add something above!</p>
+      </div>
+      <div id="store-list-items"></div>
+    </div>
+
+    <!-- Done Shopping Button -->
+    <button class="btn btn-primary" id="store-done-btn" style="display:none;margin-top:12px" onclick="finishStoreShopping()">✅ Done Shopping — Save Total</button>
   </div>
 
   <!-- TRACKER -->
@@ -908,6 +977,18 @@ let currentUser = ''; // 'douglas' or 'jamie' — controls AI personality
 let aiChatHistory = []; // conversation history for AI panel
 let aiPanelOpen = false;
 let simplefinConnected = false; // whether SimpleFIN bank is linked
+
+// ══════ MULTI-STORE GROCERY STATE (v38) ══════
+// Default stores - Jamie can add/remove/rename via ⚙️
+const DEFAULT_STORES = [
+  { id: 'aldi', name: 'Aldi', emoji: '🛒' },
+  { id: 'costco', name: 'Costco', emoji: '📦' },
+  { id: 'target', name: 'Target', emoji: '🎯' },
+  { id: 'walmart', name: 'Walmart', emoji: '🏪' }
+];
+let groceryStores = [...DEFAULT_STORES]; // user's configured stores
+let storeItems = {}; // { storeId: [{id, name, price, checked}, ...] }
+let activeStoreId = 'aldi'; // currently selected store tab
 // ALWAYS use this URL — Apps Script for receipt scanning and PDF only
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw0q-7XhX6OztGR54bXX5_iFnUCYeaRVyfxbhoDdaIuWSeDZF7U-KYxqYXfaM4eKcJD/exec';
 
@@ -915,7 +996,7 @@ const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw0q-7XhX6OztGR54bXX5
 // SYNC ENGINE — Google Sheets architecture
 // ══════════════════════════════════════════════════════════════════
 // ══════════════════════════════════════════════════════════════════
-// FIREBASE SYNC ENGINE — v37
+// FIREBASE SYNC ENGINE — v38
 //
 // One key controls everything: martinson/last_csv_data
 //
@@ -931,6 +1012,7 @@ const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw0q-7XhX6OztGR54bXX5
 // v35: Money Flow (Sankey), AI Assistant panel
 // v36: AI calls routed through Apps Script proxy (CORS fix)
 // v37: SimpleFIN bank integration — auto-pull transactions, no CSV
+// v38: Jamie's multi-store grocery lists with tabs (Aldi, Costco, Target, Walmart)
 // ══════════════════════════════════════════════════════════════════
 
 const FB = 'https://martinson-family-default-rtdb.firebaseio.com';
@@ -977,7 +1059,8 @@ function applyServerState(all) {
 
   // Apply non-CSV keys always
   const keys = ['meal_plan','week_hist','custom_meals','hidden_meals',
-                 'financial_settings','cc_balances','family_goals'];
+                 'financial_settings','cc_balances','family_goals',
+                 'grocery_stores','store_items'];
   keys.forEach(k => {
     if (all[k] !== undefined && all[k] !== null) {
       localStorage.setItem('fb_' + k, JSON.stringify(all[k]));
@@ -1128,7 +1211,8 @@ async function forceSyncNow() {
 async function syncAll() {
   // Load non-CSV keys from localStorage instantly (no network)
   ['custom_meals','hidden_meals','week_hist','meal_plan',
-   'cc_balances','family_goals','financial_settings'].forEach(k => {
+   'cc_balances','family_goals','financial_settings',
+   'grocery_stores','store_items'].forEach(k => {
     const v = localStorage.getItem('fb_' + k);
     if (v) try { applyKey(k, JSON.parse(v)); } catch(e) {}
   });
@@ -1155,6 +1239,19 @@ function applyKey(key, value) {
     case 'meal_plan': mealPlan = value; break;
     case 'cc_balances': ccBalances = value; break;
     case 'family_goals': familyGoals = value; break;
+    case 'grocery_stores': 
+      if (Array.isArray(value) && value.length > 0) {
+        groceryStores = value;
+        if (!groceryStores.find(s => s.id === activeStoreId)) {
+          activeStoreId = groceryStores[0].id;
+        }
+      }
+      break;
+    case 'store_items':
+      if (typeof value === 'object') {
+        storeItems = value;
+      }
+      break;
     case 'financial_settings':
       if (value.income) FINANCIAL.income = value.income;
       if (value.efundTarget) FINANCIAL.efundTarget = value.efundTarget;
@@ -1332,13 +1429,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Load non-CSV state from localStorage for instant startup
   ['custom_meals','hidden_meals','week_hist','meal_plan',
-   'cc_balances','family_goals','financial_settings'].forEach(k => {
+   'cc_balances','family_goals','financial_settings',
+   'grocery_stores','store_items'].forEach(k => {
     const v = localStorage.getItem('fb_' + k);
     if (v) try { applyKey(k, JSON.parse(v)); } catch(e) {}
   });
   refreshAllUI();
   updateNetWorth();
   updateDebtMetrics();
+  initStoreGrocery(); // v38: Initialize multi-store grocery tabs
 
   // Start Google-style sync: server is always right
   // 1. REST fetch immediately for fast initial load
@@ -1349,6 +1448,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   refreshAllUI();
   updateNetWorth();
   updateDebtMetrics();
+  initStoreGrocery(); // v38: Re-render after sync
   startSync();
   updateBankSyncBar();
 });
@@ -1423,6 +1523,11 @@ function jPage(id,btn){
   document.querySelectorAll('.jn-item').forEach(b=>b.classList.remove('active'));
   document.getElementById('j-'+id).classList.add('active');
   if(btn)btn.classList.add('active');
+  // v38: Re-render store grocery tabs when switching to grocery
+  if(id==='grocery') {
+    renderStoreTabs();
+    renderStoreItems();
+  }
 }
 
 // ══════ PIN
@@ -2284,6 +2389,315 @@ function renderWeekHist(){
   const wrap=document.getElementById('j-hist-wrap');
   if(!weekHist.length){wrap.innerHTML='<div class="empty-state"><div class="es-icon">🛒</div><p>No shopping trips logged yet.<br>Finish your first shop to see history here.</p></div>';return;}
   wrap.innerHTML=weekHist.map(w=>{const u=w.t<=w.budget;const diff=Math.abs(w.budget-w.t).toFixed(2);return`<div class="hist-item"><div><div class="hi-week">${w.label}</div><div class="hi-date">${w.date}</div></div><div style="text-align:right"><div class="hi-amt" style="color:${u?'var(--sage)':'var(--red)'}">$${w.t.toFixed(2)}</div><span class="hi-status ${u?'hs-under':'hs-over'}">${u?'✓ $'+diff+' under':'⚠ $'+diff+' over'}</span></div></div>`;}).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// v38 FEATURE: MULTI-STORE GROCERY LISTS
+// Jamie's stores: Aldi, Costco, Target, Walmart (configurable)
+// Each store has its own list. Per-store and cross-store budget tracking.
+// Syncs to Firebase for cross-device visibility.
+// ══════════════════════════════════════════════════════════════════
+
+function renderStoreTabs() {
+  const tabsEl = document.getElementById('store-tabs');
+  if (!tabsEl) return;
+  tabsEl.innerHTML = groceryStores.map(s => 
+    `<button class="store-tab ${s.id === activeStoreId ? 'active' : ''}" onclick="switchStore('${s.id}')">
+      <span class="store-tab-emoji">${s.emoji}</span>
+      <span>${s.name}</span>
+    </button>`
+  ).join('');
+}
+
+function switchStore(storeId) {
+  activeStoreId = storeId;
+  renderStoreTabs();
+  renderStoreItems();
+}
+
+function renderStoreItems() {
+  const wrap = document.getElementById('store-list-items');
+  const empty = document.getElementById('store-list-empty');
+  const doneBtn = document.getElementById('store-done-btn');
+  if (!wrap || !empty) return;
+
+  const items = storeItems[activeStoreId] || [];
+  
+  if (!items.length) {
+    empty.style.display = 'block';
+    wrap.innerHTML = '';
+    if (doneBtn) doneBtn.style.display = 'none';
+    updateStoreBudgetDisplay();
+    return;
+  }
+
+  empty.style.display = 'none';
+  if (doneBtn) doneBtn.style.display = 'block';
+
+  wrap.innerHTML = items.map(item => `
+    <div class="store-item ${item.checked ? 'checked' : ''}" id="si-${item.id}">
+      <div class="si-cb" onclick="toggleStoreItem('${item.id}')">${item.checked ? '✓' : ''}</div>
+      <div class="si-name" onclick="toggleStoreItem('${item.id}')">${item.name}</div>
+      <input type="number" class="si-price" placeholder="$" value="${item.price || ''}" 
+             step="0.01" min="0" onclick="event.stopPropagation()" 
+             oninput="updateStoreItemPrice('${item.id}', this.value)">
+      <button class="si-del" onclick="deleteStoreItem('${item.id}')" title="Remove">🗑</button>
+    </div>
+  `).join('');
+
+  updateStoreBudgetDisplay();
+}
+
+function addStoreItem() {
+  const inp = document.getElementById('store-add-inp');
+  if (!inp) return;
+  const name = inp.value.trim();
+  if (!name) return;
+
+  if (!storeItems[activeStoreId]) storeItems[activeStoreId] = [];
+  
+  storeItems[activeStoreId].push({
+    id: 'si_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+    name: name,
+    price: '',
+    checked: false
+  });
+
+  inp.value = '';
+  renderStoreItems();
+  saveStoreItems();
+  toast('✓ Added to ' + groceryStores.find(s => s.id === activeStoreId)?.name);
+}
+
+function toggleStoreItem(itemId) {
+  const items = storeItems[activeStoreId] || [];
+  const item = items.find(i => i.id === itemId);
+  if (!item) return;
+
+  item.checked = !item.checked;
+  
+  const el = document.getElementById('si-' + itemId);
+  if (el) {
+    el.classList.toggle('checked', item.checked);
+    el.querySelector('.si-cb').textContent = item.checked ? '✓' : '';
+  }
+
+  saveStoreItems();
+  updateStoreBudgetDisplay();
+}
+
+function updateStoreItemPrice(itemId, value) {
+  const items = storeItems[activeStoreId] || [];
+  const item = items.find(i => i.id === itemId);
+  if (item) {
+    item.price = value;
+    scheduleSave('store_items', storeItems);
+    updateStoreBudgetDisplay();
+  }
+}
+
+function deleteStoreItem(itemId) {
+  if (!storeItems[activeStoreId]) return;
+  storeItems[activeStoreId] = storeItems[activeStoreId].filter(i => i.id !== itemId);
+  renderStoreItems();
+  saveStoreItems();
+}
+
+function saveStoreItems() {
+  scheduleSave('store_items', storeItems);
+}
+
+function updateStoreBudgetDisplay() {
+  // Calculate total across ALL stores
+  let totalSpent = 0;
+  Object.values(storeItems).forEach(items => {
+    if (Array.isArray(items)) {
+      items.forEach(i => {
+        totalSpent += parseFloat(i.price) || 0;
+      });
+    }
+  });
+
+  const remaining = WEEKLY_BUDGET - totalSpent;
+  const pct = Math.min(100, (totalSpent / WEEKLY_BUDGET) * 100);
+
+  const totalEl = document.getElementById('store-total-spent');
+  const remEl = document.getElementById('store-total-remaining');
+  const fillEl = document.getElementById('store-budget-fill');
+
+  if (totalEl) {
+    totalEl.textContent = '$' + totalSpent.toFixed(2);
+    totalEl.style.color = totalSpent > WEEKLY_BUDGET ? 'var(--red)' : 'var(--sage)';
+  }
+  if (remEl) {
+    remEl.textContent = remaining >= 0 ? '$' + remaining.toFixed(2) : '-$' + Math.abs(remaining).toFixed(2);
+    remEl.style.color = remaining >= 0 ? 'var(--gold)' : 'var(--red)';
+  }
+  if (fillEl) {
+    fillEl.style.width = pct + '%';
+    fillEl.style.background = pct > 100 ? 'var(--red)' : pct > 85 ? 'var(--gold)' : 'var(--sage)';
+  }
+
+  // Also update Jamie's main gauge
+  updateJamieGauge(totalSpent);
+}
+
+function openManageStores() {
+  const overlay = document.createElement('div');
+  overlay.className = 'manage-stores-overlay';
+  overlay.id = 'manage-stores-overlay';
+  overlay.onclick = (e) => { if (e.target === overlay) closeManageStores(); };
+
+  const storeEmojis = ['🛒', '📦', '🎯', '🏪', '🛍️', '🏬', '🥬', '🍎', '🥩', '🧀'];
+
+  overlay.innerHTML = `
+    <div class="manage-stores-box">
+      <div class="msb-header">
+        <div class="msb-title">Manage Stores</div>
+        <button class="msb-close" onclick="closeManageStores()">Done</button>
+      </div>
+      <div id="msb-store-list">
+        ${groceryStores.map((s, i) => `
+          <div class="msb-store" data-index="${i}">
+            <button class="msb-emoji-btn" onclick="cycleStoreEmoji(${i})" title="Change icon">${s.emoji}</button>
+            <input type="text" class="msb-name-inp" value="${s.name}" onchange="updateStoreName(${i}, this.value)">
+            <button class="msb-del" onclick="deleteStore(${i})" title="Delete store">🗑</button>
+          </div>
+        `).join('')}
+      </div>
+      <button class="msb-add-btn" onclick="addNewStore()">+ Add Another Store</button>
+      <button class="msb-save-btn" onclick="saveAndCloseStores()">Save Changes</button>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+}
+
+function closeManageStores() {
+  const overlay = document.getElementById('manage-stores-overlay');
+  if (overlay) overlay.remove();
+}
+
+function cycleStoreEmoji(index) {
+  const emojis = ['🛒', '📦', '🎯', '🏪', '🛍️', '🏬', '🥬', '🍎', '🥩', '🧀', '🍞', '🥛', '🧈', '🥚'];
+  const current = groceryStores[index].emoji;
+  const currentIdx = emojis.indexOf(current);
+  const nextIdx = (currentIdx + 1) % emojis.length;
+  groceryStores[index].emoji = emojis[nextIdx];
+  
+  // Update the button in the overlay
+  const overlay = document.getElementById('manage-stores-overlay');
+  if (overlay) {
+    const btns = overlay.querySelectorAll('.msb-emoji-btn');
+    if (btns[index]) btns[index].textContent = emojis[nextIdx];
+  }
+}
+
+function updateStoreName(index, newName) {
+  if (newName.trim()) {
+    groceryStores[index].name = newName.trim();
+  }
+}
+
+function deleteStore(index) {
+  if (groceryStores.length <= 1) {
+    toast('Need at least one store!');
+    return;
+  }
+  if (!confirm('Delete "' + groceryStores[index].name + '" and all its items?')) return;
+
+  const storeId = groceryStores[index].id;
+  
+  // Remove store items
+  delete storeItems[storeId];
+  
+  // Remove store
+  groceryStores.splice(index, 1);
+  
+  // Switch to first store if we deleted the active one
+  if (activeStoreId === storeId) {
+    activeStoreId = groceryStores[0].id;
+  }
+
+  // Re-render the overlay
+  closeManageStores();
+  openManageStores();
+}
+
+function addNewStore() {
+  const newId = 'store_' + Date.now();
+  groceryStores.push({
+    id: newId,
+    name: 'New Store',
+    emoji: '🛍️'
+  });
+  
+  // Re-render the overlay
+  closeManageStores();
+  openManageStores();
+  
+  // Focus the new store's name input
+  setTimeout(() => {
+    const inputs = document.querySelectorAll('.msb-name-inp');
+    if (inputs.length) {
+      const lastInput = inputs[inputs.length - 1];
+      lastInput.focus();
+      lastInput.select();
+    }
+  }, 100);
+}
+
+function saveAndCloseStores() {
+  // Save stores to Firebase
+  fbSet('grocery_stores', groceryStores);
+  fbSet('store_items', storeItems);
+  
+  closeManageStores();
+  renderStoreTabs();
+  renderStoreItems();
+  toast('✓ Stores saved');
+}
+
+function finishStoreShopping() {
+  // Calculate total across all stores
+  let total = 0;
+  Object.values(storeItems).forEach(items => {
+    if (Array.isArray(items)) {
+      items.forEach(i => {
+        total += parseFloat(i.price) || 0;
+      });
+    }
+  });
+
+  // Save to week history
+  weekHist.unshift({
+    wk: currentWeek,
+    label: 'Week ' + currentWeek,
+    date: new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}),
+    t: +total.toFixed(2),
+    budget: WEEKLY_BUDGET
+  });
+  fbSet('week_hist', weekHist);
+  currentWeek++;
+
+  // Clear all store items
+  storeItems = {};
+  fbSet('store_items', storeItems);
+
+  renderStoreItems();
+  renderWeekHist();
+  syncJamieToDoug();
+  
+  toast('✓ Week saved! Total: $' + total.toFixed(2));
+}
+
+function initStoreGrocery() {
+  // Initialize store items object if empty
+  groceryStores.forEach(s => {
+    if (!storeItems[s.id]) storeItems[s.id] = [];
+  });
+  renderStoreTabs();
+  renderStoreItems();
 }
 
 function updateCCDisplay(){
