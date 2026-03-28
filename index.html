@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Martinson Family Dashboard v39</title>
+<title>Martinson Family Dashboard v39b</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script src="https://unpkg.com/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
@@ -345,6 +345,21 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .tx-scroll{max-height:400px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
 .cat-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:5px}
 
+/* v39b: Clickable category tags for recategorization */
+.cat-tag-clickable{cursor:pointer;padding:2px 8px 2px 4px;border-radius:6px;transition:all 0.15s;display:inline-flex;align-items:center}
+.cat-tag-clickable:hover{background:var(--surface2)}
+.cat-picker-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px}
+.cat-picker-box{background:var(--surface);border-radius:16px;padding:20px;width:100%;max-width:340px;max-height:80vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.4)}
+.cat-picker-title{font-family:var(--font-d);font-size:18px;margin-bottom:4px}
+.cat-picker-desc{font-size:12px;color:var(--text-mid);margin-bottom:16px;line-height:1.4}
+.cat-picker-grid{display:flex;flex-direction:column;gap:6px}
+.cat-picker-btn{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface2);cursor:pointer;transition:all 0.15s;font-family:var(--font-b);font-size:13px;color:var(--text);text-align:left}
+.cat-picker-btn:hover{background:var(--border);transform:translateX(4px)}
+.cat-picker-btn.selected{border-color:var(--teal);background:var(--teal-dim)}
+.cat-picker-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.cat-picker-cancel{margin-top:12px;width:100%;padding:10px;border:none;border-radius:10px;background:var(--surface2);color:var(--text-mid);font-family:var(--font-b);font-size:13px;cursor:pointer}
+.cat-picker-cancel:hover{background:var(--border)}
+
 /* nav bottom for jamie */
 .j-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(4,1fr);z-index:50;padding:8px 0 10px}
 .jn-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;background:none;border:none;font-family:var(--font-b);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;color:var(--text-soft);padding:4px;transition:color 0.2s}
@@ -406,7 +421,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <!-- ENTRY SCREEN -->
 <div id="entry-screen">
   <div class="entry-logo">Martinson Family</div>
-  <div class="entry-sub">Kansas City, MO · Your Family Hub · v39</div>
+  <div class="entry-sub">Kansas City, MO · Your Family Hub · v39b</div>
   <div class="entry-box">
     <div class="entry-title">🔒 Enter Password</div>
     <div class="entry-dots">
@@ -909,21 +924,149 @@ const CARDS = [
 ];
 const BUDGETS = {"Mortgage":2578,"Utilities":568,"Phone & Internet":364,"Loan Payment":248,"Debt Payments":776,"Subscriptions":552,"Groceries":800,"Food & Life":1140,"Known Unknowns":455};
 const RULES = [
-  {cat:"Mortgage",color:"#4d9fff",kw:["ROCKET MORTGAGE","ROCKET MTG"]},
-  {cat:"Phone & Internet",color:"#a78bfa",kw:["ATT* BILL","AT&T","GOOGLE *FIBER","GOOGLE FIBER","AT&T FIBER","SPECTRUM","COX COMM","XFINITY"]},
-  {cat:"Utilities",color:"#6dd5fa",kw:["SPIRE","EVERGY","KANSAS CITY WATER","CLAY COUNTY MO UTIL","ATMOS ENERGY"]},
-  {cat:"Loan Payment",color:"#f7971e",kw:["UPGRADE, INC","NEFURNMART","PROSPER","LENDING CLUB","SOFI"]},
-  {cat:"Debt Payments",color:"#ff6b6b",kw:["U.S. BANK DES:WEB PYMT","BEST BUY DES:PAYMENT","CITICTP","CHASE CREDIT CRD","CHASE EPAY","BANK OF AMERICA","BOFA","DISCOVER BANK","CAPITAL ONE PYMT","SYNCHRONY"]},
-  {cat:"Groceries",color:"#00c9a7",kw:["ALDI","PRICE CHOPPER","HY-VEE","HYVEE","WM SUPERCENTER","WAL-MART","WALMART","WAL MART","COSTCO","TARGET T-","TARGET 000","TARGET DEBIT","DOLLAR TREE","WHOLE FOODS","TRADER JOE","SPROUTS","SAVE A LOT","FRESH THYME","SCHNUCKS","DILLONS","RULER FOODS"]},
-  {cat:"Subscriptions",color:"#ffc542",kw:["NETFLIX","HULU","SPOTIFY","XBOX","ROBLOX","ADOBE","GOOGLE *CHATGP","CHATGPT","CLAUDE.AI","AMAZON PRIME","PRIME VIDEO","GOOGLE *YOUTUB","GOOGLE *TRUECA","GOOGLE *LINKED","GOOGLE *INSTAG","GOOGLE *GOOGL","AUDIBLE","NOOM","DISNEY","APPLE.COM/BILL","PEACOCK","PARAMOUNT","ESPN+","MAX ","HBO","SIRIUSXM","DROPBOX","MICROSOFT 365"]},
-  {cat:"Food & Life",color:"#fd9644",kw:["DOORDASH","DD *DOORDASH","MCDONALD","STARBUCKS","CHIPOTLE","FIRST WATCH","BUBBLES WINE","QT ","NORTH OAK SINC","SHELL","CASEY","DUNKIN","PANERA","CHICK-FIL","TACO BELL","SONIC ","DOMINO","PIZZA","DAIRY QUEEN","PANDA EXPRESS","JIMMY JOHN","RAISING CANE","CULVER","APPLEBEE","OLIVE GARDEN","CRACKER BARREL","OUTBACK","CHEESECAKE","SP COMFRT","FOOTHILLS PROF"]},
-  {cat:"Insurance",color:"#778ca3",kw:["STATE FARM","GEICO","PROGRESSIVE","ALLSTATE","NATIONWIDE","USAA"]},
-  {cat:"Health & Fitness",color:"#26de81",kw:["PLANET FIT","MpPNorthKansas","CVS/PHARMACY","CVS ","WALGREEN","URGENT CARE","PHARMACY","DENTIST","OPTOMETRIST","MEDICAL","CLINIC","DOCTOR","THERAPY","LABCORP","QUEST DIAG"]},
-  {cat:"Amazon",color:"#ff9900",kw:["AMAZON MKTPL","AMAZON.COM","AMZN MKTP"]},
-  {cat:"Home & Repairs",color:"#a55eea",kw:["HOME DEPOT","MENARDS","MNRD-","SHERWIN","LOWES","ROYAL FLUSH","PLUMB","ACE HARDWARE","TRUE VALUE","HOBBY LOBBY","HOBBYLOBBY","MICHAELS","JOANN","CLAY COUNTY","PROPERTY TAX"]},
-  {cat:"Income",color:"#00c9a7",kw:["SYMPHONYAI","PAYROLL"]},
-  {cat:"Transfers",color:"#4a5168",kw:["ONLINE BANKING TRANSFER","OVERDRAFT PROTECTION"]},
-  {cat:"Venmo/Other",color:"#778ca3",kw:["VENMO","SENDWAVE","ZELLE","CASH APP","PAYPAL"]},
+  // ═══ HOUSING & UTILITIES ═══
+  {cat:"Mortgage",color:"#4d9fff",kw:["ROCKET MORTGAGE","ROCKET MTG","QUICKEN LOANS","WELLS FARGO MTG","CHASE MTG","USAA MTG","NAVY FEDERAL MTG","PNC MTG"]},
+  {cat:"Phone & Internet",color:"#a78bfa",kw:["ATT* BILL","AT&T","GOOGLE *FIBER","GOOGLE FIBER","AT&T FIBER","SPECTRUM","COX COMM","XFINITY","COMCAST","VERIZON WIRELESS","VERIZON WL","T-MOBILE","TMOBILE","US CELLULAR","CRICKET","METRO PCS","MINT MOBILE","VISIBLE","BOOST MOBILE","STRAIGHT TALK","CONSUMER CELLULAR"]},
+  {cat:"Utilities",color:"#6dd5fa",kw:["SPIRE","EVERGY","KANSAS CITY WATER","CLAY COUNTY MO UTIL","ATMOS ENERGY","DUKE ENERGY","DOMINION ENERGY","AMEREN","CONSUMERS ENERGY","PSE&G","PEPCO","BGE","PIEDMONT GAS","NICOR GAS","CENTERPOINT","XCEL ENERGY","NATIONAL GRID","CONEDISON","WATER UTILITY","SEWER UTILITY","TRASH BILL","WASTE MGMT","REPUBLIC SERVICES"]},
+  
+  // ═══ DEBT & LOANS ═══
+  {cat:"Loan Payment",color:"#f7971e",kw:["UPGRADE, INC","NEFURNMART","PROSPER","LENDING CLUB","SOFI","UPSTART","AVANT","LIGHTSTREAM","MARCUS","EARNEST","CREDIBLE","LAUREL ROAD","FIRSTMARK"]},
+  {cat:"Debt Payments",color:"#ff6b6b",kw:["U.S. BANK DES:WEB PYMT","BEST BUY DES:PAYMENT","CITICTP","CITI CARD","CHASE CREDIT CRD","CHASE EPAY","BANK OF AMERICA","BOFA","DISCOVER BANK","DISCOVER CARD","CAPITAL ONE PYMT","CAPITAL ONE","SYNCHRONY","AMEX","AMERICAN EXPRESS","BARCLAYS","WELLS FARGO CARD","US BANK CARD"]},
+  
+  // ═══ GROCERIES (EXPANDED) ═══
+  {cat:"Groceries",color:"#00c9a7",kw:[
+    // National chains
+    "ALDI","PRICE CHOPPER","HY-VEE","HYVEE","WM SUPERCENTER","WAL-MART","WALMART","WAL MART","COSTCO","TARGET T-","TARGET 000","TARGET DEBIT","DOLLAR TREE","WHOLE FOODS","TRADER JOE","SPROUTS","SAVE A LOT","FRESH THYME","SCHNUCKS","DILLONS","RULER FOODS",
+    // More grocers
+    "KROGER","PUBLIX","SAFEWAY","ALBERTSON","FOOD LION","GIANT EAGLE","GIANT FOOD","MEIJER","WINCO","FOOD 4 LESS","FOOD4LESS","PIGGLY WIGGLY","WEGMANS","HARRIS TEETER","INGLES","BI-LO","BILO","WINN-DIXIE","WINN DIXIE","JEWEL-OSCO","JEWEL OSCO","FRED MEYER","RALPHS","VON'S","VONS","SMITHS FOOD","FRY'S FOOD","FRYS FOOD","KING SOOPERS","MARIANO'S","MARIANOS",
+    // Discount stores for groceries
+    "DOLLAR GENERAL","FAMILY DOLLAR","BIG LOTS","GROCERY OUTLET","LIDL","FOOD DEPOT","FOOD BASICS","MARKET BASKET","STATER BROS",
+    // Ethnic/specialty
+    "H MART","HMART","99 RANCH","RANCH 99","MITSUWA","ASIAN MARKET"
+  ]},
+  
+  // ═══ SUBSCRIPTIONS (EXPANDED) ═══
+  {cat:"Subscriptions",color:"#ffc542",kw:[
+    // Streaming
+    "NETFLIX","HULU","SPOTIFY","DISNEY","APPLE.COM/BILL","PEACOCK","PARAMOUNT","ESPN+","MAX ","HBO","AMAZON PRIME","PRIME VIDEO","GOOGLE *YOUTUB","YOUTUBE PREMIUM","YOUTUBE TV","SLING TV","FUBO","PHILO","CRUNCHYROLL","FUNIMATION","DISCOVERY+","SHOWTIME","AMC+","STARZ","BET+","TUBI",
+    // Gaming
+    "XBOX","ROBLOX","PLAYSTATION","PSN","NINTENDO","STEAM","EPIC GAMES","EA PLAY","GAME PASS","TWITCH",
+    // Software
+    "ADOBE","GOOGLE *CHATGP","CHATGPT","CLAUDE.AI","ANTHROPIC","OPENAI","NOTION","EVERNOTE","GRAMMARLY","CANVA","DROPBOX","MICROSOFT 365","OFFICE 365","ICLOUD","GOOGLE ONE","GOOGLE STORAGE","ZOOM","SLACK",
+    // Other subscriptions
+    "AUDIBLE","KINDLE UNLIMITED","NOOM","HEADSPACE","CALM APP","DUOLINGO","COURSERA","SKILLSHARE","MASTERCLASS","LINKEDIN PREMIUM","GOOGLE *LINKED","GOOGLE *INSTAG","GOOGLE *GOOGL","GOOGLE *TRUECA","SIRIUSXM","SIRIUS XM","PANDORA","APPLE MUSIC","TIDAL","DEEZER","NEWSPAPER","SUBSCRIPTION","PATREON","ONLYFANS"
+  ]},
+  
+  // ═══ FOOD & DINING (EXPANDED) ═══
+  {cat:"Food & Life",color:"#fd9644",kw:[
+    // Fast food
+    "MCDONALD","MCDONALDS","BURGER KING","WENDY","WENDYS","TACO BELL","CHICK-FIL","CHICKFILA","SONIC ","ARBYS","ARBY'S","JACK IN THE BOX","CARL'S JR","CARLS JR","HARDEE","POPEYES","KFC","KENTUCKY FRIED","RAISING CANE","JIMMY JOHN","JERSEY MIKE","SUBWAY ","FIREHOUSE SUB","WHICH WICH","POTBELLY","QUIZNOS","JASONS DELI","JASON'S DELI","MCALISTER","FIVE GUYS","SHAKE SHACK","IN-N-OUT","INNOUT","WHATABURGER","CULVERS","CULVER'S","CHECKERS","RALLYS","ZAXBY","WINGSTOP","BUFFALO WILD","BWW ","HOOTERS",
+    // Pizza
+    "DOMINO","PIZZA HUT","PAPA JOHN","PAPA JOHNS","LITTLE CAESAR","MARCOS PIZZA","MOD PIZZA","BLAZE PIZZA","PIEOLOGY","PAPA MURPHY",
+    // Casual dining
+    "APPLEBEE","OLIVE GARDEN","CHILI'S","CHILIS","TGIFRIDAY","TGI FRIDAY","RED LOBSTER","LONGHORN","OUTBACK","TEXAS ROADHOUSE","CRACKER BARREL","IHOP","DENNY'S","DENNYS","WAFFLE HOUSE","BOB EVANS","PERKINS","GOLDEN CORRAL","RYAN'S","RUBY TUESDAY","CHEESECAKE","RED ROBIN","BUFFALO WILD","CHEDDAR'S","BONEFISH","CARRABBAS",
+    // Coffee/breakfast
+    "STARBUCKS","DUNKIN","PANERA","FIRST WATCH","EINSTEIN BAGEL","BRUEGGER","CARIBOU COFFEE","PEET'S COFFEE","PEETS","TIM HORTON","DUTCH BROS","SCOOTERS COFFEE","BLACK ROCK COFFEE","BIGGBY",
+    // Mexican
+    "CHIPOTLE","QDOBA","MOES SOUTHWEST","MOE'S","TACO CABANA","DEL TACO","TACO BUENO","TORCHY","FREEBIRDS",
+    // Asian
+    "PANDA EXPRESS","PF CHANG","BENIHANA","POKE","TERIYAKI","CHINESE REST","THAI REST","SUSHI","PHO ",
+    // Delivery
+    "DOORDASH","DD *DOORDASH","UBER EATS","UBEREATS","GRUBHUB","POSTMATES","CAVIAR","SEAMLESS","INSTACART",
+    // Gas/convenience
+    "QT ","QUIKTRIP","NORTH OAK SINC","SHELL","CASEY","CASEYS","7-ELEVEN","7 ELEVEN","CIRCLE K","SPEEDWAY","RACETRAC","WAWA","SHEETZ","KWICK","PILOT ","LOVES TRAVEL","TA EXPRESS","FLYING J","BUCEES","BUC-EES","MAVERICK","MAPCO","PHILLIPS 66","CONOCO","BP ","EXXON","MOBIL","CHEVRON","TEXACO","VALERO","SUNOCO","GULF ","AMPM","AM PM","KWIK TRIP","KWIK STAR","HOLIDAY STATION",
+    // Other food
+    "BUBBLES WINE","SP COMFRT","FOOTHILLS PROF","DAIRY QUEEN","DQ ","BASKIN","COLD STONE","KRISPY KREME","CINNABON","AUNTIE ANNE","JAMBA","SMOOTHIE KING","TROPICAL SMOOTH"
+  ]},
+  
+  // ═══ INSURANCE ═══
+  {cat:"Insurance",color:"#778ca3",kw:["STATE FARM","GEICO","PROGRESSIVE","ALLSTATE","NATIONWIDE","USAA","LIBERTY MUTUAL","FARMERS INS","TRAVELERS INS","ERIE INS","AMERICAN FAMILY","SAFECO","ESURANCE","METLIFE","PRUDENTIAL","AETNA","CIGNA","ANTHEM","BLUE CROSS","UNITED HEALTH","KAISER","HUMANA","OSCAR HEALTH"]},
+  
+  // ═══ HEALTH & FITNESS ═══
+  {cat:"Health & Fitness",color:"#26de81",kw:[
+    // Pharmacies
+    "CVS/PHARMACY","CVS ","WALGREEN","RITE AID","PHARMACY","GOOD RX","PILL PACK",
+    // Gyms
+    "PLANET FIT","LA FITNESS","LIFETIME FIT","24 HOUR FIT","GOLD'S GYM","GOLDS GYM","ANYTIME FIT","ORANGETHEORY","CROSSFIT","YMCA","CRUNCH FIT","EQUINOX","SOUL CYCLE","F45 ","PELOTON",
+    // Medical
+    "MpPNorthKansas","URGENT CARE","DENTIST","OPTOMETRIST","MEDICAL","CLINIC","DOCTOR","THERAPY","LABCORP","QUEST DIAG","HOSPITAL","PHYSICIAN","PEDIATRIC","DERMATOL","ORTHOPEDIC","CHIROPRACT","PHYSICAL THERAPY","MENTAL HEALTH","PSYCHIATR","PSYCHOLOG","COUNSELING","EYE CARE","VISION CENTER","LENSCRAFTERS","PEARLE VISION","COSTCO OPTICAL"
+  ]},
+  
+  // ═══ SHOPPING ═══
+  {cat:"Amazon",color:"#ff9900",kw:["AMAZON MKTPL","AMAZON.COM","AMZN MKTP","AMZN","AMAZON PRIME","AMAZON FRESH","WHOLE FOODS AMAZON"]},
+  {cat:"Home & Repairs",color:"#a55eea",kw:[
+    // Hardware
+    "HOME DEPOT","MENARDS","MNRD-","SHERWIN","LOWES","ACE HARDWARE","TRUE VALUE","HARBOR FREIGHT","NORTHERN TOOL","TRACTOR SUPPLY","RURAL KING","FARM & FLEET",
+    // Home services
+    "ROYAL FLUSH","PLUMB","ROTO-ROOTER","STANLEY STEEMER","SERVPRO","HANDYMAN","ELECTRICIAN","HVAC","A/C REPAIR","ROOFING",
+    // Crafts
+    "HOBBY LOBBY","HOBBYLOBBY","MICHAELS","JOANN","AC MOORE","BLICK ART",
+    // Property
+    "CLAY COUNTY","PROPERTY TAX","HOA ","HOME OWNERS ASSOC"
+  ]},
+  
+  // ═══ SHOPPING (GENERAL) ═══
+  {cat:"Shopping",color:"#e056fd",kw:[
+    // Department stores
+    "KOHLS","KOHL'S","MACYS","MACY'S","NORDSTROM","JC PENNEY","JCPENNEY","DILLARDS","BELK","SEARS","MARSHALLS","TJ MAXX","TJMAXX","ROSS DRESS","BURLINGTON","HOMEGOODS","TUESDAY MORNING",
+    // Clothing
+    "OLD NAVY","GAP ","BANANA REPUBLIC","H&M","ZARA","FOREVER 21","URBAN OUTFITTER","AEROPOSTALE","AMERICAN EAGLE","HOLLISTER","ABERCROMBIE","EXPRESS ","BUCKLE","TORRID","LANE BRYANT","CATO","MAURICES","CHICOS","TALBOTS","ANN TAYLOR","LOFT ",
+    // Electronics
+    "BEST BUY","GAMESTOP","GAME STOP","APPLE STORE","MICRO CENTER","B&H PHOTO",
+    // Sporting goods
+    "DICK'S SPORT","DICKS SPORT","ACADEMY SPORT","BASS PRO","CABELAS","REI ","SCHEELS","BIG 5 SPORT",
+    // Pet
+    "PETCO","PETSMART","PET SUPPLIES","CHEWY",
+    // Other retail
+    "BED BATH","PIER 1","POTTERY BARN","CRATE & BARREL","WILLIAMS SONOMA","SUR LA TABLE","WEST ELM","CB2","IKEA","AT HOME","WORLD MARKET"
+  ]},
+  
+  // ═══ KIDS & FAMILY ═══
+  {cat:"Kids & Family",color:"#fd79a8",kw:[
+    // Kids retail
+    "CARTERS","CARTER'S","OSHKOSH","CHILDREN'S PLACE","ONCE UPON A CHILD","KID TO KID","GYMBOREE","JUSTICE ",
+    // Toys
+    "TOYS R US","FIVE BELOW","LEARNING EXPRESS","BUILD A BEAR","LEGO STORE",
+    // Activities
+    "DAVE & BUSTER","CHUCK E CHEESE","MAIN EVENT","TRAMPOLINE","SKY ZONE","URBAN AIR","BOUNCE","ARCADE","CINEMA","MOVIE THEATER","AMC THEATRE","REGAL CINEMA","CINEMARK","ALAMO DRAFT",
+    // Education
+    "TUTOR","KUMON","MATHNASIUM","SYLVAN","SCHOOL SUPPLY","DANCE CLASS","MUSIC LESSON","KARATE","MARTIAL ART","SWIM LESSON","LITTLE LEAGUE","YOUTH SPORT"
+  ]},
+  
+  // ═══ TRANSPORTATION ═══
+  {cat:"Transportation",color:"#00b894",kw:[
+    // Auto services
+    "OIL CHANGE","JIFFY LUBE","VALVOLINE","GREASE MONKEY","TAKE 5 OIL","EXPRESS OIL","PENSKE","UHAUL","U-HAUL","BUDGET TRUCK","ENTERPRISE","HERTZ","AVIS","NATIONAL CAR","ALAMO RENT",
+    // Auto parts
+    "AUTOZONE","O'REILLY","OREILLY","ADVANCE AUTO","NAPA AUTO","PEPBOYS","DISCOUNT TIRE","FIRESTONE","GOODYEAR","TIRE PLUS","COSTCO TIRE","SAM'S TIRE",
+    // Car wash
+    "CAR WASH","QUICK QUACK","TOMMY'S EXPRESS","MISTER CAR WASH","ZIPS CAR WASH",
+    // Parking/tolls
+    "PARKING","METER ","TOLL ","EZ PASS","SUNPASS","PIKEPASS",
+    // Rideshare
+    "UBER ","LYFT","UBER TRIP"
+  ]},
+  
+  // ═══ TRAVEL ═══
+  {cat:"Travel",color:"#74b9ff",kw:[
+    // Airlines
+    "SOUTHWEST","AMERICAN AIR","DELTA AIR","UNITED AIR","JETBLUE","SPIRIT AIR","FRONTIER AIR","ALASKA AIR","HAWAIIAN AIR","ALLEGIANT",
+    // Hotels
+    "MARRIOTT","HILTON","HYATT","IHG","HOLIDAY INN","HAMPTON INN","BEST WESTERN","CHOICE HOTEL","WYNDHAM","LA QUINTA","MOTEL 6","DAYS INN","SUPER 8","RADISSON","SHERATON","WESTIN","FAIRFIELD","COURTYARD","RESIDENCE INN","AIRBNB","VRBO",
+    // Booking
+    "EXPEDIA","BOOKING.COM","HOTELS.COM","KAYAK","PRICELINE","TRAVELOCITY","ORBITZ"
+  ]},
+  
+  // ═══ INCOME ═══
+  {cat:"Income",color:"#00c9a7",kw:["SYMPHONYAI","PAYROLL","DIRECT DEP","SALARY","WAGES","TAX REFUND","VENMO CASHOUT","DIVIDEND","INTEREST PAYMENT"]},
+  
+  // ═══ TRANSFERS ═══
+  {cat:"Transfers",color:"#4a5168",kw:["ONLINE BANKING TRANSFER","OVERDRAFT PROTECTION","TRANSFER FROM","TRANSFER TO","ACH TRANSFER","WIRE TRANSFER","INTERNAL TFR","MOBILE DEPOSIT"]},
+  
+  // ═══ PEER-TO-PEER ═══
+  {cat:"Venmo/Other",color:"#778ca3",kw:["VENMO","SENDWAVE","ZELLE","CASH APP","PAYPAL","APPLE CASH","GOOGLE PAY"]},
+  
+  // ═══ CATCH-ALL ═══
   {cat:"Other",color:"#8b92a8",kw:[]},
 ];
 const BVA_MAP = {"Mortgage":["Mortgage"],"Utilities":["Utilities"],"Phone & Internet":["Phone & Internet"],"Loan Payment":["Loan Payment"],"Debt Payments":["Debt Payments"],"Subscriptions":["Subscriptions"],"Groceries":["Groceries"],"Food & Life":["Food & Life","Amazon"],"Known Unknowns":["Home & Repairs","Health & Fitness","Insurance","Venmo/Other"]};
@@ -977,6 +1120,7 @@ let currentUser = ''; // 'douglas' or 'jamie' — controls AI personality
 let aiChatHistory = []; // conversation history for AI panel
 let aiPanelOpen = false;
 let simplefinConnected = false; // whether SimpleFIN bank is linked
+let learnedCategories = {}; // v39b: User-taught merchant→category mappings {merchantPattern: category}
 
 // ══════ MULTI-STORE GROCERY STATE (v38) ══════
 // Default stores - Jamie can add/remove/rename via ⚙️
@@ -996,7 +1140,7 @@ const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw0q-7XhX6OztGR54bXX5
 // SYNC ENGINE — Google Sheets architecture
 // ══════════════════════════════════════════════════════════════════
 // ══════════════════════════════════════════════════════════════════
-// FIREBASE SYNC ENGINE — v39
+// FIREBASE SYNC ENGINE — v39b
 //
 // One key controls everything: martinson/last_csv_data
 //
@@ -1212,7 +1356,7 @@ async function syncAll() {
   // Load non-CSV keys from localStorage instantly (no network)
   ['custom_meals','hidden_meals','week_hist','meal_plan',
    'cc_balances','family_goals','financial_settings',
-   'grocery_stores','store_items'].forEach(k => {
+   'grocery_stores','store_items','learned_categories'].forEach(k => {
     const v = localStorage.getItem('fb_' + k);
     if (v) try { applyKey(k, JSON.parse(v)); } catch(e) {}
   });
@@ -1287,6 +1431,11 @@ function applyKey(key, value) {
       }
       break;
     case 'csv_cleared': break; // handled by applyServerState now
+    case 'learned_categories': 
+      if (typeof value === 'object') {
+        learnedCategories = value;
+      }
+      break;
   }
 }
 
@@ -1430,7 +1579,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Load non-CSV state from localStorage for instant startup
   ['custom_meals','hidden_meals','week_hist','meal_plan',
    'cc_balances','family_goals','financial_settings',
-   'grocery_stores','store_items'].forEach(k => {
+   'grocery_stores','store_items','learned_categories'].forEach(k => {
     const v = localStorage.getItem('fb_' + k);
     if (v) try { applyKey(k, JSON.parse(v)); } catch(e) {}
   });
@@ -1548,7 +1697,19 @@ function updatePinDots(){for(let i=0;i<4;i++){const d=document.getElementById('p
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
 
 // ══════ CSV
-function categorize(d){const u=d.toUpperCase();for(const r of RULES){if(r.kw.some(k=>u.includes(k)))return r;}return RULES[RULES.length-1];}
+function categorize(d){
+  const u=d.toUpperCase();
+  // v39b: Check learned categories first (user-taught mappings)
+  for(const [pattern, cat] of Object.entries(learnedCategories)){
+    if(u.includes(pattern)){
+      const rule = RULES.find(r => r.cat === cat);
+      if(rule) return rule;
+    }
+  }
+  // Fall through to RULES
+  for(const r of RULES){if(r.kw.some(k=>u.includes(k)))return r;}
+  return RULES[RULES.length-1];
+}
 function onDragOver(e){e.preventDefault();document.getElementById('drop-zone').classList.add('drag-over');}
 function onDragLeave(){document.getElementById('drop-zone').classList.remove('drag-over');}
 function onDrop(e){
@@ -1937,12 +2098,170 @@ function filterTx(cat,btn){document.querySelectorAll('.txf').forEach(b=>b.classL
 function renderTxRows(cat){
   const f=cat==='All'?transactions:transactions.filter(t=>t.cat===cat);
   document.getElementById('tx-count').textContent=f.length+' transactions';
-  document.getElementById('tx-tbody').innerHTML=f.map(t=>{
+  document.getElementById('tx-tbody').innerHTML=f.map((t,i)=>{
     const abs=Math.abs(t.amount);const isI=t.amount>0;const big=abs>=200&&!isI;
     const cls=isI?'color:var(--teal);font-weight:600':big?'color:var(--red);font-weight:600':'font-weight:500';
     const s=t.desc.length>50?t.desc.substring(0,50)+'…':t.desc;
-    return`<tr><td style="color:var(--text-mid);font-size:12px;white-space:nowrap">${t.date}</td><td style="font-size:12px">${s}</td><td style="font-size:12px"><span class="cat-dot" style="background:${t.color}"></span>${t.cat}</td><td style="text-align:right;${cls}">${isI?'+'+fmt(t.amount):'-'+fmt(t.amount)}</td></tr>`;
+    // v39b: Make category clickable for recategorization
+    const txIdx = transactions.indexOf(t);
+    return`<tr><td style="color:var(--text-mid);font-size:12px;white-space:nowrap">${t.date}</td><td style="font-size:12px" title="${t.desc}">${s}</td><td style="font-size:12px"><span class="cat-tag-clickable" onclick="openCategoryPicker(${txIdx},event)" title="Click to change category"><span class="cat-dot" style="background:${t.color}"></span>${t.cat}</span></td><td style="text-align:right;${cls}">${isI?'+'+fmt(t.amount):'-'+fmt(t.amount)}</td></tr>`;
   }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// v39b: Click-to-Recategorize — teach the system once, fix forever
+// ═══════════════════════════════════════════════════════════════════════
+let _pickerTxIdx = null;
+
+function openCategoryPicker(txIdx, e) {
+  e.stopPropagation();
+  _pickerTxIdx = txIdx;
+  const tx = transactions[txIdx];
+  if (!tx) return;
+  
+  // Get unique categories from RULES (excluding empty catch-all)
+  const cats = RULES.filter(r => r.cat !== 'Other' || r.kw.length > 0).map(r => ({cat: r.cat, color: r.color}));
+  
+  const overlay = document.createElement('div');
+  overlay.className = 'cat-picker-overlay';
+  overlay.id = 'cat-picker-overlay';
+  overlay.onclick = (ev) => { if (ev.target === overlay) closeCategoryPicker(); };
+  
+  overlay.innerHTML = `
+    <div class="cat-picker-box">
+      <div class="cat-picker-title">Change Category</div>
+      <div class="cat-picker-desc">
+        <strong>${tx.desc.substring(0,40)}${tx.desc.length>40?'...':''}</strong><br>
+        Currently: <span style="color:${tx.color}">${tx.cat}</span><br>
+        <span style="font-size:11px;color:var(--text-soft)">This will also apply to all similar transactions</span>
+      </div>
+      <div class="cat-picker-grid">
+        ${cats.map(c => `
+          <button class="cat-picker-btn ${c.cat === tx.cat ? 'selected' : ''}" onclick="recategorizeTransaction('${c.cat}')">
+            <span class="cat-picker-dot" style="background:${c.color}"></span>
+            ${c.cat}
+          </button>
+        `).join('')}
+      </div>
+      <button class="cat-picker-cancel" onclick="closeCategoryPicker()">Cancel</button>
+    </div>
+  `;
+  
+  document.body.appendChild(overlay);
+}
+
+function closeCategoryPicker() {
+  const overlay = document.getElementById('cat-picker-overlay');
+  if (overlay) overlay.remove();
+  _pickerTxIdx = null;
+}
+
+function recategorizeTransaction(newCat) {
+  if (_pickerTxIdx === null) return;
+  const tx = transactions[_pickerTxIdx];
+  if (!tx) { closeCategoryPicker(); return; }
+  
+  // Extract merchant pattern (first meaningful words, remove numbers)
+  const pattern = extractMerchantPattern(tx.desc);
+  if (!pattern) {
+    toast('Could not identify merchant pattern');
+    closeCategoryPicker();
+    return;
+  }
+  
+  // Save the learned mapping
+  learnedCategories[pattern] = newCat;
+  fbSet('learned_categories', learnedCategories);
+  
+  // Get the new color
+  const rule = RULES.find(r => r.cat === newCat) || RULES[RULES.length - 1];
+  const newColor = rule.color;
+  
+  // Re-categorize ALL transactions matching this pattern
+  let matchCount = 0;
+  transactions.forEach(t => {
+    if (t.desc.toUpperCase().includes(pattern)) {
+      t.cat = newCat;
+      t.color = newColor;
+      matchCount++;
+    }
+  });
+  
+  closeCategoryPicker();
+  
+  // Refresh all views
+  renderTx();
+  renderCatTable();
+  renderBVA();
+  updateDonutFromTransactions();
+  renderSankey();
+  
+  toast(`✓ ${matchCount} transaction${matchCount !== 1 ? 's' : ''} moved to ${newCat}`);
+  
+  // Re-sync to Firebase with updated categories
+  resyncTransactionsToFirebase();
+}
+
+function extractMerchantPattern(desc) {
+  // Clean and extract the merchant identifier
+  // Remove common suffixes, numbers, locations
+  let clean = desc.toUpperCase()
+    .replace(/\d{4,}/g, '')           // Remove long numbers (card numbers, ref IDs)
+    .replace(/\s+#\d+/g, '')          // Remove store numbers like #1234
+    .replace(/\s+\d+$/g, '')          // Remove trailing numbers
+    .replace(/\s{2,}/g, ' ')          // Normalize spaces
+    .trim();
+  
+  // Extract first 2-3 meaningful words (the merchant name)
+  const words = clean.split(/\s+/).filter(w => w.length > 1);
+  
+  // If starts with common prefixes, include more words
+  const prefixes = ['DD', 'SP', 'SQ', 'TST', 'GOOGLE', 'APPLE'];
+  let numWords = 2;
+  if (prefixes.some(p => words[0] === p || words[0]?.startsWith(p + '*'))) {
+    numWords = 3;
+  }
+  
+  const pattern = words.slice(0, numWords).join(' ');
+  
+  // Must be at least 3 chars
+  return pattern.length >= 3 ? pattern : null;
+}
+
+function resyncTransactionsToFirebase() {
+  // Re-upload the updated transaction data to Firebase
+  const EXCL_SYNC = ['Transfers','Income'];
+  const catTotals = {};
+  transactions.filter(t => t.amount < 0 && !EXCL_SYNC.includes(t.cat))
+    .forEach(t => { catTotals[t.cat] = (catTotals[t.cat] || 0) + Math.abs(t.amount); });
+
+  function sfSan(s){ return String(s||'').replace(/[\x00-\x1F\x7F]/g,' ').trim(); }
+  const txCompact = transactions.map(t => ({
+    d: sfSan(t.date), 
+    n: sfSan(t.desc).substring(0, 50),
+    a: isFinite(t.amount) ? t.amount : 0, 
+    c: sfSan(t.cat), 
+    m: sfSan(t.month),
+    fp: t.fingerprint || null
+  }));
+
+  const dates = transactions.map(t => new Date(t.date)).filter(d => !isNaN(d));
+  const mn = new Date(Math.min(...dates)).toLocaleDateString('en-US', {month:'short', day:'numeric'});
+  const mx = new Date(Math.max(...dates)).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+
+  const syncData = {
+    txData: JSON.stringify(txCompact),
+    cats: JSON.stringify(catTotals),
+    period: sfSan(mn + ' – ' + mx),
+    loadedOn: sfSan(new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})),
+    count: transactions.length,
+    uploadedAt: Date.now(),
+    source: 'recategorized_v39b'
+  };
+
+  uploadCsvToServer(syncData)
+    .then(() => { lastSyncTime = new Date(); updateSyncBadge('ok'); })
+    .catch(() => { updateSyncBadge('error'); });
 }
 
 function renderBVA(){
