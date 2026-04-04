@@ -596,7 +596,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
             <tr><td>Best Buy 1345<span class="apr">29.99%</span></td><td style="text-align:right;color:var(--red);font-weight:600">$4,680</td><td style="text-align:right">$144</td></tr>
             <tr><td>Chase 0690<span class="apr">27.24%</span></td><td style="text-align:right;color:var(--red);font-weight:600">$5,460</td><td style="text-align:right">$164</td></tr>
             <tr><td>BofA 9362<span class="apr">23.74%</span></td><td style="text-align:right;color:var(--red);font-weight:600">$13,567</td><td style="text-align:right">$384</td></tr>
-            <tr style="border-top:2px solid var(--border)"><td style="font-weight:700">TOTAL</td><td style="text-align:right;font-weight:700;color:var(--red)" id="cc-total-bal">$23,707</td><td style="text-align:right;font-weight:700" id="cc-total-min">$692</td></tr>
+            <tr style="border-top:2px solid var(--border)"><td style="font-weight:700">TOTAL</td><td style="text-align:right;font-weight:700;color:var(--red)">$23,707</td><td style="text-align:right;font-weight:700">$692</td></tr>
           </tbody></table>
           <div id="daily-debt-cost" style="margin-top:10px;padding:8px 12px;background:rgba(255,107,107,0.08);border-radius:8px;font-size:12px;color:var(--red);text-align:center">
             This debt costs you <strong>$17.04/day</strong> in interest
@@ -2445,8 +2445,11 @@ function updateDonutFromTransactions(){
       : selectedPeriod === '3months' ? 'Monthly avg · 3 months'
       : `Monthly avg · ${monthsCovered.toFixed(1)}mo`;
     const warn = surplus < -200 ? ' ⚠ Overspending' : '';
-    surplusSubEl.textContent = periodLabel + warn;
-    surplusSubEl.style.color = surplus < 0 ? 'var(--red)' : '';
+    // v40: Warn when early in month — surplus is misleading before bills hit
+    const dayOfMonth = new Date().getDate();
+    const earlyWarning = (selectedPeriod === 'thisMonth' && dayOfMonth <= 10 && surplus > 500) ? ' · Before bills' : '';
+    surplusSubEl.textContent = periodLabel + warn + earlyWarning;
+    surplusSubEl.style.color = surplus < 0 ? 'var(--red)' : (earlyWarning ? 'var(--gold)' : '');
   }
   if(incomeEl) incomeEl.textContent = fmt(monthlyIncome);
 
@@ -3202,6 +3205,7 @@ function updateDebtMetrics(){
   const totalDebt = CARDS.reduce((s,c)=>s+c.balance,0);
   const dailyInterest = CARDS.reduce((s,c)=>s+(c.balance*(c.apr/365)),0);
   const monthlyInterest = CARDS.reduce((s,c)=>s+(c.balance*(c.apr/12)),0);
+  const totalMin = CARDS.reduce((s,c)=>s+c.min,0);
 
   // Daily cost banner
   const daily = document.getElementById('daily-debt-cost');
@@ -3226,6 +3230,16 @@ function updateDebtMetrics(){
   const debtSub = document.getElementById('d-debt-sub');
   if(debtEl) debtEl.textContent = fmt(totalDebt);
   if(debtSub) debtSub.textContent = `${CARDS.length} cards · $${Math.round(monthlyInterest).toLocaleString()}/mo interest`;
+
+  // v40: Sync CC table rows to match CARDS array (prevents metric vs table mismatch)
+  const ccTable = document.getElementById('cc-table');
+  if(ccTable){
+    const tbody = ccTable.querySelector('tbody');
+    if(tbody){
+      tbody.innerHTML = CARDS.map(c=>`<tr><td>${c.name}<span class="apr">${(c.apr*100).toFixed(2)}%</span></td><td style="text-align:right;color:var(--red);font-weight:600">${fmt(c.balance)}</td><td style="text-align:right">$${c.min}</td></tr>`).join('') +
+        `<tr style="border-top:2px solid var(--border)"><td style="font-weight:700">TOTAL</td><td style="text-align:right;font-weight:700;color:var(--red)" id="cc-total-bal">${fmt(totalDebt)}</td><td style="text-align:right;font-weight:700" id="cc-total-min">$${totalMin}</td></tr>`;
+    }
+  }
 }
 
 // ── AI PROXY — routes all Claude API calls through Apps Script ────
@@ -3264,29 +3278,24 @@ async function getAIInsights(){
   content.innerHTML='<div style="color:var(--teal);font-size:12px">✨ Analyzing your spending...</div>';
   if(btn) btn.style.display='none';
 
-  // Build spending summary
-  const EXCL=['Transfers','Income'];
-  const ct={};
-  const txDates=transactions.map(t=>new Date(t.date)).filter(d=>!isNaN(d));
-  const days=txDates.length>1?(Math.max(...txDates)-Math.min(...txDates))/(86400000):30;
-  const months=Math.max(1,days/30.44);
-  transactions.filter(t=>t.amount<0&&!EXCL.includes(t.cat))
-    .forEach(t=>{ct[t.cat]=(ct[t.cat]||0)+Math.abs(t.amount);});
-  const monthly=Object.entries(ct).map(([k,v])=>`${k}: $${(v/months).toFixed(0)}/mo`).join(', ');
-  const surplus=FINANCIAL.income-Object.values(ct).reduce((s,v)=>s+v,0)/months;
-  const totalDebt=CARDS.reduce((s,c)=>s+c.balance,0);
-  const sc=calcPayoff(0,'avalanche');
+  const ctx = buildFinancialContext();
+  const prompt=`${ctx}
 
-  const prompt=`You are a sharp, warm financial advisor helping the Martinson family in Kansas City. 
-Income: $${FINANCIAL.income}/mo. Monthly spending: ${monthly}. 
-Monthly surplus: $${surplus.toFixed(0)}. Total CC debt: $${totalDebt.toFixed(0)} across 3 cards (highest APR: Best Buy 29.99%).
-Debt-free in ${sc.length} months at current pace.
-Provide 3 specific, actionable insights in plain language. Be direct and encouraging. 
+You are Claudette, the Martinson family's financial co-pilot. Based on the data above, provide 3 specific insights.
+
+CRITICAL RULES:
+- NEVER suggest cutting protected subscriptions (Noom, Planet Fitness, Hulu+LiveTV, ChatGPT, Perplexity)
+- NEVER suggest Mission Control go below $700
+- NEVER suggest touching The Foundation or Merrill retirement
+- Focus on the CURRENT KILL TARGET (Best Buy 1345 at 29.99% APR)
+- Celebrate wins — 2 debts already killed! On track for debt-free Summer 2027
+- Be warm, direct, encouraging. No doom. No panic. This family has a plan and it's WORKING.
+
 Format as: "1. [insight]" on separate lines. Max 120 words total. No jargon.`;
 
   try {
     const text = await callClaudeProxy({
-      max_tokens: 200,
+      max_tokens: 250,
       messages: [{ role: 'user', content: prompt }]
     });
     content.innerHTML = '<div style="font-size:11px;font-weight:700;color:var(--teal);margin-bottom:6px">✨ AI Insights</div>' +
@@ -3680,38 +3689,59 @@ function buildFinancialContext(){
   let spendingSummary='No transaction data loaded.';
   let mealContext='';
 
-  if(transactions.length){
+  // v40: Use filtered transactions for current period context
+  const filtered = getFilteredTransactions();
+  if(filtered.length){
     const ct={};
-    const txDates=transactions.map(t=>new Date(t.date)).filter(d=>!isNaN(d));
-    const days=txDates.length>1?(Math.max(...txDates)-Math.min(...txDates))/(86400000):30;
-    const months=Math.max(1,days/30.44);
-    transactions.filter(t=>t.amount<0&&!EXCL.includes(t.cat))
+    filtered.filter(t=>t.amount<0&&!EXCL.includes(t.cat))
       .forEach(t=>{ct[t.cat]=(ct[t.cat]||0)+Math.abs(t.amount);});
-    const monthly=Object.entries(ct).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${k}: $${(v/months).toFixed(0)}/mo`).join(', ');
-    const totalSpend=Object.values(ct).reduce((s,v)=>s+v,0)/months;
-    spendingSummary=`Monthly spending breakdown: ${monthly}. Total monthly spending: $${totalSpend.toFixed(0)}.`;
+    const sorted=Object.entries(ct).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${k}: $${v.toFixed(0)}`).join(', ');
+    const totalSpend=Object.values(ct).reduce((s,v)=>s+v,0);
+    const periodLabel = selectedPeriod === 'thisMonth' ? 'this month so far' : selectedPeriod === 'lastMonth' ? 'last month' : 'recent months';
+    spendingSummary=`Spending ${periodLabel}: ${sorted}. Total: $${totalSpend.toFixed(0)}.`;
   }
 
   const totalDebt=CARDS.reduce((s,c)=>s+c.balance,0);
-  const cardDetails=CARDS.map(c=>`${c.name}: $${c.balance.toFixed(0)} at ${(c.apr*100).toFixed(2)}% APR, min $${c.min}`).join('; ');
-  const sc=calcPayoff(0,'avalanche');
-  const surplus=FINANCIAL.income-Object.values(BUDGETS).reduce((s,v)=>s+v,0);
+  const cardDetails=CARDS.map(c=>`${c.name}: $${c.balance.toFixed(0)} at ${(c.apr*100).toFixed(1)}% APR`).join('; ');
   const grocerySpent=weekHist.reduce((s,w)=>s+w.t,0);
 
-  // Meal context for Jamie
   const plannedMeals=DAYS.map(d=>{const k=d.substr(0,3);return mealPlan[k]?`${d}: ${mealPlan[k].n}`:`${d}: not planned`;}).join(', ');
   mealContext=`This week's meals: ${plannedMeals}. Grocery budget: $200/week, $800/month. Spent this month on groceries: $${grocerySpent.toFixed(0)}.`;
 
-  return `FAMILY FINANCIAL DATA (real, current):
-Income: $${FINANCIAL.income}/mo net (SymphonyAI, Kansas City).
+  return `MARTINSON FAMILY FINANCIAL PLAN (verified data — follow these rules):
+Income: $9,090/mo net (SymphonyAI, Kansas City). Paycheck $4,545 biweekly.
+
+THREE JAR SYSTEM:
+- Mission Control (MC): Bills, debt kills, strategy. $700 MINIMUM FLOOR — NEVER suggest going below $700.
+- Family Fuel (FF): Groceries, gas, kids, household. $1,200/paycheck transfer + $100 cash.
+- The Foundation: $5,000 emergency savings. Job loss ONLY. Do NOT suggest touching it.
+
+DEBT KILL PLAN (in this exact order):
+${cardDetails}. Total: $${totalDebt.toFixed(0)}.
+Kill weapon: $1,220/month ($610/paycheck) applied to highest-APR debt first.
+2 cards already killed (USB 6925 + USB 2405 on April 3).
+Next target: Best Buy 1345. Then Chase 0690. Then BofA 9362.
+Debt-free target: Summer 2027.
+
+PROTECTED SUBSCRIPTIONS (do NOT suggest cutting these):
+Noom $279 (medical), Planet Fitness x2 $107, Hulu+LiveTV+Disney+ $90, ChatGPT $20, Perplexity $20.
+
+CURRENT SPENDING:
 ${spendingSummary}
-Budget surplus: $${surplus}/mo.
-Credit card debt: $${totalDebt.toFixed(0)} across ${CARDS.length} cards. Details: ${cardDetails}.
-Debt-free estimate: ${sc.length} months (avalanche method, minimums only).
-Emergency fund: $${familyGoals.efund}. Life goals fund: $${familyGoals.lgfund}. Retirement: $158,540 (Merrill IRRA).
-Net worth: $${(158540+familyGoals.efund+familyGoals.lgfund-totalDebt).toFixed(0)}.
+Monthly fixed bills: $3,890. Subscriptions: $688. FF budget: $2,400.
+
 ${mealContext}
-Available meals in system: ${[...MEALS,...customMeals].map(m=>m.n).join(', ')}.`;
+
+RULES FOR YOUR ADVICE:
+- NEVER suggest cutting protected subscriptions
+- NEVER suggest Mission Control go below $700
+- NEVER suggest touching The Foundation or Merrill retirement ($158,540)
+- NEVER suggest new credit card debt
+- Frame advice around the kill order — redirect savings to Best Buy kill
+- Be encouraging about the plan — 2 debts already killed, 16 months to debt-free
+- If speaking to Jamie: ONE number, ONE action, warm, no jargon
+Emergency fund: $${familyGoals.efund}. Retirement: $158,540 (Merrill — DO NOT TOUCH).
+Net worth: $${(158540+familyGoals.efund+familyGoals.lgfund-totalDebt).toFixed(0)}.`;
 }
 
 async function sendAIMessage(){
@@ -3747,21 +3777,21 @@ async function sendAIMessage(){
   let systemPrompt;
 
   if(currentUser==='douglas'){
-    systemPrompt=`You are a sharp, data-driven financial analyst assistant for Douglas Martinson, a Senior Manager at SymphonyAI in Kansas City. You have access to his REAL family financial data below.
+    systemPrompt=`You are Claudette, Douglas Martinson's financial co-pilot. He's a Senior Manager of Data Analytics at SymphonyAI in Kansas City. You have access to his REAL family financial data below.
 
 Be direct, analytical, and encouraging. Use specific numbers from the data. Reference actual card names, APR rates, and spending categories. Think like a Bloomberg terminal that can talk. If he asks about projections, do the math. If he asks about optimization, model the scenarios. Be concise — Douglas respects efficiency.
 
 ${financialCtx}
 
-Rules: Be specific with numbers. Never make up data — use only what's provided. Keep responses under 200 words unless he asks for detail. Use $ formatting for all amounts.`;
+Rules: Be specific with numbers. Never make up data — use only what's provided. Keep responses under 200 words unless he asks for detail. Use $ formatting for all amounts. NEVER suggest cutting protected subscriptions. NEVER suggest MC below $700. NEVER suggest touching Foundation or Merrill.`;
   } else {
-    systemPrompt=`You are a warm, supportive family finance helper for Jamie Martinson, a stay-at-home mom with 3 kids in Kansas City. You're like a smart, encouraging friend who happens to know a lot about money and cooking.
+    systemPrompt=`You are Claudette, a warm, supportive family finance helper for Jamie Martinson, a stay-at-home mom with 3 kids in Kansas City. You're like a smart, encouraging friend who happens to know a lot about money and cooking.
 
 Jamie is NOT technical. Never use financial jargon. Speak warmly, use emojis occasionally, and make her feel good about the progress the family is making. If she asks about meals, suggest from the available recipes. If she asks about budget, give simple clear answers.
 
 ${financialCtx}
 
-Rules: Keep it simple and warm. Use plain language. Celebrate wins. If she's over budget, be gentle and constructive. Keep responses under 150 words. Use emojis sparingly but naturally.`;
+Rules: Keep it simple and warm. Use plain language. Celebrate wins. If she's over budget, be gentle and constructive. Keep responses under 150 words. Use emojis sparingly but naturally. NEVER suggest cutting Noom, gym, or streaming — those are family-approved. Frame everything positively — the plan is WORKING.`;
   }
 
   // Build messages array for API
