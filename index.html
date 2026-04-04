@@ -583,10 +583,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         </div>
       </div>
       <div class="metrics">
-        <div class="metric m-teal"><div class="metric-label">Monthly Surplus</div><div class="metric-val" id="d-surplus-val">$393</div><div class="metric-sub" id="d-surplus-sub">After all bills &amp; debt</div></div>
-        <div class="metric m-red"><div class="metric-label">Total CC Debt</div><div class="metric-val" id="d-debt-val">$23,707</div><div class="metric-sub" id="d-debt-sub">3 cards · killing Best Buy next</div></div>
-        <div class="metric m-gold"><div class="metric-label">Monthly Income</div><div class="metric-val" id="d-income-val">$9,090</div><div class="metric-sub">SymphonyAI · net</div></div>
-        <div class="metric m-blue"><div class="metric-label">Emergency Fund</div><div class="metric-val" id="d-ef-val">$5,145</div><div class="metric-sub">Target: $10,000</div></div>
+        <div class="metric m-teal"><div class="metric-label" id="d-surplus-label">Mission Control</div><div class="metric-val" id="d-mc-val">$7,606</div><div class="metric-sub" id="d-mc-sub">MC 9289 · $700 floor</div><div style="margin-top:6px;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden"><div id="mc-floor-bar" style="height:100%;background:var(--teal);width:100%;min-width:0;transition:width 0.3s"></div></div></div>
+        <div class="metric m-gold"><div class="metric-label">Family Fuel</div><div class="metric-val" id="d-ff-val">$5,262</div><div class="metric-sub" id="d-ff-sub">FF 2307 · Jamie's account</div></div>
+        <div class="metric m-blue"><div class="metric-label">The Foundation</div><div class="metric-val" id="d-ef-val">$5,000</div><div class="metric-sub">7708 · Emergency only</div></div>
+        <div class="metric m-red"><div class="metric-label">Kill Power</div><div class="metric-val" id="d-surplus-val">$1,220</div><div class="metric-sub" id="d-surplus-sub">$610/paycheck · debt weapon</div></div>
       </div>
       <div class="grid-2">
         <div class="panel">
@@ -625,7 +625,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         <div class="panel">
           <div class="panel-title"><span class="dot d-blue"></span>Savings &amp; Net Worth</div>
           <div style="display:flex;flex-direction:column;gap:16px;margin-top:4px">
-            <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:13px;font-weight:600">Emergency Fund</span><span style="font-size:13px;color:var(--teal)">$5,145 / $10K</span></div><div class="prog-wrap"><div class="prog-bar" style="background:var(--teal);width:51.45%"></div></div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">51% — $200/mo</div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:13px;font-weight:600">Emergency Fund</span><span style="font-size:13px;color:var(--teal)" id="ef-panel-display">$5,145 / $10K</span></div><div class="prog-wrap"><div class="prog-bar" id="ef-panel-bar" style="background:var(--teal);width:51.45%"></div></div><div style="font-size:11px;color:var(--text-mid);margin-top:2px" id="ef-panel-pct">51% — $200/mo</div></div>
             <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:13px;font-weight:600">Life Goals ✈️</span><span style="font-size:13px;color:var(--gold)" id="lg-display">$0 / $3K</span></div><div class="prog-wrap"><div class="prog-bar" id="lg-prog" style="background:var(--gold);width:0%"></div></div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">Building — $200/mo from April</div></div>
             <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:13px;font-weight:600">Retirement</span><span style="font-size:13px;color:var(--purple)">$158,540</span></div><div class="prog-wrap"><div class="prog-bar" style="background:var(--purple);width:79%"></div></div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">Merrill · not liquid</div></div>
             <div style="padding:12px;background:var(--purple-dim);border-radius:10px;border:1px solid rgba(167,139,250,0.2)">
@@ -1126,6 +1126,8 @@ let ccBalances = {
   bofa: 13567.18,
 };
 let familyGoals = { efund: 5145, lgfund: 0 };
+// v40: Three-jar balances — synced from BofA via SimpleFIN
+let jarBalances = { mc: 7606, ff: 5262, foundation: 5000 };
 let currentWeek = Math.max(1,Math.ceil((new Date()-new Date(2026,3,1))/(7*24*60*60*1000)));
 let pinBuffer = '';
 let pinTarget = '';
@@ -1485,6 +1487,7 @@ function applyKey(key, value) {
     case 'meal_plan': mealPlan = value; break;
     case 'cc_balances': ccBalances = value; break;
     case 'family_goals': familyGoals = value; break;
+    case 'jar_balances': jarBalances = value; updateJarDisplay(); break;
     case 'grocery_stores': 
       if (Array.isArray(value) && value.length > 0) {
         groceryStores = value;
@@ -2416,47 +2419,46 @@ function updateDonutFromTransactions(){
 
   const totalSpendRaw = Object.values(ct).reduce((s,v)=>s+v,0);
   const monthlySpend = totalSpendRaw / monthsCovered;
-  const surplus = monthlyIncome - monthlySpend;
+  // v40: For current month, show PROJECTED surplus after all KBB obligations
+  // Raw surplus (income - spending so far) is misleading early in month when bills haven't hit
+  // KBB v2.3: Bills $3,890 + Subs $688 + FF $2,400 + Cash $200 + Debt mins $692 = $7,870
+  const KBB_MONTHLY_OBLIGATIONS = 3890 + 688 + 2400 + 200 + CARDS.reduce((s,c)=>s+c.min,0);
+  const killWeapon = monthlyIncome - KBB_MONTHLY_OBLIGATIONS;
+  const rawSurplus = monthlyIncome - monthlySpend;
+  const dayOfMonth = new Date().getDate();
+  // Use projected (kill weapon) for current month; actual for historical periods
+  const surplus = (selectedPeriod === 'thisMonth') ? killWeapon : rawSurplus;
 
   const bills = ((ct['Mortgage']||0)+(ct['Utilities']||0)+(ct['Phone & Internet']||0)+(ct['Loan Payment']||0)+(ct['Insurance']||0)+(ct['Subscriptions']||0)) / monthsCovered;
   const food = ((ct['Food & Life']||0)+(ct['Groceries']||0)+(ct['Amazon']||0)) / monthsCovered;
   const other = Math.max(0, monthlySpend - bills - food);
 
   if(charts.donut){
-    charts.donut.data.datasets[0].data=[Math.round(bills),Math.round(food),Math.round(other),Math.max(0,Math.round(surplus))];
+    // Donut always uses raw spending data for visual breakdown
+    charts.donut.data.datasets[0].data=[Math.round(bills),Math.round(food),Math.round(other),Math.max(0,Math.round(rawSurplus))];
     charts.donut.options.plugins.tooltip.callbacks.label = c=>`${fmt(c.raw)} (${(c.raw/monthlyIncome*100).toFixed(1)}%)`;
     charts.donut.update();
   }
 
-  // Update metric cards
+  // Update metric cards — jar system
   const surplusEl=document.getElementById('d-surplus-val');
   const surplusSubEl=document.getElementById('d-surplus-sub');
-  const incomeEl=document.getElementById('d-income-val');
-  const debtEl=document.getElementById('d-debt-val');
-  const debtSubEl=document.getElementById('d-debt-sub');
 
   if(surplusEl){
     surplusEl.textContent = (surplus < 0 ? '-' : '') + fmt(Math.abs(surplus));
     surplusEl.style.color = surplus >= 0 ? 'var(--teal)' : 'var(--red)';
   }
+  const surplusLabel=document.getElementById('d-surplus-label');
   if(surplusSubEl){
-    const periodLabel = selectedPeriod === 'thisMonth' ? 'This month so far' 
-      : selectedPeriod === 'lastMonth' ? 'Last month'
+    const periodLabel = selectedPeriod === 'thisMonth' ? '$610/paycheck · debt weapon' 
+      : selectedPeriod === 'lastMonth' ? 'Last month actual'
       : selectedPeriod === '3months' ? 'Monthly avg · 3 months'
       : `Monthly avg · ${monthsCovered.toFixed(1)}mo`;
-    const warn = surplus < -200 ? ' ⚠ Overspending' : '';
-    // v40: Warn when early in month — surplus is misleading before bills hit
-    const dayOfMonth = new Date().getDate();
-    const earlyWarning = (selectedPeriod === 'thisMonth' && dayOfMonth <= 10 && surplus > 500) ? ' · Before bills' : '';
-    surplusSubEl.textContent = periodLabel + warn + earlyWarning;
-    surplusSubEl.style.color = surplus < 0 ? 'var(--red)' : (earlyWarning ? 'var(--gold)' : '');
+    surplusSubEl.textContent = periodLabel;
   }
-  if(incomeEl) incomeEl.textContent = fmt(monthlyIncome);
 
-  const totalDebt=CARDS.reduce((s,c)=>s+c.balance,0);
-  const totalInterest=CARDS.reduce((s,c)=>s+(c.balance*(c.apr/12)),0);
-  if(debtEl) debtEl.textContent=fmt(totalDebt);
-  if(debtSubEl) debtSubEl.textContent=`${CARDS.length} cards · $${Math.round(totalInterest).toLocaleString()}/mo interest`;
+  // Update jar displays with latest balances
+  updateJarDisplay();
 }
 
 // Load cross-device CSV data — always replaces whatever is currently loaded
@@ -3175,11 +3177,58 @@ function updateCCDisplay(){
 function updateGoalsDisplay(){
   const ef=document.getElementById('d-ef-val');
   if(ef)ef.textContent='$'+familyGoals.efund.toLocaleString();
+  // v40: Sync Foundation jar from efund
+  jarBalances.foundation = familyGoals.efund || jarBalances.foundation;
+  // v40: Sync savings panel Emergency Fund with metric card
+  const efPanel=document.getElementById('ef-panel-display');
+  const efBar=document.getElementById('ef-panel-bar');
+  const efPct=document.getElementById('ef-panel-pct');
+  if(efPanel)efPanel.textContent='$'+familyGoals.efund.toLocaleString()+' / $10K';
+  const pct=Math.min(100,familyGoals.efund/10000*100);
+  if(efBar)efBar.style.width=pct+'%';
+  if(efPct)efPct.textContent=Math.round(pct)+'% — $200/mo';
   const lgP=document.getElementById('lg-prog');
   if(lgP)lgP.style.width=(familyGoals.lgfund/3000*100)+'%';
   const lgD=document.getElementById('lg-display');
   if(lgD)lgD.textContent='$'+familyGoals.lgfund.toLocaleString()+' / $3K';
+  updateJarDisplay();
   updateNetWorth();
+}
+
+// v40: Update the 3-jar metric cards with current balances
+function updateJarDisplay(){
+  const mcEl=document.getElementById('d-mc-val');
+  const mcSub=document.getElementById('d-mc-sub');
+  const ffEl=document.getElementById('d-ff-val');
+  const ffSub=document.getElementById('d-ff-sub');
+  const efEl=document.getElementById('d-ef-val');
+  const floorBar=document.getElementById('mc-floor-bar');
+
+  if(mcEl) mcEl.textContent=fmt(jarBalances.mc);
+  if(mcSub){
+    const aboveFloor = jarBalances.mc - 700;
+    if(jarBalances.mc <= 700){
+      mcSub.textContent = '⚠ AT $700 FLOOR';
+      mcSub.style.color = 'var(--red)';
+    } else if(jarBalances.mc <= 1000){
+      mcSub.textContent = `MC 9289 · $${Math.round(aboveFloor).toLocaleString()} above floor`;
+      mcSub.style.color = 'var(--gold)';
+    } else {
+      mcSub.textContent = `MC 9289 · $${Math.round(aboveFloor).toLocaleString()} above $700 floor`;
+      mcSub.style.color = '';
+    }
+  }
+  // Floor indicator: green bar showing how far above $700 floor
+  if(floorBar){
+    const floorPct = Math.min(100, Math.max(0, ((jarBalances.mc - 700) / (jarBalances.mc || 1)) * 100));
+    floorBar.style.width = floorPct + '%';
+    floorBar.style.background = jarBalances.mc <= 700 ? 'var(--red)' : jarBalances.mc <= 1000 ? 'var(--gold)' : 'var(--teal)';
+  }
+
+  if(ffEl) ffEl.textContent=fmt(jarBalances.ff);
+  if(ffSub) ffSub.textContent = `FF 2307 · Jamie's account`;
+
+  if(efEl) efEl.textContent=fmt(jarBalances.foundation);
 }
 
 // ── NET WORTH ─────────────────────────────────────────────────────
@@ -4046,19 +4095,36 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
 
   // v39: Update account balances if provided
   if (accountBalances) {
-    // Savings → Emergency Fund
+    // Savings → Foundation (7708)
     if (accountBalances.savings) {
       familyGoals.efund = Math.round(accountBalances.savings.balance);
+      jarBalances.foundation = familyGoals.efund;
       fbSet('family_goals', familyGoals);
       updateGoalsDisplay();
     }
     
-    // BofA Credit Card
+    // BofA Credit Card (9362)
     if (accountBalances.bofaCC) {
       ccBalances.bofa = Math.abs(accountBalances.bofaCC.balance);
       fbSet('cc_balances', ccBalances);
       updateCCDisplay();
     }
+
+    // v40: Checking accounts → Mission Control (9289) and Family Fuel (2307)
+    if (accountBalances.checking) {
+      jarBalances.mc = Math.round(accountBalances.checking.balance);
+    }
+    if (accountBalances.missionControl) {
+      jarBalances.mc = Math.round(accountBalances.missionControl.balance);
+    }
+    if (accountBalances.familyFuel) {
+      jarBalances.ff = Math.round(accountBalances.familyFuel.balance);
+    }
+    if (accountBalances.checking2) {
+      jarBalances.ff = Math.round(accountBalances.checking2.balance);
+    }
+    fbSet('jar_balances', jarBalances);
+    updateJarDisplay();
     
     // Store balances for display
     localStorage.setItem('account_balances', JSON.stringify(accountBalances));
