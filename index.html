@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Martinson Family Dashboard v39b</title>
+<title>Martinson Family Dashboard v40</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script src="https://unpkg.com/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
@@ -345,7 +345,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .tx-scroll{max-height:400px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
 .cat-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:5px}
 
-/* v39b: Clickable category tags for recategorization */
+/* v40: Clickable category tags for recategorization */
 .cat-tag-clickable{cursor:pointer;padding:2px 8px 2px 4px;border-radius:6px;transition:all 0.15s;display:inline-flex;align-items:center}
 .cat-tag-clickable:hover{background:var(--surface2)}
 .cat-picker-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px}
@@ -421,7 +421,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <!-- ENTRY SCREEN -->
 <div id="entry-screen">
   <div class="entry-logo">Martinson Family</div>
-  <div class="entry-sub">Kansas City, MO · Your Family Hub · v39b</div>
+  <div class="entry-sub">Kansas City, MO · Your Family Hub · v40</div>
   <div class="entry-box">
     <div class="entry-title">🔒 Enter Password</div>
     <div class="entry-dots">
@@ -1120,7 +1120,7 @@ let currentUser = ''; // 'douglas' or 'jamie' — controls AI personality
 let aiChatHistory = []; // conversation history for AI panel
 let aiPanelOpen = false;
 let simplefinConnected = false; // whether SimpleFIN bank is linked
-let learnedCategories = {}; // v39b: User-taught merchant→category mappings {merchantPattern: category}
+let learnedCategories = {}; // v40: User-taught merchant→category mappings {merchantPattern: category}
 
 // ══════ MULTI-STORE GROCERY STATE (v38) ══════
 // Default stores - Jamie can add/remove/rename via ⚙️
@@ -1140,7 +1140,7 @@ const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw0q-7XhX6OztGR54bXX5
 // SYNC ENGINE — Google Sheets architecture
 // ══════════════════════════════════════════════════════════════════
 // ══════════════════════════════════════════════════════════════════
-// FIREBASE SYNC ENGINE — v39b
+// FIREBASE SYNC ENGINE — v40
 //
 // One key controls everything: martinson/last_csv_data
 //
@@ -1696,10 +1696,13 @@ function updatePinDots(){for(let i=0;i<4;i++){const d=document.getElementById('p
 // ══════ TOAST
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
 
+// ══════ SANITIZER (v40: consolidated from two local duplicates)
+function sfSan(s){ return String(s||'').replace(/[\x00-\x1F\x7F]/g,' ').trim(); }
+
 // ══════ CSV
 function categorize(d){
   const u=d.toUpperCase();
-  // v39b: Check learned categories first (user-taught mappings)
+  // v40: Check learned categories first (user-taught mappings)
   for(const [pattern, cat] of Object.entries(learnedCategories)){
     if(u.includes(pattern)){
       const rule = RULES.find(r => r.cat === cat);
@@ -2102,14 +2105,14 @@ function renderTxRows(cat){
     const abs=Math.abs(t.amount);const isI=t.amount>0;const big=abs>=200&&!isI;
     const cls=isI?'color:var(--teal);font-weight:600':big?'color:var(--red);font-weight:600':'font-weight:500';
     const s=t.desc.length>50?t.desc.substring(0,50)+'…':t.desc;
-    // v39b: Make category clickable for recategorization
+    // v40: Make category clickable for recategorization
     const txIdx = transactions.indexOf(t);
     return`<tr><td style="color:var(--text-mid);font-size:12px;white-space:nowrap">${t.date}</td><td style="font-size:12px" title="${t.desc}">${s}</td><td style="font-size:12px"><span class="cat-tag-clickable" onclick="openCategoryPicker(${txIdx},event)" title="Click to change category"><span class="cat-dot" style="background:${t.color}"></span>${t.cat}</span></td><td style="text-align:right;${cls}">${isI?'+'+fmt(t.amount):'-'+fmt(t.amount)}</td></tr>`;
   }).join('');
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// v39b: Click-to-Recategorize — teach the system once, fix forever
+// v40: Click-to-Recategorize — teach the system once, fix forever
 // ═══════════════════════════════════════════════════════════════════════
 let _pickerTxIdx = null;
 
@@ -2235,7 +2238,6 @@ function resyncTransactionsToFirebase() {
   transactions.filter(t => t.amount < 0 && !EXCL_SYNC.includes(t.cat))
     .forEach(t => { catTotals[t.cat] = (catTotals[t.cat] || 0) + Math.abs(t.amount); });
 
-  function sfSan(s){ return String(s||'').replace(/[\x00-\x1F\x7F]/g,' ').trim(); }
   const txCompact = transactions.map(t => ({
     d: sfSan(t.date), 
     n: sfSan(t.desc).substring(0, 50),
@@ -2256,7 +2258,7 @@ function resyncTransactionsToFirebase() {
     loadedOn: sfSan(new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})),
     count: transactions.length,
     uploadedAt: Date.now(),
-    source: 'recategorized_v39b'
+    source: 'recategorized_v40'
   };
 
   uploadCsvToServer(syncData)
@@ -2275,8 +2277,8 @@ function renderBVA(){
     return`<tr><td style="font-weight:500">${r.cat}</td><td style="text-align:right">${fmt(r.budget)}</td><td style="text-align:right;font-weight:600">${hasA?fmt(r.actual):'—'}</td><td style="text-align:right">${ds}</td><td>${tag}</td></tr>`;
   }).join('');
   const labels=rows.map(r=>r.cat);const bd=rows.map(r=>r.budget);const ad=rows.map(r=>r.actual||0);
-  if(charts.bar){charts.bar.data.labels=labels;charts.bar.data.datasets[0].data=bd;charts.bar.data.datasets[1].data=ad;charts.bar.update();}
-  else{const ctx=document.getElementById('bar-chart').getContext('2d');charts.bar=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Budget',data:bd,backgroundColor:'rgba(77,159,255,0.6)',borderRadius:4},{label:'Actual',data:ad,backgroundColor:'rgba(0,201,167,0.6)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8b92a8',font:{family:'DM Sans'},boxWidth:10}}},scales:{x:{ticks:{color:'#8b92a8',font:{size:10}},grid:{color:'rgba(42,48,69,0.4)'}},y:{ticks:{color:'#8b92a8',callback:v=>'$'+v.toLocaleString()},grid:{color:'rgba(42,48,69,0.4)'}}}}});}
+  if(charts.bar){charts.bar.destroy();charts.bar=null;}
+  {const ctx=document.getElementById('bar-chart').getContext('2d');charts.bar=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Budget',data:bd,backgroundColor:'rgba(77,159,255,0.6)',borderRadius:4},{label:'Actual',data:ad,backgroundColor:'rgba(0,201,167,0.6)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8b92a8',font:{family:'DM Sans'},boxWidth:10}}},scales:{x:{ticks:{color:'#8b92a8',font:{size:10}},grid:{color:'rgba(42,48,69,0.4)'}},y:{ticks:{color:'#8b92a8',callback:v=>'$'+v.toLocaleString()},grid:{color:'rgba(42,48,69,0.4)'}}}}}); }
 }
 
 // ══════ UPDATE ALL VISUALS FROM LIVE TRANSACTION DATA
@@ -2477,8 +2479,8 @@ function updateProj(){
   }).join('');
   const labels=sc.map((_,i)=>i%3===0?mlabel(i+1):'');
   const datasets=CARDS.map(c=>({label:c.name,data:sc.map(s=>+s[c.name].toFixed(0)),borderColor:c.color,backgroundColor:'transparent',borderWidth:2,tension:0.3,pointRadius:0}));
-  if(charts.payoff){charts.payoff.data.labels=labels;charts.payoff.data.datasets=datasets;charts.payoff.update();}
-  else{const ctx=document.getElementById('payoff-chart').getContext('2d');charts.payoff=new Chart(ctx,{type:'line',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#8b92a8',font:{family:'DM Sans'},boxWidth:10,padding:8}}},scales:{x:{ticks:{color:'#8b92a8',maxTicksLimit:10},grid:{color:'rgba(42,48,69,0.4)'}},y:{ticks:{color:'#8b92a8',callback:v=>'$'+v.toLocaleString()},grid:{color:'rgba(42,48,69,0.4)'}}}}});}
+  if(charts.payoff){charts.payoff.destroy();charts.payoff=null;}
+  {const ctx=document.getElementById('payoff-chart').getContext('2d');charts.payoff=new Chart(ctx,{type:'line',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#8b92a8',font:{family:'DM Sans'},boxWidth:10,padding:8}}},scales:{x:{ticks:{color:'#8b92a8',maxTicksLimit:10},grid:{color:'rgba(42,48,69,0.4)'}},y:{ticks:{color:'#8b92a8',callback:v=>'$'+v.toLocaleString()},grid:{color:'rgba(42,48,69,0.4)'}}}}}); }
   // Interest = total paid - original debt
   // Total paid = months × total monthly payment (minimums + extra)
   const startTotal = CARDS.reduce((s,c)=>s+c.balance,0);
@@ -3868,8 +3870,8 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
     const amount = parseFloat(t.amount) || 0;
     if(amount === 0 || desc.includes('Beginning balance') || desc.includes('balance as of')) return;
     
-    // v39: Use AI-provided category, fallback to rule-based
-    const cat = t.category || categorize(desc).cat;
+    // v40: Re-run local 717-keyword engine when server returns 'Other'
+    const cat = (t.category && t.category !== 'Other') ? t.category : categorize(desc).cat;
     const rule = RULES.find(r => r.cat === cat) || RULES[RULES.length - 1];
     
     const d = new Date(dateStr);
@@ -3955,7 +3957,6 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
   transactions.filter(t => t.amount < 0 && !EXCL_SYNC.includes(t.cat))
     .forEach(t => { catTotals[t.cat] = (catTotals[t.cat] || 0) + Math.abs(t.amount); });
 
-  function sfSan(s){ return String(s||'').replace(/[\x00-\x1F\x7F]/g,' ').trim(); }
   const txCompact = transactions.map(t => ({
     d: sfSan(t.date), 
     n: sfSan(t.desc).substring(0, 50),
