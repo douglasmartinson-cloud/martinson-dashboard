@@ -79,14 +79,14 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-b);min-height
 .page{display:none}.page.active{display:block}
 
 /* ── METRICS ── */
-.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.metrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;margin-bottom:22px}
 @media(max-width:700px){.metrics{grid-template-columns:1fr 1fr}}
 .metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 20px;position:relative;overflow:hidden}
 .metric::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0}
-.m-teal::before{background:var(--teal)}.m-red::before{background:var(--red)}.m-gold::before{background:var(--gold)}.m-blue::before{background:var(--blue)}
+.m-teal::before{background:var(--teal)}.m-red::before{background:var(--red)}.m-gold::before{background:var(--gold)}.m-blue::before{background:var(--blue)}.m-purple::before{background:var(--purple)}
 .metric-label{font-size:10px;font-weight:600;letter-spacing:0.7px;text-transform:uppercase;color:var(--text-mid);margin-bottom:6px}
 .metric-val{font-family:var(--font-d);font-size:28px;line-height:1}
-.m-teal .metric-val{color:var(--teal)}.m-red .metric-val{color:var(--red)}.m-gold .metric-val{color:var(--gold)}.m-blue .metric-val{color:var(--blue)}
+.m-teal .metric-val{color:var(--teal)}.m-red .metric-val{color:var(--red)}.m-gold .metric-val{color:var(--gold)}.m-blue .metric-val{color:var(--blue)}.m-purple .metric-val{color:var(--purple)}
 .metric-sub{font-size:11px;color:var(--text-mid);margin-top:4px}
 
 /* ── PANELS ── */
@@ -583,10 +583,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         </div>
       </div>
       <div class="metrics">
-        <div class="metric m-teal"><div class="metric-label" id="d-surplus-label">Mission Control</div><div class="metric-val" id="d-mc-val">$7,606</div><div class="metric-sub" id="d-mc-sub">MC 9289 · $700 floor</div><div style="margin-top:6px;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden"><div id="mc-floor-bar" style="height:100%;background:var(--teal);width:100%;min-width:0;transition:width 0.3s"></div></div></div>
+        <div class="metric m-teal"><div class="metric-label">Mission Control</div><div class="metric-val" id="d-mc-val">$7,606</div><div class="metric-sub" id="d-mc-sub">MC 9289 · $6,906 above $700 floor</div><div style="margin-top:6px;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden"><div id="mc-floor-bar" style="height:100%;background:var(--teal);width:100%;min-width:0;transition:width 0.3s"></div></div></div>
         <div class="metric m-gold"><div class="metric-label">Family Fuel</div><div class="metric-val" id="d-ff-val">$5,262</div><div class="metric-sub" id="d-ff-sub">FF 2307 · Jamie's account</div></div>
         <div class="metric m-blue"><div class="metric-label">The Foundation</div><div class="metric-val" id="d-ef-val">$5,000</div><div class="metric-sub">7708 · Emergency only</div></div>
         <div class="metric m-red"><div class="metric-label">Kill Power</div><div class="metric-val" id="d-surplus-val">$1,220</div><div class="metric-sub" id="d-surplus-sub">$610/paycheck · debt weapon</div></div>
+        <div class="metric m-purple"><div class="metric-label">Retirement</div><div class="metric-val" id="d-merrill-val">$157,532</div><div class="metric-sub" id="d-merrill-sub">Merrill IRRA · do not touch</div></div>
       </div>
       <div class="grid-2">
         <div class="panel">
@@ -627,7 +628,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
           <div style="display:flex;flex-direction:column;gap:16px;margin-top:4px">
             <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:13px;font-weight:600">Emergency Fund</span><span style="font-size:13px;color:var(--teal)" id="ef-panel-display">$5,145 / $10K</span></div><div class="prog-wrap"><div class="prog-bar" id="ef-panel-bar" style="background:var(--teal);width:51.45%"></div></div><div style="font-size:11px;color:var(--text-mid);margin-top:2px" id="ef-panel-pct">51% — $200/mo</div></div>
             <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:13px;font-weight:600">Life Goals ✈️</span><span style="font-size:13px;color:var(--gold)" id="lg-display">$0 / $3K</span></div><div class="prog-wrap"><div class="prog-bar" id="lg-prog" style="background:var(--gold);width:0%"></div></div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">Building — $200/mo from April</div></div>
-            <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:13px;font-weight:600">Retirement</span><span style="font-size:13px;color:var(--purple)">$158,540</span></div><div class="prog-wrap"><div class="prog-bar" style="background:var(--purple);width:79%"></div></div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">Merrill · not liquid</div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:13px;font-weight:600">Retirement</span><span style="font-size:13px;color:var(--purple)" id="retirement-panel-display">$157,532</span></div><div class="prog-wrap"><div class="prog-bar" style="background:var(--purple);width:79%"></div></div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">Merrill · not liquid</div></div>
             <div style="padding:12px;background:var(--purple-dim);border-radius:10px;border:1px solid rgba(167,139,250,0.2)">
               <div style="font-size:11px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Net Worth</div>
               <div style="font-family:var(--font-d);font-size:24px" id="d-networth-val">$139,920</div>
@@ -1126,8 +1127,8 @@ let ccBalances = {
   bofa: 13567.18,
 };
 let familyGoals = { efund: 5145, lgfund: 0 };
-// v40: Three-jar balances — synced from BofA via SimpleFIN
-let jarBalances = { mc: 7606, ff: 5262, foundation: 5000 };
+// v40: Three-jar balances + Merrill — synced from BofA via SimpleFIN
+let jarBalances = { mc: 7606, ff: 5262, foundation: 5000, merrill: 157532 };
 let currentWeek = Math.max(1,Math.ceil((new Date()-new Date(2026,3,1))/(7*24*60*60*1000)));
 let pinBuffer = '';
 let pinTarget = '';
@@ -2448,7 +2449,6 @@ function updateDonutFromTransactions(){
     surplusEl.textContent = (surplus < 0 ? '-' : '') + fmt(Math.abs(surplus));
     surplusEl.style.color = surplus >= 0 ? 'var(--teal)' : 'var(--red)';
   }
-  const surplusLabel=document.getElementById('d-surplus-label');
   if(surplusSubEl){
     const periodLabel = selectedPeriod === 'thisMonth' ? '$610/paycheck · debt weapon' 
       : selectedPeriod === 'lastMonth' ? 'Last month actual'
@@ -3176,15 +3176,13 @@ function updateCCDisplay(){
 
 function updateGoalsDisplay(){
   const ef=document.getElementById('d-ef-val');
-  if(ef)ef.textContent='$'+familyGoals.efund.toLocaleString();
-  // v40: Sync Foundation jar from efund
-  jarBalances.foundation = familyGoals.efund || jarBalances.foundation;
-  // v40: Sync savings panel Emergency Fund with metric card
+  if(ef)ef.textContent=fmt(jarBalances.foundation);
+  // v40: Sync savings panel with Foundation balance
   const efPanel=document.getElementById('ef-panel-display');
   const efBar=document.getElementById('ef-panel-bar');
   const efPct=document.getElementById('ef-panel-pct');
-  if(efPanel)efPanel.textContent='$'+familyGoals.efund.toLocaleString()+' / $10K';
-  const pct=Math.min(100,familyGoals.efund/10000*100);
+  if(efPanel)efPanel.textContent='$'+jarBalances.foundation.toLocaleString()+' / $10K';
+  const pct=Math.min(100,jarBalances.foundation/10000*100);
   if(efBar)efBar.style.width=pct+'%';
   if(efPct)efPct.textContent=Math.round(pct)+'% — $200/mo';
   const lgP=document.getElementById('lg-prog');
@@ -3229,15 +3227,19 @@ function updateJarDisplay(){
   if(ffSub) ffSub.textContent = `FF 2307 · Jamie's account`;
 
   if(efEl) efEl.textContent=fmt(jarBalances.foundation);
+
+  // Merrill retirement
+  const merrillEl=document.getElementById('d-merrill-val');
+  if(merrillEl) merrillEl.textContent=fmt(jarBalances.merrill || 157532);
 }
 
 // ── NET WORTH ─────────────────────────────────────────────────────
 function updateNetWorth(){
   const totalDebt = CARDS.reduce((s,c)=>s+c.balance,0);
-  const efund = familyGoals.efund || 5145;
+  const foundation = jarBalances.foundation || 5000;
   const lgfund = familyGoals.lgfund || 0;
-  const retirement = 158540; // Merrill — update manually when it changes
-  const assets = efund + lgfund + retirement;
+  const retirement = jarBalances.merrill || 157532;
+  const assets = foundation + lgfund + retirement + jarBalances.mc + jarBalances.ff;
   const netWorth = assets - totalDebt;
 
   const el = document.getElementById('d-networth-val');
@@ -3273,12 +3275,6 @@ function updateDebtMetrics(){
   // Also update the banner style — green for plan, not default
   const banner = document.getElementById('debt-freedom-banner');
   if(banner) banner.innerHTML = `🎯 Debt free in <strong>${freedomMonths} months</strong> — <span>${mlabel(freedomMonths)}</span> · Kill weapon: $${KILL_WEAPON_MONTHLY.toLocaleString()}/mo`;
-
-  // Update debt card
-  const debtEl = document.getElementById('d-debt-val');
-  const debtSub = document.getElementById('d-debt-sub');
-  if(debtEl) debtEl.textContent = fmt(totalDebt);
-  if(debtSub) debtSub.textContent = `${CARDS.length} cards · $${Math.round(monthlyInterest).toLocaleString()}/mo interest`;
 
   // v40: Sync CC table rows to match CARDS array (prevents metric vs table mismatch)
   const ccTable = document.getElementById('cc-table');
@@ -3784,13 +3780,13 @@ ${mealContext}
 RULES FOR YOUR ADVICE:
 - NEVER suggest cutting protected subscriptions
 - NEVER suggest Mission Control go below $700
-- NEVER suggest touching The Foundation or Merrill retirement ($158,540)
+- NEVER suggest touching The Foundation or Merrill retirement
 - NEVER suggest new credit card debt
 - Frame advice around the kill order — redirect savings to Best Buy kill
 - Be encouraging about the plan — 2 debts already killed, 16 months to debt-free
 - If speaking to Jamie: ONE number, ONE action, warm, no jargon
-Emergency fund: $${familyGoals.efund}. Retirement: $158,540 (Merrill — DO NOT TOUCH).
-Net worth: $${(158540+familyGoals.efund+familyGoals.lgfund-totalDebt).toFixed(0)}.`;
+Emergency fund: $${jarBalances.foundation}. Retirement: $${(jarBalances.merrill||157532).toLocaleString()} (Merrill — DO NOT TOUCH).
+Net worth: $${((jarBalances.merrill||157532)+jarBalances.foundation+(familyGoals.lgfund||0)+jarBalances.mc+jarBalances.ff-totalDebt).toFixed(0)}.`;
 }
 
 async function sendAIMessage(){
@@ -4095,10 +4091,17 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
 
   // v39: Update account balances if provided
   if (accountBalances) {
-    // Savings → Foundation (7708)
+    // Savings account balance — may not be Foundation (7708). Store but verify mapping.
+    // BofA shows Foundation = $5,000.00 exactly. SimpleFIN may map to a different account.
     if (accountBalances.savings) {
-      familyGoals.efund = Math.round(accountBalances.savings.balance);
-      jarBalances.foundation = familyGoals.efund;
+      // v40: Don't auto-update Foundation from unverified SimpleFIN savings mapping
+      // familyGoals.efund tracks the savings panel, jarBalances.foundation tracks The Foundation
+      // Only update if the balance matches what we expect (Foundation is exactly $5,000)
+      const savBal = Math.round(accountBalances.savings.balance);
+      if (savBal !== jarBalances.foundation) {
+        // SimpleFIN savings ≠ Foundation — log but don't override
+        console.log('SimpleFIN savings balance (' + savBal + ') differs from Foundation (' + jarBalances.foundation + '). Not auto-updating.');
+      }
       fbSet('family_goals', familyGoals);
       updateGoalsDisplay();
     }
