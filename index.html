@@ -585,7 +585,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       <div class="metrics">
         <div class="metric m-teal"><div class="metric-label">Mission Control</div><div class="metric-val" id="d-mc-val">$7,606</div><div class="metric-sub" id="d-mc-sub">MC 9289 · $6,906 above $700 floor</div><div style="margin-top:6px;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden"><div id="mc-floor-bar" style="height:100%;background:var(--teal);width:100%;min-width:0;transition:width 0.3s"></div></div></div>
         <div class="metric m-gold"><div class="metric-label">Family Fuel</div><div class="metric-val" id="d-ff-val">$5,262</div><div class="metric-sub" id="d-ff-sub">FF 2307 · Jamie's account</div></div>
-        <div class="metric m-blue"><div class="metric-label">The Foundation</div><div class="metric-val" id="d-ef-val">$5,000</div><div class="metric-sub">7708 · Emergency only</div></div>
+        <div class="metric m-blue"><div class="metric-label">The Foundation</div><div class="metric-val" id="d-ef-val">$5,000</div><div class="metric-sub">7708 · Do not touch</div></div>
         <div class="metric m-red"><div class="metric-label">Kill Power</div><div class="metric-val" id="d-surplus-val">$1,220</div><div class="metric-sub" id="d-surplus-sub">$610/paycheck · debt weapon</div></div>
         <div class="metric m-purple"><div class="metric-label">Retirement</div><div class="metric-val" id="d-merrill-val">$157,532</div><div class="metric-sub" id="d-merrill-sub">Merrill IRRA · do not touch</div></div>
       </div>
@@ -626,7 +626,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         <div class="panel">
           <div class="panel-title"><span class="dot d-blue"></span>Savings &amp; Net Worth</div>
           <div style="display:flex;flex-direction:column;gap:16px;margin-top:4px">
-            <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:13px;font-weight:600">Emergency Fund</span><span style="font-size:13px;color:var(--teal)" id="ef-panel-display">$5,145 / $10K</span></div><div class="prog-wrap"><div class="prog-bar" id="ef-panel-bar" style="background:var(--teal);width:51.45%"></div></div><div style="font-size:11px;color:var(--text-mid);margin-top:2px" id="ef-panel-pct">51% — $200/mo</div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:13px;font-weight:600">The Martinson Foundation</span><span style="font-size:13px;color:var(--teal)" id="ef-panel-display">$5,000 / $10K</span></div><div class="prog-wrap"><div class="prog-bar" id="ef-panel-bar" style="background:var(--teal);width:50%"></div></div><div style="font-size:11px;color:var(--text-mid);margin-top:2px" id="ef-panel-pct">50% — $200/mo</div></div>
             <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:13px;font-weight:600">Life Goals ✈️</span><span style="font-size:13px;color:var(--gold)" id="lg-display">$0 / $3K</span></div><div class="prog-wrap"><div class="prog-bar" id="lg-prog" style="background:var(--gold);width:0%"></div></div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">Building — $200/mo from April</div></div>
             <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:13px;font-weight:600">Retirement</span><span style="font-size:13px;color:var(--purple)" id="retirement-panel-display">$157,532</span></div><div class="prog-wrap"><div class="prog-bar" style="background:var(--purple);width:79%"></div></div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">Merrill · not liquid</div></div>
             <div style="padding:12px;background:var(--purple-dim);border-radius:10px;border:1px solid rgba(167,139,250,0.2)">
@@ -652,8 +652,17 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
           <div style="font-family:var(--font-d);font-size:20px" id="tx-title">Transactions</div>
           <div style="font-size:12px;color:var(--text-mid)" id="tx-count"></div>
         </div>
+        <!-- v40: Transaction Summary Bar -->
+        <div id="tx-summary-bar" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:14px"></div>
         <div class="tx-filter-bar" id="tx-filters"></div>
+        <!-- v40: Category detail bar (shows when filtering) -->
+        <div id="tx-cat-detail" style="display:none;padding:12px;background:var(--surface2);border-radius:10px;margin-bottom:14px"></div>
         <div class="panel"><div class="tx-scroll"><table class="tbl"><thead><tr><th>Date</th><th>Description</th><th>Category</th><th style="text-align:right">Amount</th></tr></thead><tbody id="tx-tbody"></tbody></table></div></div>
+        <!-- v40: Transaction Insights -->
+        <div id="tx-insights" style="margin-top:14px;padding:16px;background:var(--surface2);border-radius:10px;display:none">
+          <div style="font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">📊 Spending Insights</div>
+          <div id="tx-insights-content" style="font-size:13px;color:var(--text);line-height:1.6"></div>
+        </div>
       </div>
     </div>
 
@@ -861,10 +870,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       <div class="prog-wrap"><div class="prog-bar" style="background:var(--gold);width:0%"></div></div>
     </div>
     <div class="goal-card g-emerg">
-      <div class="g-emoji">🛡️</div><div class="g-name">Emergency Fund — $10,000</div>
-      <div class="g-desc">We have $5,145 saved. Adding $200/month. This is the "never panic" fund. Car breaks down? Covered. Surprise bill? Covered. This is what lets us sleep at night.</div>
-      <div class="g-prog-lbl"><span style="color:var(--text-mid);font-weight:600">Emergency Savings</span><span style="color:var(--teal)">$5,145 of $10,000</span></div>
-      <div class="prog-wrap"><div class="prog-bar" style="background:var(--teal);width:51.45%"></div></div>
+      <div class="g-emoji">🛡️</div><div class="g-name">The Martinson Foundation — $10,000</div>
+      <div class="g-desc">We have $5,000 saved. Adding $200/month. This is our "never panic" fund — job loss only. Car breaks down? MC handles it. This is what lets us sleep at night.</div>
+      <div class="g-prog-lbl"><span style="color:var(--text-mid);font-weight:600">The Foundation (7708)</span><span style="color:var(--teal)">$5,000 of $10,000</span></div>
+      <div class="prog-wrap"><div class="prog-bar" style="background:var(--teal);width:50%"></div></div>
     </div>
     <div class="goal-card g-debt">
       <div class="g-emoji">💳</div><div class="g-name">Zero Credit Card Debt</div>
@@ -1194,8 +1203,8 @@ function updateBigNumber() {
     label = monthNames[now.getMonth()] + ' ' + now.getFullYear();
     const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
     const dayOfMonth = now.getDate();
-    const projectedSpend = totalSpend / dayOfMonth * daysInMonth;
-    sub = `${dayOfMonth} of ${daysInMonth} days · On pace for ${fmt(projectedSpend)}/month`;
+    const remaining_budget = FINANCIAL.income - totalSpend;
+    sub = `${dayOfMonth} of ${daysInMonth} days · ${fmt(remaining_budget)} of ${fmt(FINANCIAL.income)} remaining`;
   } else if (selectedPeriod === 'lastMonth') {
     const lm = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     label = monthNames[lm.getMonth()] + ' ' + lm.getFullYear();
@@ -2197,8 +2206,53 @@ function renderCatTable(){
 function renderTx(){
   document.getElementById('tx-empty-state').style.display='none';document.getElementById('tx-loaded').style.display='block';
   const filtered = getFilteredTransactions();
-  const cats=['All',...new Set(filtered.map(t=>t.cat))];
-  document.getElementById('tx-filters').innerHTML=cats.map(c=>`<button class="txf ${c==='All'?'active':''}" onclick="filterTx('${c}',this)">${c}</button>`).join('');
+  const EXCL=['Transfers','Income'];
+
+  // v40: Calculate category totals
+  const catTotals={};
+  let totalSpend=0, totalIncome=0, txCount=filtered.length;
+  filtered.forEach(t=>{
+    if(t.amount<0 && !EXCL.includes(t.cat)){
+      catTotals[t.cat]=(catTotals[t.cat]||0)+Math.abs(t.amount);
+      totalSpend+=Math.abs(t.amount);
+    } else if(t.amount>0 && !EXCL.includes(t.cat)){
+      totalIncome+=t.amount;
+    }
+  });
+
+  // v40: Summary bar
+  const topCat = Object.entries(catTotals).sort((a,b)=>b[1]-a[1])[0];
+  const avgPerDay = filtered.length ? totalSpend / Math.max(1, new Set(filtered.map(t=>t.date)).size) : 0;
+  document.getElementById('tx-summary-bar').innerHTML=`
+    <div style="padding:10px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
+      <div style="font-size:10px;text-transform:uppercase;color:var(--text-soft);letter-spacing:0.5px">Total Spent</div>
+      <div style="font-family:var(--font-d);font-size:18px;color:var(--red);margin-top:2px">${fmt(totalSpend)}</div>
+    </div>
+    <div style="padding:10px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
+      <div style="font-size:10px;text-transform:uppercase;color:var(--text-soft);letter-spacing:0.5px">Avg / Day</div>
+      <div style="font-family:var(--font-d);font-size:18px;color:var(--gold);margin-top:2px">${fmt(avgPerDay)}</div>
+    </div>
+    <div style="padding:10px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
+      <div style="font-size:10px;text-transform:uppercase;color:var(--text-soft);letter-spacing:0.5px">Top Category</div>
+      <div style="font-family:var(--font-d);font-size:18px;color:var(--teal);margin-top:2px">${topCat?topCat[0]:'—'}</div>
+    </div>
+    <div style="padding:10px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
+      <div style="font-size:10px;text-transform:uppercase;color:var(--text-soft);letter-spacing:0.5px">Categories</div>
+      <div style="font-family:var(--font-d);font-size:18px;color:var(--blue);margin-top:2px">${Object.keys(catTotals).length}</div>
+    </div>`;
+
+  // v40: Filter chips with dollar amounts
+  const sortedCats = Object.entries(catTotals).sort((a,b)=>b[1]-a[1]);
+  const cats=['All',...sortedCats.map(c=>c[0])];
+  document.getElementById('tx-filters').innerHTML=cats.map(c=>{
+    if(c==='All') return `<button class="txf active" onclick="filterTx('${c}',this)" style="min-width:auto">All · ${fmt(totalSpend)}</button>`;
+    const amt=catTotals[c]||0;
+    const pct=totalSpend>0?(amt/totalSpend*100).toFixed(0):'0';
+    const rule=RULES.find(r=>r.cat===c)||RULES[RULES.length-1];
+    return `<button class="txf" onclick="filterTx('${c}',this)" style="min-width:auto"><span class="cat-dot" style="background:${rule.color};width:6px;height:6px;display:inline-block;border-radius:50%;margin-right:4px"></span>${c} · ${fmt(amt)} <span style="opacity:0.6;font-size:10px">${pct}%</span></button>`;
+  }).join('');
+
+  // Date range title
   const dates=filtered.map(t=>new Date(t.date)).filter(d=>!isNaN(d));
   if (dates.length) {
     const mn=new Date(Math.min(...dates)).toLocaleDateString('en-US',{month:'short',day:'numeric'});
@@ -2208,20 +2262,94 @@ function renderTx(){
     document.getElementById('tx-title').textContent='Transactions · No data for this period';
   }
   renderTxRows('All');
+  renderTxInsights(filtered, catTotals, totalSpend, avgPerDay);
 }
 function filterTx(cat,btn){document.querySelectorAll('.txf').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderTxRows(cat);}
 function renderTxRows(cat){
   const filtered = getFilteredTransactions();
   const f=cat==='All'?filtered:filtered.filter(t=>t.cat===cat);
   document.getElementById('tx-count').textContent=f.length+' transactions';
-  document.getElementById('tx-tbody').innerHTML=f.map((t,i)=>{
-    const abs=Math.abs(t.amount);const isI=t.amount>0;const big=abs>=200&&!isI;
-    const cls=isI?'color:var(--teal);font-weight:600':big?'color:var(--red);font-weight:600':'font-weight:500';
-    const s=t.desc.length>50?t.desc.substring(0,50)+'…':t.desc;
-    // v40: Make category clickable for recategorization
-    const txIdx = transactions.indexOf(t);
-    return`<tr><td style="color:var(--text-mid);font-size:12px;white-space:nowrap">${t.date}</td><td style="font-size:12px" title="${t.desc}">${s}</td><td style="font-size:12px"><span class="cat-tag-clickable" onclick="openCategoryPicker(${txIdx},event)" title="Click to change category"><span class="cat-dot" style="background:${t.color}"></span>${t.cat}</span></td><td style="text-align:right;${cls}">${isI?'+'+fmt(t.amount):'-'+fmt(t.amount)}</td></tr>`;
-  }).join('');
+
+  // v40: Category detail bar when filtering
+  const detailBar = document.getElementById('tx-cat-detail');
+  if(cat!=='All' && detailBar){
+    const EXCL=['Transfers','Income'];
+    const catTotal=f.filter(t=>t.amount<0&&!EXCL.includes(t.cat)).reduce((s,t)=>s+Math.abs(t.amount),0);
+    const catIncome=f.filter(t=>t.amount>0).reduce((s,t)=>s+t.amount,0);
+    const allSpend=filtered.filter(t=>t.amount<0&&!EXCL.includes(t.cat)).reduce((s,t)=>s+Math.abs(t.amount),0);
+    const pct=allSpend>0?(catTotal/allSpend*100).toFixed(1):'0';
+    const txDays=new Set(f.map(t=>t.date)).size;
+    detailBar.style.display='block';
+    detailBar.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <div><span style="font-weight:700;font-size:16px;color:var(--teal)">${cat}</span> <span style="color:var(--text-mid);font-size:13px">· ${f.length} transactions across ${txDays} days</span></div>
+      <div style="display:flex;gap:16px">
+        <div style="text-align:right"><div style="font-size:10px;color:var(--text-soft);text-transform:uppercase">Total</div><div style="font-family:var(--font-d);font-size:16px;color:var(--red)">${fmt(catTotal)}</div></div>
+        <div style="text-align:right"><div style="font-size:10px;color:var(--text-soft);text-transform:uppercase">% of Spend</div><div style="font-family:var(--font-d);font-size:16px;color:var(--gold)">${pct}%</div></div>
+        <div style="text-align:right"><div style="font-size:10px;color:var(--text-soft);text-transform:uppercase">Avg/Transaction</div><div style="font-family:var(--font-d);font-size:16px;color:var(--blue)">${f.length?fmt(catTotal/f.filter(t=>t.amount<0).length):'$0'}</div></div>
+      </div>
+    </div>`;
+  } else if(detailBar){
+    detailBar.style.display='none';
+  }
+
+  // v40: Group by date with daily subtotals
+  const byDate={};
+  f.forEach(t=>{if(!byDate[t.date])byDate[t.date]=[];byDate[t.date].push(t);});
+  const sortedDates=Object.keys(byDate).sort((a,b)=>new Date(b)-new Date(a));
+
+  let html='';
+  sortedDates.forEach(date=>{
+    const dayTxs=byDate[date];
+    const dayTotal=dayTxs.reduce((s,t)=>s+(t.amount<0?Math.abs(t.amount):0),0);
+    const dayLabel=new Date(date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    html+=`<tr style="background:var(--surface2)"><td colspan="3" style="font-size:11px;font-weight:700;color:var(--text-mid);padding:8px 10px">${dayLabel}</td><td style="text-align:right;font-size:11px;font-weight:700;color:var(--text-mid);padding:8px 10px">-${fmt(dayTotal)}</td></tr>`;
+    dayTxs.forEach(t=>{
+      const abs=Math.abs(t.amount);const isI=t.amount>0;const big=abs>=200&&!isI;
+      const cls=isI?'color:var(--teal);font-weight:600':big?'color:var(--red);font-weight:600':'font-weight:500';
+      const s=t.desc.length>50?t.desc.substring(0,50)+'…':t.desc;
+      const txIdx = transactions.indexOf(t);
+      html+=`<tr><td style="color:var(--text-mid);font-size:12px;white-space:nowrap;padding-left:20px">${t.date}</td><td style="font-size:12px" title="${t.desc}">${s}</td><td style="font-size:12px"><span class="cat-tag-clickable" onclick="openCategoryPicker(${txIdx},event)" title="Click to change category"><span class="cat-dot" style="background:${t.color}"></span>${t.cat}</span></td><td style="text-align:right;${cls}">${isI?'+'+fmt(t.amount):'-'+fmt(t.amount)}</td></tr>`;
+    });
+  });
+  document.getElementById('tx-tbody').innerHTML=html;
+}
+
+// v40: Transaction spending insights — patterns, anomalies, and tips
+function renderTxInsights(filtered, catTotals, totalSpend, avgPerDay){
+  const insightsEl = document.getElementById('tx-insights');
+  const contentEl = document.getElementById('tx-insights-content');
+  if(!insightsEl || !contentEl || !filtered.length) return;
+  insightsEl.style.display='block';
+
+  const insights=[];
+  const sortedCats=Object.entries(catTotals).sort((a,b)=>b[1]-a[1]);
+
+  // Top spending category
+  if(sortedCats.length){
+    const [topName,topAmt]=sortedCats[0];
+    const pct=(topAmt/totalSpend*100).toFixed(0);
+    insights.push(`<strong>${topName}</strong> is your biggest spend at ${fmt(topAmt)} (${pct}% of total). ${topName==='Home'?'Mortgage and housing — this is expected.':topName==='Groceries'?'Great job staying on your $800/month grocery budget!':'Watch this category closely.'}`);
+  }
+
+  // Daily spending pattern
+  const days=new Set(filtered.map(t=>t.date)).size;
+  insights.push(`You averaged <strong>${fmt(avgPerDay)}/day</strong> across ${days} days. ${avgPerDay>300?'Heavy spending days detected — check for bills hitting.':'Spending velocity looks healthy.'}`);
+
+  // Large transactions (over $200)
+  const bigOnes=filtered.filter(t=>t.amount<-200);
+  if(bigOnes.length){
+    insights.push(`<strong>${bigOnes.length} large transaction${bigOnes.length>1?'s':''}</strong> over $200: ${bigOnes.slice(0,3).map(t=>`${t.desc.substring(0,25)} (${fmt(Math.abs(t.amount))})`).join(', ')}${bigOnes.length>3?' + '+(bigOnes.length-3)+' more':''}`);
+  }
+
+  // Recurring detection
+  const merchants={};
+  filtered.forEach(t=>{const k=t.desc.substring(0,20).replace(/\d+/g,'').trim();if(k.length>3)merchants[k]=(merchants[k]||0)+1;});
+  const recurring=Object.entries(merchants).filter(([k,v])=>v>=2).sort((a,b)=>b[1]-a[1]);
+  if(recurring.length){
+    insights.push(`<strong>Recurring merchants:</strong> ${recurring.slice(0,4).map(([k,v])=>`${k.substring(0,18)} (${v}x)`).join(', ')}`);
+  }
+
+  contentEl.innerHTML=insights.map(i=>`<div style="margin-bottom:8px;padding-left:12px;border-left:2px solid var(--teal)">${i}</div>`).join('');
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -2623,7 +2751,7 @@ function renderMilestones(){
     {icon:'💳',text:'Best Buy 1345 — NEXT TARGET',sub:'$4,680 at 29.99% · Kill weapon locked on',date:mlabel((sc.findIndex(s=>s['Best Buy 1345']<=0.01)||0)+1),next:true},
     {icon:'💳',text:'Chase 0690 paid off',sub:'$5,460 at 27.24%',date:mlabel((sc.findIndex(s=>s['Chase 0690']<=0.01)||0)+1)},
     {icon:'💳',text:'BofA 9362 paid off',sub:'$13,567 at 23.74%',date:mlabel((sc.findIndex(s=>s['BofA 9362']<=0.01)||0)+1)},
-    {icon:'🛡️',text:'Emergency Fund $10K',sub:'Never panic about surprises',date:'Fall 2027'},
+    {icon:'🛡️',text:'The Foundation $10K',sub:'Never panic about surprises',date:'Fall 2027'},
     {icon:'✈️',text:'First family vacation',sub:'Debt-free family trip',date:'Aug 2027'},
     {icon:'🎉',text:'ALL DEBT ELIMINATED',sub:'$36,903 → $0 · Kill weapon redirected to wealth',date:mlabel(sc.length)},
   ];
@@ -3785,7 +3913,7 @@ RULES FOR YOUR ADVICE:
 - Frame advice around the kill order — redirect savings to Best Buy kill
 - Be encouraging about the plan — 2 debts already killed, 16 months to debt-free
 - If speaking to Jamie: ONE number, ONE action, warm, no jargon
-Emergency fund: $${jarBalances.foundation}. Retirement: $${(jarBalances.merrill||157532).toLocaleString()} (Merrill — DO NOT TOUCH).
+The Foundation: $${jarBalances.foundation}. Retirement: $${(jarBalances.merrill||157532).toLocaleString()} (Merrill — DO NOT TOUCH).
 Net worth: $${((jarBalances.merrill||157532)+jarBalances.foundation+(familyGoals.lgfund||0)+jarBalances.mc+jarBalances.ff-totalDebt).toFixed(0)}.`;
 }
 
