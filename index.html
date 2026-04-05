@@ -27,7 +27,6 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{background:var(--bg);color:var(--text);font-family:var(--font-b);min-height:100vh}
 .hidden{display:none!important}
-
 /* ── ENTRY SCREEN ── */
 #entry-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;background:radial-gradient(ellipse at 30% 20%,rgba(0,201,167,0.08),transparent 60%),radial-gradient(ellipse at 70% 80%,rgba(77,159,255,0.06),transparent 60%)}
 .entry-logo{font-family:var(--font-d);font-size:38px;color:var(--text);text-align:center;margin-bottom:6px}
@@ -42,7 +41,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-b);min-height
 .entry-key:active{background:var(--border);transform:scale(0.95)}
 .entry-error{font-size:13px;color:var(--red);margin-top:12px;min-height:18px}
 .entry-hint{font-size:11px;color:var(--text-soft);margin-top:16px}
-
 /* ── WHO SCREEN ── */
 #who-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;background:radial-gradient(ellipse at 30% 20%,rgba(0,201,167,0.08),transparent 60%),radial-gradient(ellipse at 70% 80%,rgba(77,159,255,0.06),transparent 60%)}
 .who-title{font-family:var(--font-d);font-size:36px;text-align:center;margin-bottom:8px;color:var(--text)}
@@ -57,7 +55,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-b);min-height
 .who-role{font-size:12px;color:var(--text-mid)}
 .sunday-btn{margin-top:24px;padding:12px 28px;background:var(--gold-dim);border:1px solid rgba(255,197,66,0.3);border-radius:100px;color:var(--gold);font-family:var(--font-b);font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s}
 .sunday-btn:hover{background:rgba(255,197,66,0.2)}
-
 /* ── SHARED HEADER ── */
 .app-header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:50}
 .app-header-left{display:flex;align-items:center;gap:12px}
@@ -66,18 +63,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-b);min-height
 .user-badge{padding:4px 12px;border-radius:100px;font-size:12px;font-weight:600}
 .user-badge.douglas{background:var(--teal-dim);color:var(--teal)}
 .user-badge.jamie{background:var(--sage-dim);color:var(--sage)}
-
 /* ── TAB BAR ── */
 .tab-bar{display:flex;gap:4px;padding:12px 16px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);background:var(--bg)}
 .tab-bar::-webkit-scrollbar{display:none}
 .tab{flex-shrink:0;padding:7px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--text-mid);transition:all 0.2s;font-family:var(--font-b)}
 .tab.active{background:var(--teal-dim);color:var(--teal)}
 .tab.active.jamie-tab{background:var(--sage-dim);color:var(--sage)}
-
 /* ── PAGE SHELL ── */
 .app-body{padding:24px;max-width:1200px}
 .page{display:none}.page.active{display:block}
-
 /* ── METRICS ── */
 .metrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;margin-bottom:22px}
 @media(max-width:700px){.metrics{grid-template-columns:1fr 1fr}}
@@ -88,7 +82,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-b);min-height
 .metric-val{font-family:var(--font-d);font-size:28px;line-height:1}
 .m-teal .metric-val{color:var(--teal)}.m-red .metric-val{color:var(--red)}.m-gold .metric-val{color:var(--gold)}.m-blue .metric-val{color:var(--blue)}.m-purple .metric-val{color:var(--purple)}
 .metric-sub{font-size:11px;color:var(--text-mid);margin-top:4px}
-
 /* ── PANELS ── */
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
 @media(max-width:700px){.grid-2{grid-template-columns:1fr}}
@@ -96,7 +89,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-b);min-height
 .panel-title{font-size:11px;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;color:var(--text-mid);margin-bottom:14px;display:flex;align-items:center;gap:7px}
 .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .d-teal{background:var(--teal)}.d-red{background:var(--red)}.d-gold{background:var(--gold)}.d-blue{background:var(--blue)}.d-purple{background:var(--purple)}.d-sage{background:var(--sage)}
-
 /* ── TABLES ── */
 .tbl{width:100%;border-collapse:collapse;font-size:13px}
 .tbl th{text-align:left;padding:7px 10px;font-size:10px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:var(--text-soft);border-bottom:1px solid var(--border)}
@@ -109,14 +101,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-b);min-height
 .prog-wrap{background:var(--surface2);border-radius:100px;height:5px;overflow:hidden;margin-top:3px}
 .prog-bar{height:100%;border-radius:100px;transition:width 0.6s}
 .chart-wrap{position:relative;height:220px}
-
 /* ── DROP ZONE ── */
 .drop-zone{border:2px dashed var(--border);border-radius:var(--r);padding:28px;text-align:center;margin-bottom:20px;cursor:pointer;position:relative;transition:all 0.3s}
 .drop-zone.drag-over{border-color:var(--teal);background:var(--teal-dim)}
 .drop-zone.loaded{border-color:var(--teal);border-style:solid;background:var(--teal-dim)}
 .drop-input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
 .loaded-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:100px;background:rgba(0,201,167,0.2);color:var(--teal);font-size:13px;font-weight:600}
-
 /* ── PROJECTIONS ── */
 .proj-ctrl{display:flex;align-items:center;gap:16px;padding:12px 16px;background:var(--surface2);border-radius:10px;margin-bottom:16px;flex-wrap:wrap}
 .slider-wrap{display:flex;align-items:center;gap:12px;flex:1;min-width:240px}
@@ -132,7 +122,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .pc-mo{font-family:var(--font-d);font-size:20px}
 .pc-date{font-size:11px;color:var(--text-mid);margin-top:2px}
 .pc-saved{font-size:11px;color:var(--teal);margin-top:2px}
-
 /* ── JAMIE SIDE ── */
 .jamie-bg{background:linear-gradient(135deg,#1a2818 0%,#0f1117 100%)}
 .j-header{background:linear-gradient(135deg,#2d5a3d,#1a3d2a);padding:24px;border-bottom:1px solid rgba(90,158,138,0.2)}
@@ -147,7 +136,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .gauge-bar-bg{background:var(--surface2);border-radius:100px;height:10px;overflow:hidden;margin-bottom:6px}
 .gauge-bar-fill{height:100%;border-radius:100px;transition:width 0.5s,background 0.3s}
 .gauge-sub{display:flex;justify-content:space-between;font-size:12px;color:var(--text-mid)}
-
 /* meal planner */
 .j-page{display:none;padding:14px}.j-page.active{display:block}
 .j-sec-title{font-family:var(--font-d);font-size:20px;margin-bottom:4px}
@@ -167,7 +155,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .m-chip:active{transform:scale(0.96)}
 .m-chip-rm{background:rgba(255,107,107,0.12);border:none;color:var(--red);font-size:11px;border-radius:100px;width:20px;height:20px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;transition:background 0.15s;line-height:1;margin-right:4px}
 .m-chip-rm:hover{background:rgba(255,107,107,0.28)}
-
 /* grocery */
 .spend-summary{background:var(--surface);border-radius:var(--r);padding:14px 16px;margin-bottom:14px}
 .ss-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0}
@@ -194,7 +181,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .gi-price-inp:focus{outline:none;border-color:var(--sage)}
 .empty-state{text-align:center;padding:40px 20px;color:var(--text-mid)}
 .es-icon{font-size:36px;margin-bottom:10px}
-
 /* ── MULTI-STORE GROCERY TABS (v38) ── */
 .store-tabs-wrap{display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
 .store-tabs{display:flex;gap:6px;overflow-x:auto;flex:1;scrollbar-width:none}
@@ -228,7 +214,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .sbb-val{font-family:var(--font-d);font-size:18px}
 .sbb-progress{background:var(--surface2);border-radius:100px;height:8px;overflow:hidden}
 .sbb-fill{height:100%;border-radius:100px;transition:width 0.4s,background 0.3s}
-
 /* Manage Stores Overlay */
 .manage-stores-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
 .manage-stores-box{background:var(--surface);border-radius:16px;padding:24px;width:100%;max-width:400px;max-height:85vh;overflow-y:auto}
@@ -245,13 +230,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .msb-add-btn{width:100%;padding:12px;background:var(--surface2);border:2px dashed var(--border);border-radius:10px;color:var(--text-mid);font-family:var(--font-b);font-size:14px;font-weight:600;cursor:pointer;margin-top:8px;transition:all 0.2s}
 .msb-add-btn:hover{border-color:var(--sage);color:var(--sage)}
 .msb-save-btn{width:100%;padding:14px;background:var(--sage);color:#fff;border:none;border-radius:10px;font-family:var(--font-b);font-size:15px;font-weight:700;cursor:pointer;margin-top:16px}
-
 /* history */
 .hist-item{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--surface);border-radius:10px;margin-bottom:8px;border:1px solid var(--border)}
 .hi-week{font-size:13px;font-weight:600}.hi-date{font-size:11px;color:var(--text-mid);margin-top:1px}
 .hi-amt{font-family:var(--font-d);font-size:18px}.hi-status{font-size:10px;font-weight:700;padding:2px 7px;border-radius:100px;margin-top:2px;display:inline-block}
 .hs-under{background:var(--sage-dim);color:var(--sage)}.hs-over{background:var(--red-dim);color:var(--red)}
-
 /* goals */
 .goal-card{background:var(--surface);border-radius:var(--r);padding:16px;margin-bottom:10px;border-left:4px solid var(--border);border-bottom:1px solid var(--border)}
 .goal-card.g-vac{border-left-color:var(--gold)}.goal-card.g-emerg{border-left-color:var(--teal)}.goal-card.g-debt{border-left-color:var(--red)}
@@ -259,13 +242,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .g-name{font-size:15px;font-weight:700;margin-bottom:4px}
 .g-desc{font-size:13px;color:var(--text-mid);line-height:1.5;margin-bottom:10px}
 .g-prog-lbl{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px}
-
 .impact-panel{background:linear-gradient(135deg,var(--sage-dim),rgba(90,158,138,0.05));border:1px solid rgba(90,158,138,0.2);border-radius:var(--r);padding:16px;margin-bottom:14px}
 .ip-title{font-size:13px;font-weight:700;color:var(--sage);margin-bottom:10px}
 .ip-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(90,158,138,0.1)}
 .ip-row:last-child{border-bottom:none}
 .ip-label{font-size:13px;color:var(--text-mid)}.ip-val{font-size:14px;font-weight:700;color:var(--sage)}
-
 /* ── CUSTOM MEAL FORM ── */
 .custom-meal-form{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:14px}
 .cmf-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px}
@@ -301,7 +282,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .btn-outline{background:transparent;color:var(--sage);border:2px solid var(--sage)}
 .btn-gold{background:var(--gold);color:#000}
 .btn-small{width:auto;padding:8px 16px;font-size:13px;margin-bottom:0}
-
 /* SUNDAY MODE */
 #sunday-screen{min-height:100vh;background:radial-gradient(ellipse at 50% 0%,rgba(255,197,66,0.1),transparent 60%),var(--bg)}
 .sunday-header{text-align:center;padding:32px 24px 20px}
@@ -318,7 +298,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .ms-day{font-size:11px;font-weight:700;color:var(--text-soft);width:28px;text-transform:uppercase}
 .ms-meal{font-size:13px;font-weight:500}
 .sunday-back{display:block;width:calc(100% - 40px);margin:0 20px 20px;padding:13px;background:var(--surface2);border:none;border-radius:var(--r);color:var(--text-mid);font-family:var(--font-b);font-size:14px;font-weight:600;cursor:pointer;text-align:center}
-
 /* PIN */
 .pin-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px)}
 .pin-box{background:var(--surface);border-radius:20px;padding:32px 28px;max-width:320px;width:90%;text-align:center}
@@ -332,11 +311,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .pin-key:active{background:var(--border);transform:scale(0.95)}
 .pin-error{font-size:13px;color:var(--red);margin-top:10px;min-height:18px}
 .pin-cancel{margin-top:14px;background:none;border:none;color:var(--text-mid);font-family:var(--font-b);font-size:13px;cursor:pointer;text-decoration:underline}
-
 /* TOAST */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);color:var(--text);padding:10px 20px;border-radius:100px;font-size:13px;font-weight:600;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:300;white-space:nowrap;box-shadow:var(--sh)}
 .toast.show{opacity:1}
-
 /* TX list */
 .tx-filter-bar{display:flex;gap:7px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px;scrollbar-width:none}
 .tx-filter-bar::-webkit-scrollbar{display:none}
@@ -344,7 +321,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .txf.active{border-color:var(--teal);background:var(--teal-dim);color:var(--teal)}
 .tx-scroll{max-height:400px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
 .cat-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:5px}
-
 /* v40: Clickable category tags for recategorization */
 .cat-tag-clickable{cursor:pointer;padding:2px 8px 2px 4px;border-radius:6px;transition:all 0.15s;display:inline-flex;align-items:center}
 .cat-tag-clickable:hover{background:var(--surface2)}
@@ -363,13 +339,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .cat-picker-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .cat-picker-cancel{margin-top:12px;width:100%;padding:10px;border:none;border-radius:10px;background:var(--surface2);color:var(--text-mid);font-family:var(--font-b);font-size:13px;cursor:pointer}
 .cat-picker-cancel:hover{background:var(--border)}
-
 /* nav bottom for jamie */
 .j-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(4,1fr);z-index:50;padding:8px 0 10px}
 .jn-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;background:none;border:none;font-family:var(--font-b);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;color:var(--text-soft);padding:4px;transition:color 0.2s}
 .jn-item.active{color:var(--sage)}
 .jn-icon{font-size:20px}
-
 /* ── SANKEY / MONEY FLOW ── */
 .sankey-wrap{position:relative;width:100%;overflow-x:auto}
 .sankey-wrap svg{display:block;width:100%;min-width:600px}
@@ -382,23 +356,19 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .sankey-tooltip .st-label{font-weight:700;color:var(--teal);margin-bottom:4px;font-size:13px}
 .sankey-tooltip .st-amount{font-family:var(--font-d);font-size:18px;margin-bottom:2px}
 .sankey-tooltip .st-pct{color:var(--text-mid);font-size:11px}
-
 /* ── AI ASSISTANT ── */
 .ai-fab{position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--blue));color:#fff;border:none;font-size:24px;cursor:pointer;z-index:90;box-shadow:0 4px 20px rgba(0,201,167,0.35);transition:all 0.3s;display:flex;align-items:center;justify-content:center}
 .ai-fab:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(0,201,167,0.45)}
 .ai-fab:active{transform:scale(0.96)}
 .ai-fab.jamie-fab{background:linear-gradient(135deg,var(--sage),#3d8b6e)}
 #jamie-app .ai-fab{bottom:80px}
-
 .ai-panel{position:fixed;bottom:0;right:0;width:400px;max-width:100vw;height:70vh;max-height:600px;background:var(--surface);border:1px solid var(--border);border-radius:20px 20px 0 0;box-shadow:0 -4px 40px rgba(0,0,0,0.4);z-index:100;display:flex;flex-direction:column;transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);overflow:hidden}
 .ai-panel.open{transform:translateY(0)}
 @media(max-width:500px){.ai-panel{width:100%;height:80vh;max-height:none;border-radius:20px 20px 0 0}}
-
 .ai-panel-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);background:var(--surface2);flex-shrink:0}
 .ai-panel-title{font-family:var(--font-d);font-size:18px;display:flex;align-items:center;gap:8px}
 .ai-panel-close{background:none;border:none;color:var(--text-mid);font-size:20px;cursor:pointer;padding:4px 8px;border-radius:6px;transition:background 0.15s}
 .ai-panel-close:hover{background:var(--surface)}
-
 .ai-messages{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
 .ai-msg{max-width:88%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.6;animation:msgIn 0.25s ease-out}
 @keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -407,7 +377,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .ai-msg.assistant{align-self:flex-start;background:var(--surface2);border:1px solid var(--border);color:var(--text)}
 .ai-msg.thinking{color:var(--text-mid);font-style:italic}
 .ai-msg.error{color:var(--red);background:var(--red-dim);border:1px solid rgba(255,107,107,0.2)}
-
 .ai-input-row{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--border);background:var(--surface);flex-shrink:0}
 .ai-input{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:12px;background:var(--bg);color:var(--text);font-family:var(--font-b);font-size:13px;resize:none;min-height:40px;max-height:80px}
 .ai-input:focus{outline:none;border-color:var(--teal)}
@@ -421,7 +390,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 </style>
 </head>
 <body>
-
 <!-- ENTRY SCREEN -->
 <div id="entry-screen">
   <div class="entry-logo">Martinson Family</div>
@@ -452,7 +420,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
     <div class="entry-hint">Family access only</div>
   </div>
 </div>
-
 <!-- WHO SCREEN -->
 <div id="who-screen" class="hidden">
   <div class="who-title">Martinson Family</div>
@@ -471,7 +438,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   </div>
   <button class="sunday-btn" onclick="showSunday()">☀️ Sunday Check-In Mode</button>
 </div>
-
 <!-- SUNDAY SCREEN -->
 <div id="sunday-screen" class="hidden">
   <div class="sunday-header">
@@ -514,7 +480,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   </div>
   <button class="sunday-back" onclick="showWho()">← Back to Home</button>
 </div>
-
 <!-- DOUGLAS APP -->
 <div id="douglas-app" class="hidden">
   <div class="app-header">
@@ -538,7 +503,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
     <button class="tab" onclick="dPage('goals',this)">Goals</button>
   </div>
   <div class="app-body">
-
     <!-- OVERVIEW -->
     <div class="page active" id="d-overview">
       <!-- BANK SYNC BAR -->
@@ -643,7 +607,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         </div>
       </div>
     </div>
-
     <!-- TRANSACTIONS -->
     <div class="page" id="d-transactions">
       <div id="tx-empty-state" class="empty-state"><div class="es-icon">📂</div><p>Drop BofA CSV on Overview tab to see transactions</p></div>
@@ -665,7 +628,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         </div>
       </div>
     </div>
-
     <!-- BUDGET VS ACTUAL -->
     <div class="page" id="d-budget">
       <div id="bva-empty" class="empty-state"><div class="es-icon">📂</div><p>Drop CSV on Overview tab first</p></div>
@@ -675,7 +637,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         <div class="panel"><div class="panel-title"><span class="dot d-blue"></span>Visual</div><div class="chart-wrap" style="height:280px"><canvas id="bar-chart"></canvas></div></div>
       </div>
     </div>
-
     <!-- MONEY FLOW (Sankey) -->
     <div class="page" id="d-moneyflow">
       <div id="mf-empty" class="empty-state"><div class="es-icon">🌊</div><p style="font-size:13px">Drop a CSV on Overview to see your money flow</p><p style="font-size:12px;color:var(--text-soft);margin-top:6px">Interactive Sankey diagram showing Income → Category → Subcategory</p></div>
@@ -700,15 +661,28 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         </div>
       </div>
     </div>
-
     <!-- PROJECTIONS -->
     <div class="page" id="d-projections">
-      <div style="font-family:var(--font-d);font-size:22px;margin-bottom:16px">Debt Payoff Projector</div>
+      <div style="font-family:var(--font-d);font-size:22px;margin-bottom:6px">Debt Payoff Projector</div>
+      <div style="font-size:13px;color:var(--text-mid);margin-bottom:16px">Drag the slider. Watch your future change in real time.</div>
+      <!-- v40b: Freedom Countdown Banner -->
+      <div id="proj-freedom-banner" style="background:linear-gradient(135deg,var(--teal-dim),var(--blue-dim));border:1px solid rgba(0,201,167,0.2);border-radius:var(--r);padding:16px 20px;margin-bottom:16px;text-align:center">
+        <div style="font-size:12px;color:var(--teal);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Your Debt Freedom Date</div>
+        <div id="proj-freedom-date" style="font-family:var(--font-d);font-size:28px;color:var(--teal)">Jul 2027</div>
+        <div id="proj-freedom-sub" style="font-size:13px;color:var(--text-mid);margin-top:4px">16 months away · $1,220/mo kill weapon active</div>
+      </div>
+      <!-- v40b: Preset Buttons -->
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+        <button class="txf" onclick="setExtra(0)" id="preset-min">Minimums Only</button>
+        <button class="txf active" onclick="setExtra(1220)" id="preset-kill">Kill Weapon · $1,220</button>
+        <button class="txf" onclick="setExtra(1500)" id="preset-agg">Aggressive · $1,500</button>
+        <button class="txf" onclick="setExtra(2000)" id="preset-max">All-In · $2,000</button>
+      </div>
       <div class="proj-ctrl">
         <div class="slider-wrap">
           <span class="slider-label">Extra/month:</span>
-          <input type="range" id="extra-slider" min="0" max="500" step="25" value="0" oninput="updateProj()">
-          <span class="slider-val" id="extra-display">+$0</span>
+          <input type="range" id="extra-slider" min="0" max="2500" step="50" value="1220" oninput="updateProj()">
+          <span class="slider-val" id="extra-display">+$1,220</span>
         </div>
         <select class="ctrl-sel" id="proj-strat" onchange="updateProj()">
           <option value="avalanche">Highest APR first (saves most $)</option>
@@ -716,12 +690,24 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         </select>
       </div>
       <div class="payoff-grid" id="payoff-cards"></div>
+      <!-- v40b: Strategy Comparison -->
+      <div id="strat-compare" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px"></div>
       <div class="grid-2">
         <div class="panel"><div class="panel-title"><span class="dot d-red"></span>Balance Over Time</div><div class="chart-wrap" style="height:240px"><canvas id="payoff-chart"></canvas></div></div>
         <div class="panel"><div class="panel-title"><span class="dot d-gold"></span>Interest Savings</div><div id="int-summary" style="display:flex;flex-direction:column;gap:12px;margin-top:4px"></div></div>
       </div>
+      <!-- v40b: What-If Scenarios -->
+      <div style="margin-top:16px;padding:16px;background:var(--surface2);border-radius:var(--r)">
+        <div style="font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">💡 What-If Scenarios</div>
+        <div id="whatif-scenarios" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px"></div>
+      </div>
+      <!-- v40b: Daily Interest Ticker -->
+      <div style="margin-top:16px;padding:16px;background:var(--surface2);border-radius:var(--r);text-align:center">
+        <div style="font-size:11px;color:var(--text-soft);text-transform:uppercase;letter-spacing:0.5px">While You Decide, Debt Costs You</div>
+        <div id="proj-daily-cost" style="font-family:var(--font-d);font-size:32px;color:var(--red);margin-top:4px">$15.59/day</div>
+        <div style="font-size:12px;color:var(--text-mid);margin-top:4px">That's <span id="proj-hourly">$0.65/hour</span> · <span id="proj-yearly">$5,690/year</span> · even while you sleep</div>
+      </div>
     </div>
-
     <!-- GOALS (DOUGLAS) -->
     <div class="page" id="d-goals">
       <div style="background:linear-gradient(135deg,var(--teal-dim),var(--blue-dim));border:1px solid rgba(0,201,167,0.2);border-radius:var(--r);padding:20px;margin-bottom:16px">
@@ -735,7 +721,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
     </div>
   </div>
 </div>
-
 <!-- JAMIE APP -->
 <div id="jamie-app" class="hidden" style="padding-bottom:70px">
   <div class="j-header">
@@ -762,7 +747,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
     <div class="gauge-bar-bg"><div class="gauge-bar-fill" id="j-gauge-bar" style="width:0%;background:var(--sage)"></div></div>
     <div class="gauge-sub"><span>Spent: <strong id="j-gauge-spent">$0</strong></span><span id="j-gauge-rem">$200 remaining</span></div>
   </div>
-
   <!-- JAMIE NAV -->
   <nav class="j-nav">
     <button class="jn-item active" onclick="jPage('meals',this)"><span class="jn-icon">🍽️</span>Meals</button>
@@ -770,12 +754,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
     <button class="jn-item" onclick="jPage('tracker',this)"><span class="jn-icon">📊</span>Tracker</button>
     <button class="jn-item" onclick="jPage('goals',this)"><span class="jn-icon">⭐</span>Goals</button>
   </nav>
-
   <!-- MEALS -->
   <div class="j-page active" id="j-meals">
     <div class="j-sec-title">This Week's Dinners</div>
     <div class="j-sec-sub">Tap a day → pick your meal → tap "Build List" when done</div>
-
     <!-- CUSTOM MEAL FORM -->
     <div class="custom-meal-form">
       <div class="cmf-title">➕ Add Your Own Meal</div>
@@ -787,18 +769,15 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       <button class="cmf-add-ing" onclick="addCustomMealIngRow()">+ Add another ingredient</button>
       <button class="cmf-btn" style="width:100%;margin-top:4px" onclick="saveCustomMeal()">✓ Save This Meal</button>
     </div>
-
     <!-- CUSTOM MEALS SAVED -->
     <div id="custom-meals-display" style="display:none;margin-bottom:12px">
       <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--sage);margin-bottom:8px">Your Custom Meals</div>
       <div class="custom-meals-list" id="custom-meals-list"></div>
     </div>
-
     <div id="j-day-cards"></div>
     <button class="btn btn-primary" onclick="buildList()">✨ Build My Grocery List</button>
     <button class="btn btn-outline" onclick="clearMeals()">Clear & Start Over</button>
   </div>
-
   <!-- GROCERY (v38 - Multi-Store Tabs) -->
   <div class="j-page" id="j-grocery">
     <!-- Budget Summary -->
@@ -819,19 +798,16 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         <div class="sbb-fill" id="store-budget-fill" style="width:0%;background:var(--sage)"></div>
       </div>
     </div>
-
     <!-- Store Tabs -->
     <div class="store-tabs-wrap">
       <div class="store-tabs" id="store-tabs"></div>
       <button class="store-manage-btn" onclick="openManageStores()" title="Manage Stores">⚙️</button>
     </div>
-
     <!-- Add Item Row -->
     <div class="store-add-row">
       <input type="text" class="store-add-inp" id="store-add-inp" placeholder="Add item to this store..." onkeydown="if(event.key==='Enter')addStoreItem()">
       <button class="store-add-btn" onclick="addStoreItem()">Add</button>
     </div>
-
     <!-- Current Store's List -->
     <div class="store-list-wrap" id="store-list-wrap">
       <div class="store-list-empty" id="store-list-empty">
@@ -840,11 +816,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       </div>
       <div id="store-list-items"></div>
     </div>
-
     <!-- Done Shopping Button -->
     <button class="btn btn-primary" id="store-done-btn" style="display:none;margin-top:12px" onclick="finishStoreShopping()">✅ Done Shopping — Save Total</button>
   </div>
-
   <!-- TRACKER -->
   <div class="j-page" id="j-tracker">
     <div class="j-sec-title">Spending History</div>
@@ -858,7 +832,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
     </div>
     <div id="j-hist-wrap"></div>
   </div>
-
   <!-- GOALS -->
   <div class="j-page" id="j-goals">
     <div class="j-sec-title">Family Goals</div>
@@ -890,7 +863,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
     </div>
   </div>
 </div>
-
 <!-- PIN OVERLAY -->
 <div class="pin-overlay hidden" id="pin-overlay">
   <div class="pin-box">
@@ -909,20 +881,16 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
     <div class="pin-error" id="pin-error"></div>
   </div>
 </div>
-
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
-
 <!-- SANKEY TOOLTIP -->
 <div class="sankey-tooltip" id="sankey-tooltip">
   <div class="st-label" id="st-label"></div>
   <div class="st-amount" id="st-amount"></div>
   <div class="st-pct" id="st-pct"></div>
 </div>
-
 <!-- AI ASSISTANT FAB -->
 <button class="ai-fab hidden" id="ai-fab" onclick="toggleAIPanel()">✨</button>
-
 <!-- AI ASSISTANT PANEL -->
 <div class="ai-panel" id="ai-panel">
   <div class="ai-panel-header">
@@ -938,9 +906,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
     <button class="ai-send" id="ai-send" onclick="sendAIMessage()">Send</button>
   </div>
 </div>
-
 <script>
-// ══════ CONFIG
 const ENTRY_PASS = "5626"; // Entry password — change this anytime
 const PIN = "1234"; // Douglas's view PIN for Jamie
 const WEEKLY_BUDGET = 200;
@@ -1121,8 +1087,6 @@ const MEALS = [
 ];
 const STAPLES = [{n:"Milk gallon",s:"aldi",sec:"Dairy",e:3.5},{n:"Eggs dozen",s:"aldi",sec:"Dairy",e:2.5},{n:"Bread loaf",s:"aldi",sec:"Bakery",e:2.0},{n:"Bananas",s:"aldi",sec:"Produce",e:1.5},{n:"Butter",s:"aldi",sec:"Dairy",e:3.5}];
 const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday"];
-
-// ══════ STATE
 let transactions = [];
 let charts = {};
 let mealPlan = {};
@@ -1148,7 +1112,6 @@ let aiChatHistory = []; // conversation history for AI panel
 let aiPanelOpen = false;
 let simplefinConnected = false; // whether SimpleFIN bank is linked
 let selectedPeriod = 'thisMonth'; // v40: time period filter — 'thisMonth', 'lastMonth', '3months', 'all'
-
 // v40: Filter transactions by selected time period
 function getFilteredTransactions() {
   if (!transactions.length || selectedPeriod === 'all') return transactions;
@@ -1171,7 +1134,6 @@ function getFilteredTransactions() {
     return !isNaN(d) && d >= startDate && d <= endDate;
   });
 }
-
 function setPeriod(period, btn) {
   selectedPeriod = period;
   document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
@@ -1179,7 +1141,6 @@ function setPeriod(period, btn) {
   renderFromTransactions();
   updateBigNumber();
 }
-
 function updateBigNumber() {
   const filtered = getFilteredTransactions();
   if (!filtered.length) {
@@ -1235,8 +1196,6 @@ function updateBigNumber() {
   }
 }
 let learnedCategories = {}; // v40: User-taught merchant→category mappings {merchantPattern: category}
-
-// ══════ MULTI-STORE GROCERY STATE (v38) ══════
 // Default stores - Jamie can add/remove/rename via ⚙️
 const DEFAULT_STORES = [
   { id: 'aldi', name: 'Aldi', emoji: '🛒' },
@@ -1249,11 +1208,7 @@ let storeItems = {}; // { storeId: [{id, name, price, checked}, ...] }
 let activeStoreId = 'aldi'; // currently selected store tab
 // ALWAYS use this URL — Apps Script for receipt scanning and PDF only
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw0q-7XhX6OztGR54bXX5_iFnUCYeaRVyfxbhoDdaIuWSeDZF7U-KYxqYXfaM4eKcJD/exec';
-
-// ══════════════════════════════════════════════════════════════════
 // SYNC ENGINE — Google Sheets architecture
-// ══════════════════════════════════════════════════════════════════
-// ══════════════════════════════════════════════════════════════════
 // FIREBASE SYNC ENGINE — v40
 //
 // One key controls everything: martinson/last_csv_data
@@ -1271,17 +1226,12 @@ const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw0q-7XhX6OztGR54bXX5
 // v36: AI calls routed through Apps Script proxy (CORS fix)
 // v37: SimpleFIN bank integration — auto-pull transactions, no CSV
 // v38: Jamie's multi-store grocery lists with tabs (Aldi, Costco, Target, Walmart)
-// ══════════════════════════════════════════════════════════════════
-
 const FB = 'https://martinson-family-default-rtdb.firebaseio.com';
 firebase.initializeApp({ databaseURL: FB });
 const FBDB = firebase.database();
 const FB_ROOT = FBDB.ref('martinson');
-
 let lastSyncTime = null;
 let _pollTimer = null;
-
-// ── WRITE ─────────────────────────────────────────────────────────
 function fbSet(key, value) {
   localStorage.setItem('fb_' + key, JSON.stringify(value));
   return FB_ROOT.child(key).set(value).catch(() =>
@@ -1291,30 +1241,23 @@ function fbSet(key, value) {
     })
   );
 }
-
-// ── DELETE ────────────────────────────────────────────────────────
 function fbDelete(key) {
   localStorage.removeItem('fb_' + key);
   return FB_ROOT.child(key).remove().catch(() =>
     fetch(`${FB}/martinson/${key}.json`, {method:'DELETE'})
   );
 }
-
-// ── READ ALL — single REST call, always works ────────────────────
 async function fbGetAll() {
   try {
     const res = await fetch(`${FB}/martinson.json`);
     return res.ok ? await res.json() : null;
   } catch(e) { return null; }
 }
-
-// ── THE ONE RULE — server decides what to show ───────────────────
 // Called every time we get fresh data from Firebase
 let _syncPaused = false;
 function applyServerState(all) {
   if (!all) return;
   if (_syncPaused) return;
-
   // Apply non-CSV keys always
   const keys = ['meal_plan','week_hist','custom_meals','hidden_meals',
                  'financial_settings','cc_balances','family_goals',
@@ -1325,13 +1268,11 @@ function applyServerState(all) {
       applyKey(k, all[k]);
     }
   });
-
   // CSV DECISION: server is the sole source of truth.
   // If server has real tx data (not cleared marker) → show it
   // If server has cleared marker or no data → show empty
   // _syncPaused prevents race conditions during the clear write.
   const csv = all.last_csv_data;
-
   if (csv && !csv.cleared && csv.uploadedAt && (csv.txData || csv.txList)) {
     // Server has real data → show it, update localStorage to match
     localStorage.setItem('fb_last_csv_data', JSON.stringify({uploadedAt: csv.uploadedAt}));
@@ -1345,15 +1286,12 @@ function applyServerState(all) {
       clearCSVDisplay();
     }
   }
-
   lastSyncTime = new Date();
   updateSyncBadge('ok');
   refreshAllUI();
   updateNetWorth();
   updateDebtMetrics();
 }
-
-// ── LOAD CSV FROM SERVER ─────────────────────────────────────────
 let _loadedUploadedAt = 0;
 function loadCsvFromServer(data) {
   // Don't reload if we already have this exact version
@@ -1364,31 +1302,24 @@ function loadCsvFromServer(data) {
   const aiBtn = document.getElementById('ai-btn-wrap');
   if(aiBtn) aiBtn.style.display = 'block';
 }
-
-// ── CLEAR — overwrites last_csv_data with a cleared marker ───────
 // Uses DIRECT REST PUT as the primary write (same mechanism that
 // makes uploads work). SDK is fallback. This is the most reliable
 // write path available — a simple HTTP PUT to a known URL.
 function clearCsvOnAllDevices() {
   // 1. Pause sync
   _syncPaused = true;
-
   // 2. Clear locally — instant
   transactions = [];
   _loadedUploadedAt = 0;
   clearCSVDisplay();
-
   // 3. Stop all listeners so nothing can fight us
   FB_ROOT.off('value');
   if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
   clearTimeout(_sdkDebounceTimer);
-
   // 4. Build the cleared marker
   const marker = { cleared: true, clearedAt: Date.now() };
-
   // 5. Write to localStorage immediately (survives if network fails)
   localStorage.setItem('fb_last_csv_data', JSON.stringify(marker));
-
   // 6. Write to Firebase via DIRECT REST PUT — most reliable path
   fetch(`${FB}/martinson/last_csv_data.json`, {
     method: 'PUT',
@@ -1418,8 +1349,6 @@ function clearCsvOnAllDevices() {
       });
   });
 }
-
-// ── UPLOAD — writes new CSV data to server ───────────────────────
 // New data replaces the cleared marker. Clear the localStorage guard.
 function uploadCsvToServer(syncData) {
   _syncPaused = false;
@@ -1427,8 +1356,6 @@ function uploadCsvToServer(syncData) {
   localStorage.setItem('fb_last_csv_data', JSON.stringify(syncData));
   return fbSet('last_csv_data', syncData);
 }
-
-// ── START SYNC ───────────────────────────────────────────────────
 // Uses SDK WebSocket for instant push + REST polling every 8s as backup
 // SDK fires on EVERY write — debounce to prevent rapid re-apply
 let _sdkDebounceTimer = null;
@@ -1440,7 +1367,6 @@ function startSync() {
       applyServerState(snap.val());
     }, 300); // 300ms debounce — lets multiple writes settle
   }, () => updateSyncBadge('error'));
-
   // 2. REST polling every 8 seconds — bulletproof fallback
   // Increased from 4s to 8s since SDK handles instant sync already
   if (_pollTimer) clearInterval(_pollTimer);
@@ -1449,8 +1375,6 @@ function startSync() {
     if (all) applyServerState(all);
   }, 8000);
 }
-
-// ── FORCE SYNC ────────────────────────────────────────────────────
 async function forceSyncNow() {
   if (_syncPaused) { toast('⟳ Clear in progress...'); return; }
   updateSyncBadge('syncing');
@@ -1464,8 +1388,6 @@ async function forceSyncNow() {
     updateSyncBadge('error');
   }
 }
-
-// ── INITIAL LOAD ──────────────────────────────────────────────────
 async function syncAll() {
   // Load non-CSV keys from localStorage instantly (no network)
   ['custom_meals','hidden_meals','week_hist','meal_plan',
@@ -1479,15 +1401,11 @@ async function syncAll() {
   const all = await fbGetAll();
   if (all) applyServerState(all);
 }
-
-// ── DEBOUNCED SAVE ────────────────────────────────────────────────
 const _saveTimers = {};
 function scheduleSave(key, value) {
   clearTimeout(_saveTimers[key]);
   _saveTimers[key] = setTimeout(() => fbSet(key, value), 800);
 }
-
-// ── APPLY KEY — map server data to local app state ────────────────
 function applyKey(key, value) {
   if (value === null || value === undefined) return;
   switch(key) {
@@ -1553,13 +1471,10 @@ function applyKey(key, value) {
       break;
   }
 }
-
-// ── FINANCIAL SETTINGS — editable from UI ─────────────────────────
 const FINANCIAL = {
   income: 9090.46,
   efundTarget: 10000,
 };
-
 // Save updated financial settings (CC balances, income, etc)
 function saveFinancialSettings() {
   const settings = {
@@ -1570,7 +1485,6 @@ function saveFinancialSettings() {
   };
   fbSet('financial_settings', settings);
 }
-
 async function syncTransactionBatch(txns, loadedOn) {
   if (!txns.length) return { added:txns.length, duplicates:0 };
   // Write to Apps Script for permanent Sheets archive (fire and forget)
@@ -1583,7 +1497,6 @@ async function syncTransactionBatch(txns, loadedOn) {
   } catch(e) {}
   return { added:txns.length, duplicates:0 };
 }
-
 function updateSyncBadge(status) {
   syncStatus = status;
   const configs = {
@@ -1606,9 +1519,7 @@ function updateSyncBadge(status) {
       : () => forceSyncNow();
   });
 }
-
 // scheduleSave defined above in Firebase engine
-
 function showSyncSetup() {
   const existing = document.getElementById('sync-setup-overlay');
   if (existing) existing.remove();
@@ -1640,7 +1551,6 @@ function showSyncSetup() {
     </div>`;
   document.body.appendChild(overlay);
 }
-
 let _sheetSyncTimer = null;
 function saveSyncURL() {
   const url = document.getElementById('sheet-url-input').value.trim();
@@ -1657,7 +1567,6 @@ function saveSyncURL() {
     _sheetSyncTimer = setInterval(() => syncAll().then(refreshAllUI), 30000);
   });
 }
-
 function refreshAllUI() {
   renderDayCards();
   renderCustomMealsList();
@@ -1667,7 +1576,6 @@ function refreshAllUI() {
   updateCCDisplay();
   updateGoalsDisplay();
 }
-
 // Render all transaction-dependent views
 function renderFromTransactions() {
   if (!transactions.length) return;
@@ -1681,8 +1589,6 @@ function renderFromTransactions() {
   // v35: update Money Flow tab
   renderSankey();
 }
-
-// ══════ INIT
 document.addEventListener('DOMContentLoaded', async () => {
   renderDonut();
   updateProj();
@@ -1690,7 +1596,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderFreedomChart();
   document.getElementById('j-week-of').textContent = getWeekOf();
   document.getElementById('j-gauge-week').textContent = 'Week ' + currentWeek;
-
   // Load non-CSV state from localStorage for instant startup
   ['custom_meals','hidden_meals','week_hist','meal_plan',
    'cc_balances','family_goals','financial_settings',
@@ -1702,7 +1607,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   updateNetWorth();
   updateDebtMetrics();
   initStoreGrocery(); // v38: Initialize multi-store grocery tabs
-
   // Start Google-style sync: server is always right
   // 1. REST fetch immediately for fast initial load
   // 2. SDK WebSocket listener for instant push updates
@@ -1716,13 +1620,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   startSync();
   updateBankSyncBar();
 });
-
 function getWeekOf(){const n=new Date();const d=n.getDate()-n.getDay()+(n.getDay()===0?-6:1);const m=new Date(n.setDate(d));return m.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
 function fmt(n){return '$'+Math.abs(n).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,',');}
 function fmtD(n){return '$'+Math.abs(n).toFixed(2);}
 function gid(l=8){return Math.random().toString(36).substr(2,l);}
-
-// ══════ ENTRY PASSWORD
 function entryKey(k){
   if(k==='back'){entryBuffer=entryBuffer.slice(0,-1);updateEntryDots();document.getElementById('entry-error').textContent='';return;}
   if(k==='clear'){entryBuffer='';updateEntryDots();document.getElementById('entry-error').textContent='';return;}
@@ -1740,8 +1641,6 @@ function entryKey(k){
   }
 }
 function updateEntryDots(){for(let i=0;i<4;i++){document.getElementById('ed'+i).classList.toggle('filled',i<entryBuffer.length);}}
-
-// ══════ NAVIGATION
 function showWho(){
   document.getElementById('who-screen').classList.remove('hidden');
   document.getElementById('douglas-app').classList.add('hidden');
@@ -1770,8 +1669,6 @@ function showJamieFromDouglas(){
   currentUser='jamie';
   initAIForUser('jamie');
 }
-
-// ══════ DOUGLAS TABS
 function dPage(id,btn){
   document.querySelectorAll('#douglas-app .page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('#d-tabs .tab').forEach(t=>t.classList.remove('active'));
@@ -1780,8 +1677,6 @@ function dPage(id,btn){
   if(id==='projections')updateProj();
   if(id==='moneyflow'&&transactions.length)renderSankey();
 }
-
-// ══════ JAMIE TABS
 function jPage(id,btn){
   document.querySelectorAll('.j-page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.jn-item').forEach(b=>b.classList.remove('active'));
@@ -1793,8 +1688,6 @@ function jPage(id,btn){
     renderStoreItems();
   }
 }
-
-// ══════ PIN
 function pinPrompt(target){pinTarget=target;pinBuffer='';updatePinDots();document.getElementById('pin-error').textContent='';document.getElementById('pin-overlay').classList.remove('hidden');}
 function pinCancel(){document.getElementById('pin-overlay').classList.add('hidden');pinBuffer='';}
 function pinKey(k){
@@ -1807,14 +1700,8 @@ function pinKey(k){
   }
 }
 function updatePinDots(){for(let i=0;i<4;i++){const d=document.getElementById('pd'+i);d.classList.toggle('filled',i<pinBuffer.length);}}
-
-// ══════ TOAST
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
-
-// ══════ SANITIZER (v40: consolidated from two local duplicates)
 function sfSan(s){ return String(s||'').replace(/[\x00-\x1F\x7F]/g,' ').trim(); }
-
-// ══════ CSV
 function categorize(d){
   const u=d.toUpperCase();
   // v40: Check learned categories first (user-taught mappings)
@@ -1845,7 +1732,6 @@ function onFileSel(e){
   if(f.name.endsWith('.csv')) processFile(f);
   else if(f.type==='application/pdf'||f.name.endsWith('.pdf')) processPDF(f);
 }
-
 // PDF processing — sends to Apps Script which extracts transaction text via AI
 async function processPDF(file){
   const dz=document.getElementById('drop-zone');
@@ -1916,7 +1802,6 @@ function parseCSV(text,fname){
   // Disable invisible file input so it can't intercept button clicks
   const dropInp=document.getElementById('drop-input');
   if(dropInp) dropInp.style.pointerEvents='none';
-
   // ── FULL SAME-DEVICE REFRESH ──────────────────────────────────────
   // Update every visual that depends on transaction data
   renderCatTable();
@@ -1924,16 +1809,13 @@ function parseCSV(text,fname){
   renderBVA();
   updateDonutFromTransactions();
   toast('✓ '+transactions.length+' transactions loaded — syncing...');
-
   // ── CROSS-DEVICE SYNC ─────────────────────────────────────────────
   const catTotals={};
   transactions.filter(t=>t.amount<0&&t.cat!=='Transfers'&&t.cat!=='Income')
     .forEach(t=>{catTotals[t.cat]=(catTotals[t.cat]||0)+Math.abs(t.amount);});
-
   // Sanitize strings — remove any chars that break Firebase JSON parsing
   // Firebase rejects null bytes, control chars, and improperly encoded strings
   function sanitize(s){ return String(s||'').replace(/[\x00-\x1F\x7F]/g,' ').trim(); }
-
   const txCompact = transactions.map(t=>({
     d: sanitize(t.date),
     n: sanitize(t.desc).substring(0,50), // cap description at 50 chars
@@ -1941,7 +1823,6 @@ function parseCSV(text,fname){
     c: sanitize(t.cat),
     m: sanitize(t.month)
   }));
-
   // Build sync payload — Firebase SDK handles nested objects fine, no need to stringify arrays
   const syncData = {
     txData: JSON.stringify(txCompact), // keep as string for size efficiency
@@ -1951,11 +1832,9 @@ function parseCSV(text,fname){
     count: transactions.length,
     uploadedAt: Date.now()
   };
-
   // Write to Firebase using SDK — WebSocket push to ALL devices instantly
   const el = document.getElementById('tx-sync-status');
   if(el){ el.style.color='var(--text-mid)'; el.textContent='⟳ Syncing to all devices...'; }
-
   uploadCsvToServer(syncData)
     .then(() => {
       lastSyncTime = new Date();
@@ -1966,17 +1845,13 @@ function parseCSV(text,fname){
       if(el){ el.style.color='var(--red)'; el.textContent='⚠ Sync error: ' + err.message; }
       updateSyncBadge('error');
     });
-
   // Archive to Firebase history (2-year rolling archive by month)
   archiveToHistory(transactions, mn + ' – ' + mx);
-
   // Show AI insights button
   const aiBtn = document.getElementById('ai-btn-wrap');
   if(aiBtn) aiBtn.style.display='block';
-
   syncTransactionsToSheet(transactions, loadedOn);
 }
-
 async function syncTransactionsToSheet(txns, loadedOn) {
   const el = document.getElementById('tx-sync-status');
   try {
@@ -2028,7 +1903,6 @@ function clearCSVDisplay(){
   const sankeyC=document.getElementById('sankey-container');
   if(sankeyC) sankeyC.innerHTML='';
 }
-
 function resetCSV(openPicker){
   if(openPicker===true){
     // Load different file — clear locally and open picker
@@ -2050,8 +1924,6 @@ function resetCSV(openPicker){
     updateDebtMetrics();
   }
 }
-
-// ══════ CUSTOM MEALS
 function addCustomMealIngRow(){
   cmfIngCount++;
   const list=document.getElementById('cmf-ing-list');
@@ -2063,7 +1935,6 @@ function addCustomMealIngRow(){
     <button class="cmf-ing-rm" onclick="document.getElementById('cmf-ing-${cmfIngCount}').remove()">×</button>`;
   list.appendChild(row);
 }
-
 function saveCustomMeal(){
   const name=document.getElementById('cmf-meal-name').value.trim();
   if(!name){toast('Give the meal a name first');return;}
@@ -2085,7 +1956,6 @@ function saveCustomMeal(){
   renderDayCards();
   toast('✓ "'+name+'" saved to your meals!');
 }
-
 function renderCustomMealsList(){
   const wrap=document.getElementById('custom-meals-display');
   const list=document.getElementById('custom-meals-list');
@@ -2093,7 +1963,6 @@ function renderCustomMealsList(){
   wrap.style.display='block';
   list.innerHTML=customMeals.map((m,i)=>`<div class="custom-meal-tag"><span class="cmt-name">🍽️ ${m.n}</span><button class="cmt-rm" onclick="deleteCustomMeal(${i})">✕</button></div>`).join('');
 }
-
 function deleteCustomMeal(i){
   customMeals.splice(i,1);
   fbSet('custom_meals', customMeals);
@@ -2101,20 +1970,16 @@ function deleteCustomMeal(i){
   renderDayCards();
   toast('Meal removed');
 }
-
-// ══════ RECEIPT SCANNING
 // Uses Google Apps Script as a proxy to call Claude API
 // This bypasses browser CORS restrictions that block direct API calls
 function onReceiptDragOver(e){e.preventDefault();document.getElementById('receipt-zone').classList.add('drag-over');}
 function onReceiptDragLeave(){document.getElementById('receipt-zone').classList.remove('drag-over');}
 function onReceiptDrop(e){e.preventDefault();document.getElementById('receipt-zone').classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/'))scanReceipt(f);}
 function onReceiptSel(e){const f=e.target.files[0];if(f)scanReceipt(f);}
-
 function scanReceipt(file){
   const zone=document.getElementById('receipt-zone');
   zone.classList.add('scanning');
   document.getElementById('receipt-content').innerHTML=`<div><span class="scan-spinner"></span><span style="font-size:14px;font-weight:600;color:var(--gold)">Reading your receipt...</span></div><div style="font-size:12px;color:var(--text-mid);margin-top:6px">This takes about 10 seconds</div>`;
-
   const reader=new FileReader();
   reader.onload=async(e)=>{
     const base64=e.target.result.split(',')[1];
@@ -2151,7 +2016,6 @@ function scanReceipt(file){
   };
   reader.readAsDataURL(file);
 }
-
 function applyReceiptToList(receiptItems){
   receiptItems.forEach(ri=>{
     const name=ri.item.toLowerCase();
@@ -2172,42 +2036,35 @@ function applyReceiptToList(receiptItems){
   renderGrocList();
   updateCartTotal();
 }
-
 function resetReceipt(){
   const zone=document.getElementById('receipt-zone');
   zone.classList.remove('done','scanning');
   document.getElementById('receipt-content').innerHTML=`<div style="font-size:24px;margin-bottom:6px">📸</div><div style="font-size:14px;font-weight:600;margin-bottom:3px">Scan Receipt</div><div style="font-size:12px;color:var(--text-mid)">Take a photo or upload a receipt image — AI reads it and updates your list automatically</div>`;
   document.getElementById('receipt-inp').value='';
 }
-
 function renderCatTable(){
   const EXCLUDE_CAT = ['Transfers','Income'];
   const filtered = getFilteredTransactions();
   const tot={};
   filtered.filter(t=>t.amount<0 && !EXCLUDE_CAT.includes(t.cat))
     .forEach(t=>{tot[t.cat]=(tot[t.cat]||0)+Math.abs(t.amount);});
-
   // For single-month view, don't pro-rate — show actual totals
   const txDates=filtered.map(t=>new Date(t.date)).filter(d=>!isNaN(d));
   const days=txDates.length>1?(Math.max(...txDates)-Math.min(...txDates))/(1000*60*60*24):30;
   const months = (selectedPeriod === 'thisMonth' || selectedPeriod === 'lastMonth') ? 1 : Math.max(1,days/30.44);
   const isMultiMonth = months > 1.2;
-
   const sorted=Object.entries(tot).sort((a,b)=>b[1]-a[1]);
   const total=sorted.reduce((s,[,v])=>s+v,0);
   const displayTotal=isMultiMonth ? total/months : total;
-
   const label=isMultiMonth?`Monthly Avg <span style="color:var(--text-soft);font-weight:400">(${months.toFixed(1)}mo)</span>`:'Spent';
   document.getElementById('cat-table').innerHTML=`<thead><tr><th>Category</th><th style="text-align:right">${label}</th><th style="text-align:right">%</th></tr></thead><tbody>${sorted.map(([cat,amt])=>{const r=RULES.find(x=>x.cat===cat)||RULES[RULES.length-1];const display=isMultiMonth?amt/months:amt;const pct=displayTotal>0?(display/displayTotal*100).toFixed(1):0;return`<tr><td><span class="cat-dot" style="background:${r.color}"></span>${cat}</td><td style="text-align:right;font-weight:600">${fmt(display)}</td><td style="text-align:right;color:var(--text-mid)">${pct}%</td></tr>`;}).join('')}<tr style="border-top:2px solid var(--border)"><td style="font-weight:700">TOTAL</td><td style="text-align:right;font-weight:700;color:var(--red)">${fmt(displayTotal)}</td><td></td></tr></tbody>`;
   document.getElementById('cat-empty').style.display='none';
   document.getElementById('cat-table-wrap').style.display='block';
 }
-
 function renderTx(){
   document.getElementById('tx-empty-state').style.display='none';document.getElementById('tx-loaded').style.display='block';
   const filtered = getFilteredTransactions();
   const EXCL=['Transfers','Income'];
-
   // v40: Calculate category totals
   const catTotals={};
   let totalSpend=0, totalIncome=0, txCount=filtered.length;
@@ -2219,7 +2076,6 @@ function renderTx(){
       totalIncome+=t.amount;
     }
   });
-
   // v40: Summary bar
   const topCat = Object.entries(catTotals).sort((a,b)=>b[1]-a[1])[0];
   const avgPerDay = filtered.length ? totalSpend / Math.max(1, new Set(filtered.map(t=>t.date)).size) : 0;
@@ -2240,7 +2096,6 @@ function renderTx(){
       <div style="font-size:10px;text-transform:uppercase;color:var(--text-soft);letter-spacing:0.5px">Categories</div>
       <div style="font-family:var(--font-d);font-size:18px;color:var(--blue);margin-top:2px">${Object.keys(catTotals).length}</div>
     </div>`;
-
   // v40: Filter chips with dollar amounts — ALL categories including Transfers
   const allCatTotals={};
   filtered.forEach(t=>{
@@ -2258,7 +2113,6 @@ function renderTx(){
     const rule=RULES.find(r=>r.cat===c)||RULES[RULES.length-1];
     return `<button class="txf" onclick="filterTx('${c}',this)" style="min-width:auto"><span class="cat-dot" style="background:${rule.color};width:6px;height:6px;display:inline-block;border-radius:50%;margin-right:4px"></span>${c} · ${fmt(amt)} <span style="opacity:0.6;font-size:10px">${pct}%</span></button>`;
   }).join('');
-
   // Date range title
   const dates=filtered.map(t=>new Date(t.date)).filter(d=>!isNaN(d));
   if (dates.length) {
@@ -2276,7 +2130,6 @@ function renderTxRows(cat){
   const filtered = getFilteredTransactions();
   const f=cat==='All'?filtered:filtered.filter(t=>t.cat===cat);
   document.getElementById('tx-count').textContent=f.length+' transactions';
-
   // v40: Category detail bar when filtering
   const detailBar = document.getElementById('tx-cat-detail');
   if(cat!=='All' && detailBar){
@@ -2298,12 +2151,10 @@ function renderTxRows(cat){
   } else if(detailBar){
     detailBar.style.display='none';
   }
-
   // v40: Group by date with daily subtotals
   const byDate={};
   f.forEach(t=>{if(!byDate[t.date])byDate[t.date]=[];byDate[t.date].push(t);});
   const sortedDates=Object.keys(byDate).sort((a,b)=>new Date(b)-new Date(a));
-
   let html='';
   sortedDates.forEach(date=>{
     const dayTxs=byDate[date];
@@ -2320,34 +2171,28 @@ function renderTxRows(cat){
   });
   document.getElementById('tx-tbody').innerHTML=html;
 }
-
 // v40: Transaction spending insights — patterns, anomalies, and tips
 function renderTxInsights(filtered, catTotals, totalSpend, avgPerDay){
   const insightsEl = document.getElementById('tx-insights');
   const contentEl = document.getElementById('tx-insights-content');
   if(!insightsEl || !contentEl || !filtered.length) return;
   insightsEl.style.display='block';
-
   const insights=[];
   const sortedCats=Object.entries(catTotals).sort((a,b)=>b[1]-a[1]);
-
   // Top spending category
   if(sortedCats.length){
     const [topName,topAmt]=sortedCats[0];
     const pct=(topAmt/totalSpend*100).toFixed(0);
     insights.push(`<strong>${topName}</strong> is your biggest spend at ${fmt(topAmt)} (${pct}% of total). ${topName==='Home'?'Mortgage and housing — this is expected.':topName==='Groceries'?'Great job staying on your $800/month grocery budget!':'Watch this category closely.'}`);
   }
-
   // Daily spending pattern
   const days=new Set(filtered.map(t=>t.date)).size;
   insights.push(`You averaged <strong>${fmt(avgPerDay)}/day</strong> across ${days} days. ${avgPerDay>300?'Heavy spending days detected — check for bills hitting.':'Spending velocity looks healthy.'}`);
-
   // Large transactions (over $200)
   const bigOnes=filtered.filter(t=>t.amount<-200);
   if(bigOnes.length){
     insights.push(`<strong>${bigOnes.length} large transaction${bigOnes.length>1?'s':''}</strong> over $200: ${bigOnes.slice(0,3).map(t=>`${t.desc.substring(0,25)} (${fmt(Math.abs(t.amount))})`).join(', ')}${bigOnes.length>3?' + '+(bigOnes.length-3)+' more':''}`);
   }
-
   // Recurring detection
   const merchants={};
   filtered.forEach(t=>{const k=t.desc.substring(0,20).replace(/\d+/g,'').trim();if(k.length>3)merchants[k]=(merchants[k]||0)+1;});
@@ -2355,15 +2200,10 @@ function renderTxInsights(filtered, catTotals, totalSpend, avgPerDay){
   if(recurring.length){
     insights.push(`<strong>Recurring merchants:</strong> ${recurring.slice(0,4).map(([k,v])=>`${k.substring(0,18)} (${v}x)`).join(', ')}`);
   }
-
   contentEl.innerHTML=insights.map(i=>`<div style="margin-bottom:8px;padding-left:12px;border-left:2px solid var(--teal)">${i}</div>`).join('');
 }
-
-// ═══════════════════════════════════════════════════════════════════════
 // v40: Click-to-Recategorize — teach the system once, fix forever
-// ═══════════════════════════════════════════════════════════════════════
 let _pickerTxIdx = null;
-
 function openCategoryPicker(txIdx, e) {
   e.stopPropagation();
   _pickerTxIdx = txIdx;
@@ -2400,13 +2240,11 @@ function openCategoryPicker(txIdx, e) {
   
   document.body.appendChild(overlay);
 }
-
 function closeCategoryPicker() {
   const overlay = document.getElementById('cat-picker-overlay');
   if (overlay) overlay.remove();
   _pickerTxIdx = null;
 }
-
 function recategorizeTransaction(newCat) {
   if (_pickerTxIdx === null) return;
   const tx = transactions[_pickerTxIdx];
@@ -2452,7 +2290,6 @@ function recategorizeTransaction(newCat) {
   // Re-sync to Firebase with updated categories
   resyncTransactionsToFirebase();
 }
-
 function extractMerchantPattern(desc) {
   // Clean and extract the merchant identifier
   // Remove common suffixes, numbers, locations
@@ -2478,14 +2315,12 @@ function extractMerchantPattern(desc) {
   // Must be at least 3 chars
   return pattern.length >= 3 ? pattern : null;
 }
-
 function resyncTransactionsToFirebase() {
   // Re-upload the updated transaction data to Firebase
   const EXCL_SYNC = ['Transfers','Income'];
   const catTotals = {};
   transactions.filter(t => t.amount < 0 && !EXCL_SYNC.includes(t.cat))
     .forEach(t => { catTotals[t.cat] = (catTotals[t.cat] || 0) + Math.abs(t.amount); });
-
   const txCompact = transactions.map(t => ({
     d: sfSan(t.date), 
     n: sfSan(t.desc).substring(0, 50),
@@ -2494,11 +2329,9 @@ function resyncTransactionsToFirebase() {
     m: sfSan(t.month),
     fp: t.fingerprint || null
   }));
-
   const dates = transactions.map(t => new Date(t.date)).filter(d => !isNaN(d));
   const mn = new Date(Math.min(...dates)).toLocaleDateString('en-US', {month:'short', day:'numeric'});
   const mx = new Date(Math.max(...dates)).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
-
   const syncData = {
     txData: JSON.stringify(txCompact),
     cats: JSON.stringify(catTotals),
@@ -2508,12 +2341,10 @@ function resyncTransactionsToFirebase() {
     uploadedAt: Date.now(),
     source: 'recategorized_v40'
   };
-
   uploadCsvToServer(syncData)
     .then(() => { lastSyncTime = new Date(); updateSyncBadge('ok'); })
     .catch(() => { updateSyncBadge('error'); });
 }
-
 function renderBVA(){
   document.getElementById('bva-empty').style.display='none';document.getElementById('bva-loaded').style.display='block';
   const ct={};transactions.filter(t=>t.amount<0).forEach(t=>{ct[t.cat]=(ct[t.cat]||0)+Math.abs(t.amount);});
@@ -2528,31 +2359,24 @@ function renderBVA(){
   if(charts.bar){charts.bar.destroy();charts.bar=null;}
   {const ctx=document.getElementById('bar-chart').getContext('2d');charts.bar=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Budget',data:bd,backgroundColor:'rgba(77,159,255,0.6)',borderRadius:4},{label:'Actual',data:ad,backgroundColor:'rgba(0,201,167,0.6)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8b92a8',font:{family:'DM Sans'},boxWidth:10}}},scales:{x:{ticks:{color:'#8b92a8',font:{size:10}},grid:{color:'rgba(42,48,69,0.4)'}},y:{ticks:{color:'#8b92a8',callback:v=>'$'+v.toLocaleString()},grid:{color:'rgba(42,48,69,0.4)'}}}}}); }
 }
-
-// ══════ UPDATE ALL VISUALS FROM LIVE TRANSACTION DATA
 function updateDonutFromTransactions(){
   if(!transactions.length) return;
   
   // Show period bar now that we have data
   document.getElementById('period-bar').style.display='block';
   updateBigNumber();
-
   const EXCLUDE = ['Transfers','Income'];
   const filtered = getFilteredTransactions();
-
   const ct={};
   filtered.filter(t=>t.amount<0 && !EXCLUDE.includes(t.cat))
     .forEach(t=>{ct[t.cat]=(ct[t.cat]||0)+Math.abs(t.amount);});
-
   const monthlyIncome = FINANCIAL.income;
-
   // For single-month views, don't pro-rate
   const txDates = filtered.map(t=>new Date(t.date)).filter(d=>!isNaN(d));
   const minDate = txDates.length ? new Date(Math.min(...txDates)) : new Date();
   const maxDate = txDates.length ? new Date(Math.max(...txDates)) : new Date();
   const daysCovered = Math.max(1,(maxDate-minDate)/(1000*60*60*24));
   const monthsCovered = (selectedPeriod === 'thisMonth' || selectedPeriod === 'lastMonth') ? 1 : Math.max(1,daysCovered/30.44);
-
   const totalSpendRaw = Object.values(ct).reduce((s,v)=>s+v,0);
   const monthlySpend = totalSpendRaw / monthsCovered;
   // v40: For current month, show PROJECTED surplus after all KBB obligations
@@ -2564,22 +2388,18 @@ function updateDonutFromTransactions(){
   const dayOfMonth = new Date().getDate();
   // Use projected (kill weapon) for current month; actual for historical periods
   const surplus = (selectedPeriod === 'thisMonth') ? killWeapon : rawSurplus;
-
   const bills = ((ct['Mortgage']||0)+(ct['Utilities']||0)+(ct['Phone & Internet']||0)+(ct['Loan Payment']||0)+(ct['Insurance']||0)+(ct['Subscriptions']||0)) / monthsCovered;
   const food = ((ct['Food & Life']||0)+(ct['Groceries']||0)+(ct['Amazon']||0)) / monthsCovered;
   const other = Math.max(0, monthlySpend - bills - food);
-
   if(charts.donut){
     // Donut always uses raw spending data for visual breakdown
     charts.donut.data.datasets[0].data=[Math.round(bills),Math.round(food),Math.round(other),Math.max(0,Math.round(rawSurplus))];
     charts.donut.options.plugins.tooltip.callbacks.label = c=>`${fmt(c.raw)} (${(c.raw/monthlyIncome*100).toFixed(1)}%)`;
     charts.donut.update();
   }
-
   // Update metric cards — jar system
   const surplusEl=document.getElementById('d-surplus-val');
   const surplusSubEl=document.getElementById('d-surplus-sub');
-
   if(surplusEl){
     surplusEl.textContent = (surplus < 0 ? '-' : '') + fmt(Math.abs(surplus));
     surplusEl.style.color = surplus >= 0 ? 'var(--teal)' : 'var(--red)';
@@ -2591,11 +2411,9 @@ function updateDonutFromTransactions(){
       : `Monthly avg · ${monthsCovered.toFixed(1)}mo`;
     surplusSubEl.textContent = periodLabel;
   }
-
   // Update jar displays with latest balances
   updateJarDisplay();
 }
-
 // Load cross-device CSV data — always replaces whatever is currently loaded
 function loadCrossDeviceCsvData(data){
   if(!data||!data.txList||!data.txList.length) return;
@@ -2609,39 +2427,31 @@ function loadCrossDeviceCsvData(data){
     color:(RULES.find(r=>r.cat===(t.c||t.cat))||RULES[RULES.length-1]).color
   }));
   transactions.sort((a,b)=>new Date(b.date)-new Date(a.date));
-
   // Update drop zone
   const dz=document.getElementById('drop-zone');
   dz.classList.add('loaded');
   const dropInp=document.getElementById('drop-input');
   if(dropInp) dropInp.style.pointerEvents='none';
-
   // Show accurate count from actual transactions array (not stored count)
   const actualCount = transactions.length;
   const uploadedAt = data.uploadedAt ? new Date(data.uploadedAt).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) : data.loadedOn;
-
   document.getElementById('drop-content').innerHTML=`<div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap">
     <span class="loaded-badge">✓ ${actualCount} transactions</span>
     <span style="font-size:12px;color:var(--text-mid)">${data.period||''}</span>
     <span style="font-size:12px;color:var(--purple)">🔄 Synced · ${uploadedAt}</span>
     <span style="font-size:12px;color:var(--red);cursor:pointer;text-decoration:underline;position:relative;z-index:10" onclick="event.stopPropagation();resetCSV(false)">✕ Clear</span>
   </div>`;
-
   // Refresh all visualizations with the correct data
   renderCatTable();
   renderTx();
   renderBVA();
   updateDonutFromTransactions();
 }
-
-// ══════ DONUT
 function renderDonut(){
   if(charts.donut){charts.donut.destroy();charts.donut=null;}
   const ctx=document.getElementById('donut-chart').getContext('2d');
   charts.donut=new Chart(ctx,{type:'doughnut',data:{labels:['Bills & Mortgage','Food & Life','Savings','Surplus'],datasets:[{data:[5502,1940,400,393],backgroundColor:['#4d9fff','#a78bfa','#00c9a7','#ffc542'],borderWidth:0,hoverOffset:6}]},options:{cutout:'68%',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#8b92a8',font:{family:'DM Sans',size:11},padding:12,boxWidth:10}},tooltip:{callbacks:{label:c=>` ${fmt(c.raw)} (${(c.raw/9090*100).toFixed(1)}%)`}}}}});
 }
-
-// ══════ PROJECTIONS — CORRECT ENGINE
 // Critical fix: minimum payment must always >= monthly interest charged
 // Otherwise low minimums on high-APR cards cause balances to grow forever
 // Real credit cards work this way — your minimum adjusts as balance grows
@@ -2656,10 +2466,8 @@ function calcPayoff(extra, strat) {
   }));
   const hist = [];
   const MAX_MONTHS = 120; // 10 year cap — should never hit this with correct math
-
   for (let mo = 0; mo < MAX_MONTHS; mo++) {
     if (!bal.some(c => c.balance > 0.01)) break;
-
     // Step 1: Apply monthly interest & compute effective minimum
     // Effective minimum = max(stated minimum, monthly interest + $1)
     // This prevents any card from growing — matches how real cards work
@@ -2676,10 +2484,8 @@ function calcPayoff(extra, strat) {
         c.effectiveMin = 0;
       }
     });
-
     // Step 2: Total monthly payment budget
     let budget = totalEffectiveMin + extra;
-
     // Step 3: Pay effective minimum on every active card
     bal.forEach(c => {
       if (c.balance > 0.01) {
@@ -2688,13 +2494,11 @@ function calcPayoff(extra, strat) {
         budget -= pay;
       }
     });
-
     // Step 4: Apply any remaining budget to target card (avalanche or snowball)
     // Freed minimums from paid-off cards also flow here automatically
     const targets = strat === 'avalanche'
       ? [...bal].filter(c => c.balance > 0.01).sort((a, b) => b.apr - a.apr)
       : [...bal].filter(c => c.balance > 0.01).sort((a, b) => a.balance - b.balance);
-
     for (const t of targets) {
       if (budget <= 0.005) break;
       const card = bal.find(c => c.name === t.name);
@@ -2702,7 +2506,6 @@ function calcPayoff(extra, strat) {
       card.balance = Math.max(0, card.balance - pay);
       budget -= pay;
     }
-
     // Snapshot
     const snap = {};
     bal.forEach(c => snap[c.name] = Math.max(0, +c.balance.toFixed(2)));
@@ -2711,42 +2514,106 @@ function calcPayoff(extra, strat) {
   }
   return hist;
 }
-
 function mlabel(n){
   const d=new Date(2026,3,1);
   d.setMonth(d.getMonth()+n-1);
   return d.toLocaleDateString('en-US',{month:'short',year:'numeric'});
 }
+// v40b: Preset extra buttons
+function setExtra(val){
+  document.getElementById('extra-slider').value=val;
+  document.querySelectorAll('#d-projections .txf').forEach(b=>b.classList.remove('active'));
+  const presets={'0':'preset-min','1220':'preset-kill','1500':'preset-agg','2000':'preset-max'};
+  const btn=document.getElementById(presets[val]);
+  if(btn)btn.classList.add('active');
+  updateProj();
+}
 function updateProj(){
   const extra=+document.getElementById('extra-slider').value;
   const strat=document.getElementById('proj-strat').value;
-  document.getElementById('extra-display').textContent='+$'+extra;
-  const sc=calcPayoff(extra,strat);const scB=calcPayoff(0,strat);
+  document.getElementById('extra-display').textContent='+$'+extra.toLocaleString();
+  // Highlight matching preset
+  document.querySelectorAll('#d-projections .txf').forEach(b=>b.classList.remove('active'));
+  const presets={'0':'preset-min','1220':'preset-kill','1500':'preset-agg','2000':'preset-max'};
+  const btn=document.getElementById(presets[extra]);
+  if(btn)btn.classList.add('active');
+  const sc=calcPayoff(extra,strat);
+  const scB=calcPayoff(0,strat);
+  const startTotal = CARDS.reduce((s,c)=>s+c.balance,0);
+  const baseMonthlyPmt = CARDS.reduce((s,c)=>s+c.min,0);
+  // v40b: Freedom countdown banner
+  const freedomDate=document.getElementById('proj-freedom-date');
+  const freedomSub=document.getElementById('proj-freedom-sub');
+  if(freedomDate) freedomDate.textContent=mlabel(sc.length);
+  if(freedomSub){
+    const saved=scB.length-sc.length;
+    freedomSub.textContent=extra>0
+      ?`${sc.length} months away · ${saved} months faster than minimums · $${extra.toLocaleString()}/mo extra`
+      :`${sc.length} months away · minimums only · drag the slider to accelerate`;
+  }
+  // Payoff cards with per-card details
   document.getElementById('payoff-cards').innerHTML=CARDS.map(c=>{
     const mo=sc.findIndex(s=>s[c.name]<=0.01);const moB=scB.findIndex(s=>s[c.name]<=0.01);const sv=extra>0?moB-mo:0;
-    return`<div class="payoff-card"><div class="pc-name">${c.name}</div><div class="pc-mo" style="color:${c.color}">${mo>=0?'Mo '+(mo+1):'36+'}</div><div class="pc-date">${mo>=0?mlabel(mo+1):'—'}</div>${sv>0?`<div class="pc-saved">-${sv} mo faster</div>`:''}</div>`;
+    const monthlyInterest=(c.balance*c.apr/12);
+    return`<div class="payoff-card"><div class="pc-name">${c.name}</div><div class="pc-mo" style="color:${c.color}">${mo>=0?'Mo '+(mo+1):'36+'}</div><div class="pc-date">${mo>=0?mlabel(mo+1):'—'}</div>${sv>0?`<div class="pc-saved">-${sv} mo faster</div>`:''}<div style="font-size:10px;color:var(--text-soft);margin-top:4px">${(c.apr*100).toFixed(1)}% APR · $${Math.round(monthlyInterest)}/mo interest</div></div>`;
   }).join('');
+  // v40b: Strategy comparison — Avalanche vs Snowball side by side
+  const scAval=calcPayoff(extra,'avalanche');
+  const scSnow=calcPayoff(extra,'snowball');
+  const iAval=Math.max(0,(baseMonthlyPmt+extra)*scAval.length-startTotal);
+  const iSnow=Math.max(0,(baseMonthlyPmt+extra)*scSnow.length-startTotal);
+  const stratDiff=Math.abs(iSnow-iAval);
+  document.getElementById('strat-compare').innerHTML=`
+    <div style="padding:14px;background:var(--surface2);border-radius:10px;border:2px solid ${strat==='avalanche'?'var(--teal)':'var(--border)'}">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--teal);margin-bottom:6px">⚡ Avalanche (highest APR first)</div>
+      <div style="font-family:var(--font-d);font-size:20px;color:var(--text)">${scAval.length} months</div>
+      <div style="font-size:12px;color:var(--text-mid);margin-top:2px">${mlabel(scAval.length)} · $${Math.round(iAval).toLocaleString()} total interest</div>
+      <div style="font-size:11px;color:var(--teal);margin-top:6px;font-weight:600">${iAval<=iSnow?'✓ Saves $'+Math.round(stratDiff).toLocaleString()+' in interest':'$'+Math.round(stratDiff).toLocaleString()+' more in interest'}</div>
+    </div>
+    <div style="padding:14px;background:var(--surface2);border-radius:10px;border:2px solid ${strat==='snowball'?'var(--teal)':'var(--border)'}">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--gold);margin-bottom:6px">🎯 Snowball (smallest balance first)</div>
+      <div style="font-family:var(--font-d);font-size:20px;color:var(--text)">${scSnow.length} months</div>
+      <div style="font-size:12px;color:var(--text-mid);margin-top:2px">${mlabel(scSnow.length)} · $${Math.round(iSnow).toLocaleString()} total interest</div>
+      <div style="font-size:11px;color:var(--gold);margin-top:6px;font-weight:600">${scSnow.length<=scAval.length?'✓ First card dies fastest — momentum wins':'First card dies month '+(scSnow.findIndex(s=>s[CARDS[0].name]<=0.01)+1)}</div>
+    </div>`;
+  // Balance over time chart
   const labels=sc.map((_,i)=>i%3===0?mlabel(i+1):'');
   const datasets=CARDS.map(c=>({label:c.name,data:sc.map(s=>+s[c.name].toFixed(0)),borderColor:c.color,backgroundColor:'transparent',borderWidth:2,tension:0.3,pointRadius:0}));
   if(charts.payoff){charts.payoff.destroy();charts.payoff=null;}
   {const ctx=document.getElementById('payoff-chart').getContext('2d');charts.payoff=new Chart(ctx,{type:'line',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#8b92a8',font:{family:'DM Sans'},boxWidth:10,padding:8}}},scales:{x:{ticks:{color:'#8b92a8',maxTicksLimit:10},grid:{color:'rgba(42,48,69,0.4)'}},y:{ticks:{color:'#8b92a8',callback:v=>'$'+v.toLocaleString()},grid:{color:'rgba(42,48,69,0.4)'}}}}}); }
-  // Interest = total paid - original debt
-  // Total paid = months × total monthly payment (minimums + extra)
-  const startTotal = CARDS.reduce((s,c)=>s+c.balance,0);
-
-  // Base scenario: minimums only
-  const baseMonthlyPmt = CARDS.reduce((s,c)=>s+c.min,0);
+  // Interest savings
   const iB = Math.max(0, baseMonthlyPmt * scB.length - startTotal);
-
-  // Extra scenario: minimums + extra
   const extraMonthlyPmt = baseMonthlyPmt + extra;
   const iE = Math.max(0, extraMonthlyPmt * sc.length - startTotal);
   const sv = Math.max(0, iB - iE);
-
-  document.getElementById('int-summary').innerHTML=`<div style="padding:12px;background:var(--surface2);border-radius:10px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-mid);margin-bottom:4px">Minimums only</div><div style="font-family:var(--font-d);font-size:22px;color:var(--red)">$${Math.round(iB).toLocaleString()}</div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">total interest · debt free ${mlabel(scB.length)}</div></div><div style="padding:12px;background:var(--surface2);border-radius:10px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-mid);margin-bottom:4px">With +$${extra}/mo extra</div><div style="font-family:var(--font-d);font-size:22px;color:${extra>0?'var(--teal)':'var(--red)'}">$${Math.round(iE).toLocaleString()}</div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">total interest · debt free ${mlabel(sc.length)}</div></div>${extra>0?`<div style="padding:12px;background:var(--teal-dim);border:1px solid rgba(0,201,167,0.2);border-radius:10px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--teal);margin-bottom:4px">You save</div><div style="font-family:var(--font-d);font-size:26px;color:var(--teal)">$${Math.round(sv).toLocaleString()}</div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">${scB.length-sc.length} months earlier</div></div>`:''}`;
+  document.getElementById('int-summary').innerHTML=`<div style="padding:12px;background:var(--surface2);border-radius:10px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-mid);margin-bottom:4px">Minimums only</div><div style="font-family:var(--font-d);font-size:22px;color:var(--red)">$${Math.round(iB).toLocaleString()}</div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">total interest · debt free ${mlabel(scB.length)}</div></div><div style="padding:12px;background:var(--surface2);border-radius:10px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-mid);margin-bottom:4px">With +$${extra.toLocaleString()}/mo extra</div><div style="font-family:var(--font-d);font-size:22px;color:${extra>0?'var(--teal)':'var(--red)'}">$${Math.round(iE).toLocaleString()}</div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">total interest · debt free ${mlabel(sc.length)}</div></div>${extra>0?`<div style="padding:12px;background:var(--teal-dim);border:1px solid rgba(0,201,167,0.2);border-radius:10px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--teal);margin-bottom:4px">You save</div><div style="font-family:var(--font-d);font-size:26px;color:var(--teal)">$${Math.round(sv).toLocaleString()}</div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">${scB.length-sc.length} months earlier</div></div>`:''}`;
+  // v40b: What-If Scenarios
+  const scenarios=[
+    {label:'Tax refund ($914)',extra:914,icon:'💰',desc:'Apply KS refund to Best Buy'},
+    {label:'$200 raise',extra:extra+200,icon:'📈',desc:'If paycheck grows $200/mo'},
+    {label:'Side hustle $500/mo',extra:extra+500,icon:'🚀',desc:'Jamie\'s creative business takes off'},
+    {label:'Double kill weapon',extra:extra*2,icon:'⚔️',desc:'Sacrifice everything — maximum speed'},
+  ];
+  document.getElementById('whatif-scenarios').innerHTML=scenarios.map(s=>{
+    const wsc=calcPayoff(s.extra,strat);
+    const wiE=Math.max(0,(baseMonthlyPmt+s.extra)*wsc.length-startTotal);
+    const wSaved=Math.max(0,iB-wiE);
+    return`<div style="padding:12px;background:var(--surface);border-radius:8px;border:1px solid var(--border);cursor:pointer" onclick="setExtra(${Math.min(2500,s.extra)})">
+      <div style="font-size:14px;margin-bottom:4px">${s.icon} ${s.label}</div>
+      <div style="font-family:var(--font-d);font-size:18px;color:var(--teal)">${wsc.length} months</div>
+      <div style="font-size:11px;color:var(--text-mid)">${mlabel(wsc.length)} · saves $${Math.round(wSaved).toLocaleString()}</div>
+      <div style="font-size:10px;color:var(--text-soft);margin-top:4px">${s.desc}</div>
+    </div>`;
+  }).join('');
+  // v40b: Daily interest ticker
+  const dailyInterest=CARDS.reduce((s,c)=>s+(c.balance*(c.apr/365)),0);
+  const projDaily=document.getElementById('proj-daily-cost');
+  const projHourly=document.getElementById('proj-hourly');
+  const projYearly=document.getElementById('proj-yearly');
+  if(projDaily)projDaily.textContent='$'+dailyInterest.toFixed(2)+'/day';
+  if(projHourly)projHourly.textContent='$'+(dailyInterest/24).toFixed(2)+'/hour';
+  if(projYearly)projYearly.textContent='$'+Math.round(dailyInterest*365).toLocaleString()+'/year';
 }
-
-// ══════ MILESTONES
 function renderMilestones(){
   const KILL_EXTRA = 1220; // Kill weapon $1,220/month
   const sc=calcPayoff(KILL_EXTRA,'avalanche');
@@ -2764,7 +2631,6 @@ function renderMilestones(){
   ];
   document.getElementById('milestone-list').innerHTML=items.map(m=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface2);border-radius:10px;border-left:3px solid ${m.done?'var(--teal)':m.next?'var(--gold)':'var(--border)'};margin-bottom:8px"><div style="font-size:16px;width:24px;text-align:center">${m.icon}</div><div style="flex:1"><div style="font-size:13px;font-weight:600">${m.text}</div><div style="font-size:11px;color:var(--text-mid);margin-top:1px">${m.sub}</div></div><div style="font-size:11px;color:${m.done?'var(--teal)':m.next?'var(--gold)':'var(--text-mid)'};font-weight:${m.next?'700':'400'};white-space:nowrap">${m.done?'✓ Done':m.date}</div></div>`).join('');
 }
-
 function renderFreedomChart(){
   const KILL_EXTRA = 1220;
   const sc=calcPayoff(KILL_EXTRA,'avalanche');const step=Math.max(1,Math.floor(sc.length/12));
@@ -2774,8 +2640,6 @@ function renderFreedomChart(){
   const ctx=document.getElementById('freedom-chart').getContext('2d');
   charts.freedom=new Chart(ctx,{type:'line',data:{labels,datasets:[{label:'Total CC Debt',data,borderColor:'#ff6b6b',backgroundColor:'rgba(255,107,107,0.08)',fill:true,borderWidth:2,tension:0.4,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#8b92a8',maxTicksLimit:8},grid:{color:'rgba(42,48,69,0.4)'}},y:{ticks:{color:'#8b92a8',callback:v=>'$'+v.toLocaleString()},grid:{color:'rgba(42,48,69,0.4)'}}}}});
 }
-
-// ══════ SUNDAY MODE
 function renderSunday(){
   const total=weekHist.reduce((s,w)=>s+w.t,0);
   document.getElementById('sun-grocery').textContent=fmt(total);
@@ -2784,8 +2648,6 @@ function renderSunday(){
   const mealRows=days.map(d=>`<div class="ms-row"><div class="ms-day">${d}</div><div class="ms-meal">${mealPlan[d]?mealPlan[d].n:'<span style="color:var(--text-soft);font-style:italic">not planned</span>'}</div></div>`).join('');
   document.getElementById('sun-meals').innerHTML=mealRows||'<div style="color:var(--text-mid);font-size:13px">No meals planned yet — Jamie sets this up on her side</div>';
 }
-
-// ══════ JAMIE MEALS
 function renderDayCards(){
   const allMeals=[...MEALS,...customMeals].filter(m=>!hiddenMeals.includes(m.n));
   document.getElementById('j-day-cards').innerHTML=DAYS.map(day=>{
@@ -2804,7 +2666,6 @@ function renderDayCards(){
     return`<div class="day-card"><div class="day-head" onclick="toggleDay('${key}')"><span class="day-label">${day}</span><div style="display:flex;align-items:center;gap:8px">${sel?`<span class="day-meal-name">🍽️ ${sel.n}</span>`:'<span class="day-empty-txt">tap to pick</span>'}<span class="day-chev" id="dc-${key}">▼</span></div></div><div class="meal-chips" id="mc-${key}">${chips}${hiddenMeals.length?`<div style="width:100%;padding:6px 4px 2px;font-size:11px;color:var(--text-soft)">${hiddenMeals.length} meal${hiddenMeals.length>1?'s':''} hidden — <span style="color:var(--sage);cursor:pointer;text-decoration:underline" onclick="event.stopPropagation();showManageMeals()">manage</span></div>`:''}</div></div>`;
   }).join('');
 }
-
 function hideMeal(encodedName){
   const name=decodeURIComponent(encodedName);
   if(!hiddenMeals.includes(name)){hiddenMeals.push(name);fbSet('hidden_meals', hiddenMeals);}
@@ -2812,7 +2673,6 @@ function hideMeal(encodedName){
   Object.keys(mealPlan).forEach(k=>{if(mealPlan[k]&&mealPlan[k].n===name)delete mealPlan[k];});
   renderDayCards();toast('"'+name+'" hidden — tap Manage to restore');
 }
-
 function deleteCustomMealByName(encodedName){
   const name=decodeURIComponent(encodedName);
   customMeals=customMeals.filter(m=>m.n!==name);
@@ -2820,7 +2680,6 @@ function deleteCustomMealByName(encodedName){
   Object.keys(mealPlan).forEach(k=>{if(mealPlan[k]&&mealPlan[k].n===name)delete mealPlan[k];});
   renderDayCards();renderCustomMealsList();toast('"'+name+'" deleted');
 }
-
 function showManageMeals(){
   if(!hiddenMeals.length){toast('No hidden meals');return;}
   const list=hiddenMeals.map(name=>`
@@ -2842,7 +2701,6 @@ function showManageMeals(){
   </div>`;
   document.body.appendChild(overlay);
 }
-
 function unhideMeal(encodedName){
   const name=decodeURIComponent(encodedName);
   hiddenMeals=hiddenMeals.filter(n=>n!==name);
@@ -2877,8 +2735,6 @@ function pickMeal(key,encodedName){
   renderDayCards();toast('✓ '+name);
 }
 function clearMeals(){mealPlan={};fbSet('meal_plan',mealPlan);renderDayCards();toast('Meal plan cleared');}
-
-// ══════ JAMIE GROCERY
 function buildList(){
   const planned=Object.values(mealPlan).filter(Boolean);
   if(!planned.length){toast('Pick at least one meal first!');return;}
@@ -2944,7 +2800,6 @@ function updateJamieStrip(){
   const spent=thisWeek?thisWeek.t:0;
   updateJamieGauge(spent);
 }
-
 function finishShop(){
   const total=grocItems.reduce((s,i)=>s+(parseFloat(i.actual)||i.e||0),0);
   weekHist.unshift({wk:currentWeek,label:'Week '+currentWeek,date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),t:+total.toFixed(2),budget:WEEKLY_BUDGET});
@@ -2954,7 +2809,6 @@ function finishShop(){
   toast('✓ Saved & syncing! Total: $'+total.toFixed(2));
   grocItems=[];renderGrocList();document.getElementById('j-done-btn').style.display='none';
 }
-
 function renderWeekHist(){
   const monthTotal=weekHist.reduce((s,w)=>s+w.t,0);
   const monthRem=Math.max(0,800-monthTotal);
@@ -2964,14 +2818,10 @@ function renderWeekHist(){
   if(!weekHist.length){wrap.innerHTML='<div class="empty-state"><div class="es-icon">🛒</div><p>No shopping trips logged yet.<br>Finish your first shop to see history here.</p></div>';return;}
   wrap.innerHTML=weekHist.map(w=>{const u=w.t<=w.budget;const diff=Math.abs(w.budget-w.t).toFixed(2);return`<div class="hist-item"><div><div class="hi-week">${w.label}</div><div class="hi-date">${w.date}</div></div><div style="text-align:right"><div class="hi-amt" style="color:${u?'var(--sage)':'var(--red)'}">$${w.t.toFixed(2)}</div><span class="hi-status ${u?'hs-under':'hs-over'}">${u?'✓ $'+diff+' under':'⚠ $'+diff+' over'}</span></div></div>`;}).join('');
 }
-
-// ══════════════════════════════════════════════════════════════════
 // v38 FEATURE: MULTI-STORE GROCERY LISTS
 // Jamie's stores: Aldi, Costco, Target, Walmart (configurable)
 // Each store has its own list. Per-store and cross-store budget tracking.
 // Syncs to Firebase for cross-device visibility.
-// ══════════════════════════════════════════════════════════════════
-
 function renderStoreTabs() {
   const tabsEl = document.getElementById('store-tabs');
   if (!tabsEl) return;
@@ -2982,19 +2832,16 @@ function renderStoreTabs() {
     </button>`
   ).join('');
 }
-
 function switchStore(storeId) {
   activeStoreId = storeId;
   renderStoreTabs();
   renderStoreItems();
 }
-
 function renderStoreItems() {
   const wrap = document.getElementById('store-list-items');
   const empty = document.getElementById('store-list-empty');
   const doneBtn = document.getElementById('store-done-btn');
   if (!wrap || !empty) return;
-
   const items = storeItems[activeStoreId] || [];
   
   if (!items.length) {
@@ -3004,10 +2851,8 @@ function renderStoreItems() {
     updateStoreBudgetDisplay();
     return;
   }
-
   empty.style.display = 'none';
   if (doneBtn) doneBtn.style.display = 'block';
-
   wrap.innerHTML = items.map(item => `
     <div class="store-item ${item.checked ? 'checked' : ''}" id="si-${item.id}">
       <div class="si-cb" onclick="toggleStoreItem('${item.id}')">${item.checked ? '✓' : ''}</div>
@@ -3018,16 +2863,13 @@ function renderStoreItems() {
       <button class="si-del" onclick="deleteStoreItem('${item.id}')" title="Remove">🗑</button>
     </div>
   `).join('');
-
   updateStoreBudgetDisplay();
 }
-
 function addStoreItem() {
   const inp = document.getElementById('store-add-inp');
   if (!inp) return;
   const name = inp.value.trim();
   if (!name) return;
-
   if (!storeItems[activeStoreId]) storeItems[activeStoreId] = [];
   
   storeItems[activeStoreId].push({
@@ -3036,18 +2878,15 @@ function addStoreItem() {
     price: '',
     checked: false
   });
-
   inp.value = '';
   renderStoreItems();
   saveStoreItems();
   toast('✓ Added to ' + groceryStores.find(s => s.id === activeStoreId)?.name);
 }
-
 function toggleStoreItem(itemId) {
   const items = storeItems[activeStoreId] || [];
   const item = items.find(i => i.id === itemId);
   if (!item) return;
-
   item.checked = !item.checked;
   
   const el = document.getElementById('si-' + itemId);
@@ -3055,11 +2894,9 @@ function toggleStoreItem(itemId) {
     el.classList.toggle('checked', item.checked);
     el.querySelector('.si-cb').textContent = item.checked ? '✓' : '';
   }
-
   saveStoreItems();
   updateStoreBudgetDisplay();
 }
-
 function updateStoreItemPrice(itemId, value) {
   const items = storeItems[activeStoreId] || [];
   const item = items.find(i => i.id === itemId);
@@ -3069,18 +2906,15 @@ function updateStoreItemPrice(itemId, value) {
     updateStoreBudgetDisplay();
   }
 }
-
 function deleteStoreItem(itemId) {
   if (!storeItems[activeStoreId]) return;
   storeItems[activeStoreId] = storeItems[activeStoreId].filter(i => i.id !== itemId);
   renderStoreItems();
   saveStoreItems();
 }
-
 function saveStoreItems() {
   scheduleSave('store_items', storeItems);
 }
-
 function updateStoreBudgetDisplay() {
   // Calculate total across ALL stores
   let totalSpent = 0;
@@ -3091,14 +2925,11 @@ function updateStoreBudgetDisplay() {
       });
     }
   });
-
   const remaining = WEEKLY_BUDGET - totalSpent;
   const pct = Math.min(100, (totalSpent / WEEKLY_BUDGET) * 100);
-
   const totalEl = document.getElementById('store-total-spent');
   const remEl = document.getElementById('store-total-remaining');
   const fillEl = document.getElementById('store-budget-fill');
-
   if (totalEl) {
     totalEl.textContent = '$' + totalSpent.toFixed(2);
     totalEl.style.color = totalSpent > WEEKLY_BUDGET ? 'var(--red)' : 'var(--sage)';
@@ -3111,19 +2942,15 @@ function updateStoreBudgetDisplay() {
     fillEl.style.width = pct + '%';
     fillEl.style.background = pct > 100 ? 'var(--red)' : pct > 85 ? 'var(--gold)' : 'var(--sage)';
   }
-
   // Also update Jamie's main gauge
   updateJamieGauge(totalSpent);
 }
-
 function openManageStores() {
   const overlay = document.createElement('div');
   overlay.className = 'manage-stores-overlay';
   overlay.id = 'manage-stores-overlay';
   overlay.onclick = (e) => { if (e.target === overlay) closeManageStores(); };
-
   const storeEmojis = ['🛒', '📦', '🎯', '🏪', '🛍️', '🏬', '🥬', '🍎', '🥩', '🧀'];
-
   overlay.innerHTML = `
     <div class="manage-stores-box">
       <div class="msb-header">
@@ -3143,7 +2970,6 @@ function openManageStores() {
       <button class="msb-save-btn" onclick="saveAndCloseStores()">Save Changes</button>
     </div>
   `;
-
   document.body.appendChild(overlay);
   
   // Event delegation for buttons
@@ -3171,12 +2997,10 @@ function openManageStores() {
     }
   });
 }
-
 function closeManageStores() {
   const overlay = document.getElementById('manage-stores-overlay');
   if (overlay) overlay.remove();
 }
-
 function cycleStoreEmoji(index) {
   const emojis = ['🛒', '📦', '🎯', '🏪', '🛍️', '🏬', '🥬', '🍎', '🥩', '🧀', '🍞', '🥛', '🧈', '🥚'];
   const current = groceryStores[index].emoji;
@@ -3191,13 +3015,11 @@ function cycleStoreEmoji(index) {
     if (btns[index]) btns[index].textContent = emojis[nextIdx];
   }
 }
-
 function updateStoreName(index, newName) {
   if (newName.trim()) {
     groceryStores[index].name = newName.trim();
   }
 }
-
 function deleteStore(index) {
   if (groceryStores.length <= 1) {
     toast('Need at least one store!');
@@ -3217,14 +3039,12 @@ function deleteStore(index) {
   if (activeStoreId === storeId) {
     activeStoreId = groceryStores[0].id;
   }
-
   // Re-render the overlay
   closeManageStores();
   openManageStores();
   
   toast('🗑 Deleted "' + storeName + '"');
 }
-
 function addNewStore() {
   const newId = 'store_' + Date.now();
   groceryStores.push({
@@ -3247,7 +3067,6 @@ function addNewStore() {
     }
   }, 100);
 }
-
 function saveAndCloseStores() {
   // Save stores to Firebase
   fbSet('grocery_stores', groceryStores);
@@ -3258,7 +3077,6 @@ function saveAndCloseStores() {
   renderStoreItems();
   toast('✓ Stores saved');
 }
-
 function finishStoreShopping() {
   // Calculate total across all stores
   let total = 0;
@@ -3269,7 +3087,6 @@ function finishStoreShopping() {
       });
     }
   });
-
   // Save to week history
   weekHist.unshift({
     wk: currentWeek,
@@ -3280,18 +3097,15 @@ function finishStoreShopping() {
   });
   fbSet('week_hist', weekHist);
   currentWeek++;
-
   // Clear all store items
   storeItems = {};
   fbSet('store_items', storeItems);
-
   renderStoreItems();
   renderWeekHist();
   syncJamieToDoug();
   
   toast('✓ Week saved! Total: $' + total.toFixed(2));
 }
-
 function initStoreGrocery() {
   // Initialize store items object if empty
   groceryStores.forEach(s => {
@@ -3300,7 +3114,6 @@ function initStoreGrocery() {
   renderStoreTabs();
   renderStoreItems();
 }
-
 function updateCCDisplay(){
   CARDS[0].balance=ccBalances.bestbuy||4680;
   CARDS[1].balance=ccBalances.chase||5460;
@@ -3308,7 +3121,6 @@ function updateCCDisplay(){
   updateDebtMetrics();
   updateNetWorth();
 }
-
 function updateGoalsDisplay(){
   const ef=document.getElementById('d-ef-val');
   if(ef)ef.textContent=fmt(jarBalances.foundation);
@@ -3327,7 +3139,6 @@ function updateGoalsDisplay(){
   updateJarDisplay();
   updateNetWorth();
 }
-
 // v40: Update the 3-jar metric cards with current balances
 function updateJarDisplay(){
   const mcEl=document.getElementById('d-mc-val');
@@ -3336,7 +3147,6 @@ function updateJarDisplay(){
   const ffSub=document.getElementById('d-ff-sub');
   const efEl=document.getElementById('d-ef-val');
   const floorBar=document.getElementById('mc-floor-bar');
-
   if(mcEl) mcEl.textContent=fmt(jarBalances.mc);
   if(mcSub){
     const aboveFloor = jarBalances.mc - 700;
@@ -3357,18 +3167,13 @@ function updateJarDisplay(){
     floorBar.style.width = floorPct + '%';
     floorBar.style.background = jarBalances.mc <= 700 ? 'var(--red)' : jarBalances.mc <= 1000 ? 'var(--gold)' : 'var(--teal)';
   }
-
   if(ffEl) ffEl.textContent=fmt(jarBalances.ff);
   if(ffSub) ffSub.textContent = `FF 2307 · Jamie's account`;
-
   if(efEl) efEl.textContent=fmt(jarBalances.foundation);
-
   // Merrill retirement
   const merrillEl=document.getElementById('d-merrill-val');
   if(merrillEl) merrillEl.textContent=fmt(jarBalances.merrill || 157532);
 }
-
-// ── NET WORTH ─────────────────────────────────────────────────────
 function updateNetWorth(){
   const totalDebt = CARDS.reduce((s,c)=>s+c.balance,0);
   const foundation = jarBalances.foundation || 5000;
@@ -3376,7 +3181,6 @@ function updateNetWorth(){
   const retirement = jarBalances.merrill || 157532;
   const assets = foundation + lgfund + retirement + jarBalances.mc + jarBalances.ff;
   const netWorth = assets - totalDebt;
-
   const el = document.getElementById('d-networth-val');
   const sub = document.getElementById('d-networth-sub');
   if(el){
@@ -3385,18 +3189,14 @@ function updateNetWorth(){
   }
   if(sub) sub.textContent = `Assets ${fmt(assets)} − Liabilities ${fmt(totalDebt)}`;
 }
-
-// ── DEBT METRICS ─────────────────────────────────────────────────
 function updateDebtMetrics(){
   const totalDebt = CARDS.reduce((s,c)=>s+c.balance,0);
   const dailyInterest = CARDS.reduce((s,c)=>s+(c.balance*(c.apr/365)),0);
   const monthlyInterest = CARDS.reduce((s,c)=>s+(c.balance*(c.apr/12)),0);
   const totalMin = CARDS.reduce((s,c)=>s+c.min,0);
-
   // Daily cost banner
   const daily = document.getElementById('daily-debt-cost');
   if(daily) daily.innerHTML = `This debt costs you <strong>$${dailyInterest.toFixed(2)}/day</strong> in interest`;
-
   // Freedom countdown using kill weapon ($1,220/month extra above minimums)
   // KBB v2.3: Kill weapon = $610/paycheck = $1,220/month ABOVE minimums
   const KILL_WEAPON_MONTHLY = 1220;
@@ -3406,11 +3206,9 @@ function updateDebtMetrics(){
   const freedomDate = document.getElementById('freedom-date-banner');
   if(freedomEl) freedomEl.textContent = freedomMonths + ' months';
   if(freedomDate) freedomDate.textContent = mlabel(freedomMonths);
-
   // Also update the banner style — green for plan, not default
   const banner = document.getElementById('debt-freedom-banner');
   if(banner) banner.innerHTML = `🎯 Debt free in <strong>${freedomMonths} months</strong> — <span>${mlabel(freedomMonths)}</span> · Kill weapon: $${KILL_WEAPON_MONTHLY.toLocaleString()}/mo`;
-
   // v40: Sync CC table rows to match CARDS array (prevents metric vs table mismatch)
   const ccTable = document.getElementById('cc-table');
   if(ccTable){
@@ -3421,8 +3219,6 @@ function updateDebtMetrics(){
     }
   }
 }
-
-// ── AI PROXY — routes all Claude API calls through Apps Script ────
 // Browser → Apps Script (SHEET_URL) → Anthropic API → response back
 // This bypasses CORS restrictions that block direct browser→API calls.
 // The API key lives in Apps Script, never exposed to the browser.
@@ -3445,24 +3241,18 @@ async function callClaudeProxy(opts) {
   if (data.error) throw new Error(data.error);
   throw new Error('No response from AI');
 }
-
-// ── AI INSIGHTS ───────────────────────────────────────────────────
 async function getAIInsights(){
   if(!transactions.length){ toast('Load a CSV first'); return; }
   const btn = document.getElementById('ai-btn-wrap');
   const wrap = document.getElementById('ai-insights-wrap');
   const content = document.getElementById('ai-insights-content');
   if(!wrap||!content) return;
-
   wrap.style.display='block';
   content.innerHTML='<div style="color:var(--teal);font-size:12px">✨ Analyzing your spending...</div>';
   if(btn) btn.style.display='none';
-
   const ctx = buildFinancialContext();
   const prompt=`${ctx}
-
 You are Claudette, the Martinson family's financial co-pilot. Based on the data above, provide 3 specific insights.
-
 CRITICAL RULES:
 - NEVER suggest cutting protected subscriptions (Noom, Planet Fitness, Hulu+LiveTV, ChatGPT, Perplexity)
 - NEVER suggest Mission Control go below $700
@@ -3470,9 +3260,7 @@ CRITICAL RULES:
 - Focus on the CURRENT KILL TARGET (Best Buy 1345 at 29.99% APR)
 - Celebrate wins — 2 debts already killed! On track for debt-free Summer 2027
 - Be warm, direct, encouraging. No doom. No panic. This family has a plan and it's WORKING.
-
 Format as: "1. [insight]" on separate lines. Max 120 words total. No jargon.`;
-
   try {
     const text = await callClaudeProxy({
       max_tokens: 250,
@@ -3486,8 +3274,6 @@ Format as: "1. [insight]" on separate lines. Max 120 words total. No jargon.`;
     if(btn) btn.style.display='block';
   }
 }
-
-// ── HISTORY — store each CSV load by month for 2-year archive ─────
 function archiveToHistory(txns, period){
   if(!txns.length) return;
   const monthKey = new Date().toISOString().substring(0,7); // YYYY-MM
@@ -3506,14 +3292,12 @@ function archiveToHistory(txns, period){
   // Store in Firebase under history/YYYY-MM — keeps up to 24 months
   FBDB.ref(`martinson/history/${monthKey}`).set(snapshot);
 }
-
 function updateCCBalance(card, value){
   ccBalances[card] = parseFloat(value)||0;
   fbSet('cc_balances', ccBalances);
   updateCCDisplay();
   toast('✓ Balance updated & syncing');
 }
-
 function syncJamieToDoug(liveSpent){
   const monthTotal=weekHist.reduce((s,w)=>s+w.t,0)+(liveSpent||0);
   const el=document.getElementById('d-jamie-grocery');
@@ -3521,10 +3305,7 @@ function syncJamieToDoug(liveSpent){
   if(el){el.textContent=fmt(monthTotal);}
   if(sub){const rem=800-monthTotal;sub.textContent=`of $800 budget — ${rem>=0?fmt(rem)+' remaining':'$'+Math.abs(rem).toFixed(0)+' over'}`;}
 }
-
-// ══════════════════════════════════════════════════════════════════
 // v35 FEATURE 1: MONEY FLOW — Interactive Sankey Diagram
-// ══════════════════════════════════════════════════════════════════
 function renderSankey(){
   const filtered = getFilteredTransactions();
   if(!filtered.length){
@@ -3534,23 +3315,19 @@ function renderSankey(){
     if(mfLoaded) mfLoaded.style.display='none';
     return;
   }
-
   const mfEmpty=document.getElementById('mf-empty');
   const mfLoaded=document.getElementById('mf-loaded');
   if(mfEmpty) mfEmpty.style.display='none';
   if(mfLoaded) mfLoaded.style.display='block';
-
   const EXCLUDE=['Transfers','Income'];
   const txDates=filtered.map(t=>new Date(t.date)).filter(d=>!isNaN(d));
   const days=txDates.length>1?(Math.max(...txDates)-Math.min(...txDates))/(86400000):30;
   const months = (selectedPeriod === 'thisMonth' || selectedPeriod === 'lastMonth') ? 1 : Math.max(1,days/30.44);
-
   // Period label
   const mn=new Date(Math.min(...txDates)).toLocaleDateString('en-US',{month:'short',day:'numeric'});
   const mx=new Date(Math.max(...txDates)).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
   const pfx=months>1.2?'Monthly avg · ':'';
   document.getElementById('mf-period').textContent=pfx+mn+' – '+mx;
-
   // Build category totals (monthly)
   const catTotals={};
   const descTotals={}; // track top descriptions per category for subcategory
@@ -3563,11 +3340,9 @@ function renderSankey(){
     const key=t.desc.replace(/[#\d]+/g,'').trim().split(/\s+/).slice(0,3).join(' ').substring(0,25);
     descTotals[cat][key]=(descTotals[cat][key]||0)+amt;
   });
-
   const totalSpend=Object.values(catTotals).reduce((s,v)=>s+v,0);
   const income=FINANCIAL.income;
   const surplus=Math.max(0,income-totalSpend);
-
   // Build Sankey nodes and links
   // Layer 0: Income source
   // Layer 1: Categories
@@ -3575,7 +3350,6 @@ function renderSankey(){
   const nodes=[];
   const links=[];
   const nodeMap={};
-
   function getNode(name){
     if(nodeMap[name]===undefined){
       nodeMap[name]=nodes.length;
@@ -3583,26 +3357,20 @@ function renderSankey(){
     }
     return nodeMap[name];
   }
-
   // Income node
   getNode('Income ($'+Math.round(income).toLocaleString()+'/mo)');
-
   // Sort categories by amount descending
   const sortedCats=Object.entries(catTotals).sort((a,b)=>b[1]-a[1]);
-
   // Category colors from RULES
   const catColors={};
   RULES.forEach(r=>{catColors[r.cat]=r.color;});
-
   sortedCats.forEach(([cat,total])=>{
     const catIdx=getNode(cat);
     links.push({source:0,target:catIdx,value:Math.round(total)});
-
     // Top subcategories (max 4 per cat, merge remainder into "Other")
     const subs=Object.entries(descTotals[cat]||{}).sort((a,b)=>b[1]-a[1]);
     const topSubs=subs.slice(0,4);
     const remainder=subs.slice(4).reduce((s,[,v])=>s+v,0);
-
     topSubs.forEach(([desc,val])=>{
       if(val<5) return; // skip tiny amounts
       const subIdx=getNode(desc+' ('+cat+')');
@@ -3613,33 +3381,26 @@ function renderSankey(){
       links.push({source:catIdx,target:otherIdx,value:Math.round(remainder)});
     }
   });
-
   // Surplus node
   if(surplus>50){
     const surpIdx=getNode('Surplus');
     links.push({source:0,target:surpIdx,value:Math.round(surplus)});
   }
-
   // Clear container and build SVG
   const container=document.getElementById('sankey-container');
   container.innerHTML='';
-
   const width=Math.max(700,container.clientWidth||700);
   const height=Math.max(400,Math.min(600,nodes.length*28));
-
   const svg=d3.select('#sankey-container').append('svg')
     .attr('viewBox',`0 0 ${width} ${height}`)
     .attr('preserveAspectRatio','xMidYMid meet');
-
   const sankey=d3.sankey()
     .nodeWidth(18)
     .nodePadding(12)
     .nodeAlign(d3.sankeyLeft)
     .extent([[1,1],[width-1,height-6]]);
-
   // Filter out zero-value links
   const validLinks=links.filter(l=>l.value>0);
-
   let graph;
   try {
     graph=sankey({
@@ -3650,7 +3411,6 @@ function renderSankey(){
     container.innerHTML='<div class="empty-state"><div class="es-icon">⚠️</div><p>Could not render flow diagram</p></div>';
     return;
   }
-
   // Colors for nodes
   function nodeColor(d){
     if(d.name.startsWith('Income')) return '#00c9a7';
@@ -3663,7 +3423,6 @@ function renderSankey(){
     if(parentLink && catColors[parentLink.source.name]) return catColors[parentLink.source.name];
     return '#4a5168';
   }
-
   // Draw links
   const link=svg.append('g')
     .selectAll('.link')
@@ -3682,14 +3441,12 @@ function renderSankey(){
       d3.select(this).classed('highlighted',false);
       hideSankeyTooltip();
     });
-
   // Draw nodes
   const node=svg.append('g')
     .selectAll('.node')
     .data(graph.nodes)
     .join('g')
     .attr('class','node');
-
   node.append('rect')
     .attr('x',d=>d.x0)
     .attr('y',d=>d.y0)
@@ -3710,7 +3467,6 @@ function renderSankey(){
       svg.selectAll('.link').classed('highlighted',false);
       hideSankeyTooltip();
     });
-
   // Node labels
   node.append('text')
     .attr('x',d=>d.x0<width/2?d.x1+8:d.x0-8)
@@ -3724,12 +3480,10 @@ function renderSankey(){
     })
     .style('font-size','10px')
     .style('fill','var(--text-mid)');
-
   // Top flows sidebar
   renderTopFlows(sortedCats,totalSpend,months);
   renderFlowSummary(totalSpend,income,surplus,sortedCats.length);
 }
-
 function showSankeyTooltip(event,label,value,total){
   const tip=document.getElementById('sankey-tooltip');
   document.getElementById('st-label').textContent=label;
@@ -3744,7 +3498,6 @@ function moveSankeyTooltip(event){
   tip.style.top=(event.clientY-60)+'px';
 }
 function hideSankeyTooltip(){document.getElementById('sankey-tooltip').classList.remove('visible');}
-
 function renderTopFlows(sortedCats,total,months){
   const wrap=document.getElementById('mf-top-flows');
   if(!wrap) return;
@@ -3759,7 +3512,6 @@ function renderTopFlows(sortedCats,total,months){
     </div>`;
   }).join('');
 }
-
 function renderFlowSummary(totalSpend,income,surplus,catCount){
   const wrap=document.getElementById('mf-summary');
   if(!wrap) return;
@@ -3784,15 +3536,11 @@ function renderFlowSummary(totalSpend,income,surplus,catCount){
       </div>
     </div>`;
 }
-
-// ══════════════════════════════════════════════════════════════════
 // v35 FEATURE 2: AI ASSISTANT — Floating Chat Panel
-// ══════════════════════════════════════════════════════════════════
 function initAIForUser(who){
   const fab=document.getElementById('ai-fab');
   const panel=document.getElementById('ai-panel');
   fab.classList.remove('hidden');
-
   // Style fab for user
   if(who==='jamie'){
     fab.classList.add('jamie-fab');
@@ -3803,12 +3551,10 @@ function initAIForUser(who){
     document.getElementById('ai-input').classList.remove('jamie-input');
     document.getElementById('ai-send').classList.remove('jamie-send');
   }
-
   // Reset chat
   aiChatHistory=[];
   const msgs=document.getElementById('ai-messages');
   msgs.innerHTML='';
-
   // Welcome message
   const welcome=document.createElement('div');
   welcome.className='ai-msg assistant';
@@ -3835,18 +3581,15 @@ function initAIForUser(who){
   }
   msgs.appendChild(welcome);
 }
-
 function renderQuickChips(prompts){
   const wrap=document.getElementById('ai-quick-chips');
   wrap.innerHTML=prompts.map(p=>`<button class="ai-chip" onclick="sendQuickPrompt('${p.replace(/'/g,"\\'")}')">${p}</button>`).join('');
 }
-
 function sendQuickPrompt(text){
   document.getElementById('ai-input').value=text;
   document.getElementById('ai-quick-chips').innerHTML='';
   sendAIMessage();
 }
-
 function toggleAIPanel(){
   const panel=document.getElementById('ai-panel');
   const fab=document.getElementById('ai-fab');
@@ -3863,12 +3606,10 @@ function closeAIPanel(){
   aiPanelOpen=false;
   panel.classList.remove('open');
 }
-
 function buildFinancialContext(){
   const EXCL=['Transfers','Income'];
   let spendingSummary='No transaction data loaded.';
   let mealContext='';
-
   // v40: Use filtered transactions for current period context
   const filtered = getFilteredTransactions();
   if(filtered.length){
@@ -3880,38 +3621,29 @@ function buildFinancialContext(){
     const periodLabel = selectedPeriod === 'thisMonth' ? 'this month so far' : selectedPeriod === 'lastMonth' ? 'last month' : 'recent months';
     spendingSummary=`Spending ${periodLabel}: ${sorted}. Total: $${totalSpend.toFixed(0)}.`;
   }
-
   const totalDebt=CARDS.reduce((s,c)=>s+c.balance,0);
   const cardDetails=CARDS.map(c=>`${c.name}: $${c.balance.toFixed(0)} at ${(c.apr*100).toFixed(1)}% APR`).join('; ');
   const grocerySpent=weekHist.reduce((s,w)=>s+w.t,0);
-
   const plannedMeals=DAYS.map(d=>{const k=d.substr(0,3);return mealPlan[k]?`${d}: ${mealPlan[k].n}`:`${d}: not planned`;}).join(', ');
   mealContext=`This week's meals: ${plannedMeals}. Grocery budget: $200/week, $800/month. Spent this month on groceries: $${grocerySpent.toFixed(0)}.`;
-
   return `MARTINSON FAMILY FINANCIAL PLAN (verified data — follow these rules):
 Income: $9,090/mo net (SymphonyAI, Kansas City). Paycheck $4,545 biweekly.
-
 THREE JAR SYSTEM:
 - Mission Control (MC): Bills, debt kills, strategy. $700 MINIMUM FLOOR — NEVER suggest going below $700.
 - Family Fuel (FF): Groceries, gas, kids, household. $1,200/paycheck transfer + $100 cash.
 - The Foundation: $5,000 emergency savings. Job loss ONLY. Do NOT suggest touching it.
-
 DEBT KILL PLAN (in this exact order):
 ${cardDetails}. Total: $${totalDebt.toFixed(0)}.
 Kill weapon: $1,220/month ($610/paycheck) applied to highest-APR debt first.
 2 cards already killed (USB 6925 + USB 2405 on April 3).
 Next target: Best Buy 1345. Then Chase 0690. Then BofA 9362.
 Debt-free target: Summer 2027.
-
 PROTECTED SUBSCRIPTIONS (do NOT suggest cutting these):
 Noom $279 (medical), Planet Fitness x2 $107, Hulu+LiveTV+Disney+ $90, ChatGPT $20, Perplexity $20.
-
 CURRENT SPENDING:
 ${spendingSummary}
 Monthly fixed bills: $3,890. Subscriptions: $688. FF budget: $2,400.
-
 ${mealContext}
-
 RULES FOR YOUR ADVICE:
 - NEVER suggest cutting protected subscriptions
 - NEVER suggest Mission Control go below $700
@@ -3923,12 +3655,10 @@ RULES FOR YOUR ADVICE:
 The Foundation: $${jarBalances.foundation}. Retirement: $${(jarBalances.merrill||157532).toLocaleString()} (Merrill — DO NOT TOUCH).
 Net worth: $${((jarBalances.merrill||157532)+jarBalances.foundation+(familyGoals.lgfund||0)+jarBalances.mc+jarBalances.ff-totalDebt).toFixed(0)}.`;
 }
-
 async function sendAIMessage(){
   const input=document.getElementById('ai-input');
   const text=input.value.trim();
   if(!text) return;
-
   // Add user message
   const msgs=document.getElementById('ai-messages');
   const userMsg=document.createElement('div');
@@ -3937,59 +3667,43 @@ async function sendAIMessage(){
   msgs.appendChild(userMsg);
   input.value='';
   input.style.height='40px';
-
   // Remove quick chips
   document.getElementById('ai-quick-chips').innerHTML='';
-
   // Disable send button
   const sendBtn=document.getElementById('ai-send');
   sendBtn.disabled=true;
-
   // Thinking indicator
   const thinking=document.createElement('div');
   thinking.className='ai-msg assistant thinking';
   thinking.textContent=currentUser==='jamie'?'Thinking...':'Analyzing...';
   msgs.appendChild(thinking);
   msgs.scrollTop=msgs.scrollHeight;
-
   // Build system prompt based on user
   const financialCtx=buildFinancialContext();
   let systemPrompt;
-
   if(currentUser==='douglas'){
     systemPrompt=`You are Claudette, Douglas Martinson's financial co-pilot. He's a Senior Manager of Data Analytics at SymphonyAI in Kansas City. You have access to his REAL family financial data below.
-
 Be direct, analytical, and encouraging. Use specific numbers from the data. Reference actual card names, APR rates, and spending categories. Think like a Bloomberg terminal that can talk. If he asks about projections, do the math. If he asks about optimization, model the scenarios. Be concise — Douglas respects efficiency.
-
 ${financialCtx}
-
 Rules: Be specific with numbers. Never make up data — use only what's provided. Keep responses under 200 words unless he asks for detail. Use $ formatting for all amounts. NEVER suggest cutting protected subscriptions. NEVER suggest MC below $700. NEVER suggest touching Foundation or Merrill.`;
   } else {
     systemPrompt=`You are Claudette, a warm, supportive family finance helper for Jamie Martinson, a stay-at-home mom with 3 kids in Kansas City. You're like a smart, encouraging friend who happens to know a lot about money and cooking.
-
 Jamie is NOT technical. Never use financial jargon. Speak warmly, use emojis occasionally, and make her feel good about the progress the family is making. If she asks about meals, suggest from the available recipes. If she asks about budget, give simple clear answers.
-
 ${financialCtx}
-
 Rules: Keep it simple and warm. Use plain language. Celebrate wins. If she's over budget, be gentle and constructive. Keep responses under 150 words. Use emojis sparingly but naturally. NEVER suggest cutting Noom, gym, or streaming — those are family-approved. Frame everything positively — the plan is WORKING.`;
   }
-
   // Build messages array for API
   aiChatHistory.push({role:'user',content:text});
-
   // Keep only last 10 exchanges to stay within token limits
   const recentHistory=aiChatHistory.slice(-20);
-
   try{
     const reply = await callClaudeProxy({
       max_tokens: 400,
       system: systemPrompt,
       messages: recentHistory
     });
-
     // Remove thinking indicator
     thinking.remove();
-
     // Add assistant response
     const assistantMsg=document.createElement('div');
     assistantMsg.className='ai-msg assistant';
@@ -3998,7 +3712,6 @@ Rules: Keep it simple and warm. Use plain language. Celebrate wins. If she's ove
       .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
       .replace(/\n/g,'<br>');
     msgs.appendChild(assistantMsg);
-
     aiChatHistory.push({role:'assistant',content:reply});
   } catch(e){
     thinking.remove();
@@ -4007,20 +3720,14 @@ Rules: Keep it simple and warm. Use plain language. Celebrate wins. If she's ove
     errorMsg.textContent='Could not reach AI — make sure the aiChat action is deployed in your Apps Script. Error: ' + (e.message||'unknown');
     msgs.appendChild(errorMsg);
   }
-
   sendBtn.disabled=false;
   msgs.scrollTop=msgs.scrollHeight;
 }
-
-// ══════════════════════════════════════════════════════════════════
 // v37 FEATURE: SimpleFIN Bank Integration
-// ══════════════════════════════════════════════════════════════════
 // Flow: User signs up at SimpleFIN ($1.50/mo) → connects BofA →
 // creates Setup Token → pastes into dashboard → we claim it via
 // Apps Script → store Access URL → fetch transactions on demand.
 // No more CSV downloads.
-// ══════════════════════════════════════════════════════════════════
-
 function updateBankSyncBar(){
   const connected = localStorage.getItem('simplefin_connected') === 'true';
   simplefinConnected = connected;
@@ -4030,7 +3737,6 @@ function updateBankSyncBar(){
   const syncBtn = document.getElementById('bank-sync-btn');
   const disconnectBtn = document.getElementById('bank-disconnect-btn');
   if(!label) return;
-
   if(connected){
     const lastSync = localStorage.getItem('simplefin_last_sync');
     label.textContent = '\u2705 Bank Connected';
@@ -4048,11 +3754,9 @@ function updateBankSyncBar(){
     disconnectBtn.style.display = 'none';
   }
 }
-
 function showBankConnect(){
   const existing = document.getElementById('bank-connect-overlay');
   if(existing) existing.remove();
-
   const overlay = document.createElement('div');
   overlay.id = 'bank-connect-overlay';
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:400;display:flex;align-items:center;justify-content:center;padding:24px';
@@ -4082,16 +3786,13 @@ function showBankConnect(){
     </div>`;
   document.body.appendChild(overlay);
 }
-
 async function claimSimpleFINToken(){
   const tokenInput = document.getElementById('simplefin-token-input');
   const status = document.getElementById('simplefin-status');
   const token = tokenInput.value.trim();
   if(!token){status.textContent = 'Please paste your Setup Token';status.style.color='var(--red)';return;}
-
   status.textContent = '\u23F3 Connecting to your bank...';
   status.style.color = 'var(--gold)';
-
   try {
     const res = await fetch(SHEET_URL, {
       method: 'POST',
@@ -4099,13 +3800,11 @@ async function claimSimpleFINToken(){
       body: JSON.stringify({ action: 'simplefinSetup', setupToken: token })
     });
     const data = await res.json();
-
     if(data.error){
       status.textContent = 'Error: ' + data.error;
       status.style.color = 'var(--red)';
       return;
     }
-
     if(data.status === 'ok' && data.accounts){
       localStorage.setItem('simplefin_connected', 'true');
       simplefinConnected = true;
@@ -4127,15 +3826,12 @@ async function claimSimpleFINToken(){
     status.style.color = 'var(--red)';
   }
 }
-
 async function syncFromBank(){
   // v39a: Always try sync - server will tell us if not connected
-
   const syncBtn = document.getElementById('bank-sync-btn');
   const sub = document.getElementById('bank-sync-sub');
   if(syncBtn) syncBtn.textContent = '\u23F3 Syncing...';
   if(sub) sub.textContent = 'Pulling transactions from BofA...';
-
   try {
     const res = await fetch(SHEET_URL, {
       method: 'POST',
@@ -4143,7 +3839,6 @@ async function syncFromBank(){
       body: JSON.stringify({ action: 'simplefinSync' })
     });
     const data = await res.json();
-
     if(data.error){
       toast('\u26A0 Bank sync error: ' + data.error);
       if(syncBtn) syncBtn.textContent = 'Sync Now';
@@ -4157,7 +3852,6 @@ async function syncFromBank(){
       }
       return;
     }
-
     if(data.transactions && data.transactions.length > 0){
       // v39: Process with new format including accountBalances
       processSimpleFINTransactions(data.transactions, data.accountBalances, data.newCount);
@@ -4170,16 +3864,13 @@ async function syncFromBank(){
     } else {
       toast('No transactions found');
     }
-
     if(syncBtn) syncBtn.textContent = 'Sync Now';
     updateBankSyncBar();
-
   } catch(e){
     toast('\u26A0 Could not reach bank \u2014 try again');
     if(syncBtn) syncBtn.textContent = 'Sync Now';
   }
 }
-
 function processSimpleFINTransactions(txns, accountBalances, newCount){
   // v39: Transactions now come pre-categorized from Apps Script (AI + learned mappings)
   // Format: {date, description, amount, category, merchant, accountId, accountName, fingerprint, source}
@@ -4219,11 +3910,9 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
       source: t.source || 'rules'
     });
   });
-
   if(!transactions.length){ toast('No valid transactions found'); return; }
   transactions.sort((a,b) => new Date(b.date) - new Date(a.date));
   _loadedUploadedAt = 0;
-
   // v39: Update account balances if provided
   if (accountBalances) {
     // Savings account balance — may not be Foundation (7708). Store but verify mapping.
@@ -4247,7 +3936,6 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
       fbSet('cc_balances', ccBalances);
       updateCCDisplay();
     }
-
     // v40: Checking accounts → Mission Control (9289) and Family Fuel (2307)
     if (accountBalances.checking) {
       jarBalances.mc = Math.round(accountBalances.checking.balance);
@@ -4267,13 +3955,11 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
     // Store balances for display
     localStorage.setItem('account_balances', JSON.stringify(accountBalances));
   }
-
   // Update drop zone to show loaded state
   const dz = document.getElementById('drop-zone');
   dz.classList.add('loaded');
   const dropInp = document.getElementById('drop-input');
   if(dropInp) dropInp.style.pointerEvents = 'none';
-
   const dates = transactions.map(t => new Date(t.date)).filter(d => !isNaN(d));
   const mn = new Date(Math.min(...dates)).toLocaleDateString('en-US', {month:'short', day:'numeric'});
   const mx = new Date(Math.max(...dates)).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
@@ -4283,7 +3969,6 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
   const newBadge = (newCount && newCount > 0) 
     ? `<span style="font-size:11px;background:var(--teal);color:#000;padding:2px 8px;border-radius:100px;font-weight:600">${newCount} new</span>` 
     : '';
-
   document.getElementById('drop-content').innerHTML = `<div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap">
     <span class="loaded-badge">\uD83C\uDFE6 ${transactions.length} transactions</span>
     ${newBadge}
@@ -4291,7 +3976,6 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
     <span style="font-size:12px;color:var(--purple)">\uD83D\uDD04 ${now}</span>
     <span style="font-size:12px;color:var(--red);cursor:pointer;text-decoration:underline;position:relative;z-index:10" onclick="event.stopPropagation();resetCSV(false)">\u2715 Clear</span>
   </div>`;
-
   // Run the full rendering pipeline
   renderCatTable();
   renderTx();
@@ -4302,13 +3986,11 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
   renderFreedomChart();
   renderSankey();
   toast('\u2705 ' + transactions.length + ' transactions loaded');
-
   // Sync to Firebase so Jamie sees it on her phone
   const EXCL_SYNC = ['Transfers','Income'];
   const catTotals = {};
   transactions.filter(t => t.amount < 0 && !EXCL_SYNC.includes(t.cat))
     .forEach(t => { catTotals[t.cat] = (catTotals[t.cat] || 0) + Math.abs(t.amount); });
-
   const txCompact = transactions.map(t => ({
     d: sfSan(t.date), 
     n: sfSan(t.desc).substring(0, 50),
@@ -4317,7 +3999,6 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
     m: sfSan(t.month),
     fp: t.fingerprint || null
   }));
-
   const syncData = {
     txData: JSON.stringify(txCompact),
     cats: JSON.stringify(catTotals),
@@ -4327,15 +4008,12 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
     uploadedAt: Date.now(),
     source: 'simplefin_v39'
   };
-
   uploadCsvToServer(syncData)
     .then(() => { lastSyncTime = new Date(); updateSyncBadge('ok'); })
     .catch(() => { updateSyncBadge('error'); });
-
   const aiBtn = document.getElementById('ai-btn-wrap');
   if(aiBtn) aiBtn.style.display = 'block';
 }
-
 function disconnectBank(){
   if(!confirm('Disconnect your bank? You can reconnect anytime with a new token.')) return;
   // Tell Apps Script to clear stored access URL
