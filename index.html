@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Martinson Family Dashboard v40</title>
+<title>Martinson Family Dashboard v40b</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script src="https://unpkg.com/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
@@ -425,7 +425,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <!-- ENTRY SCREEN -->
 <div id="entry-screen">
   <div class="entry-logo">Martinson Family</div>
-  <div class="entry-sub">Kansas City, MO · Your Family Hub · v40</div>
+  <div class="entry-sub">Kansas City, MO · Your Family Hub · v40b</div>
   <div class="entry-box">
     <div class="entry-title">🔒 Enter Password</div>
     <div class="entry-dots">
@@ -2241,13 +2241,20 @@ function renderTx(){
       <div style="font-family:var(--font-d);font-size:18px;color:var(--blue);margin-top:2px">${Object.keys(catTotals).length}</div>
     </div>`;
 
-  // v40: Filter chips with dollar amounts
-  const sortedCats = Object.entries(catTotals).sort((a,b)=>b[1]-a[1]);
+  // v40: Filter chips with dollar amounts — ALL categories including Transfers
+  const allCatTotals={};
+  filtered.forEach(t=>{
+    if(t.amount<0){
+      allCatTotals[t.cat]=(allCatTotals[t.cat]||0)+Math.abs(t.amount);
+    }
+  });
+  const sortedCats = Object.entries(allCatTotals).sort((a,b)=>b[1]-a[1]);
   const cats=['All',...sortedCats.map(c=>c[0])];
+  const allSpendForChips = Object.values(allCatTotals).reduce((s,v)=>s+v,0);
   document.getElementById('tx-filters').innerHTML=cats.map(c=>{
-    if(c==='All') return `<button class="txf active" onclick="filterTx('${c}',this)" style="min-width:auto">All · ${fmt(totalSpend)}</button>`;
-    const amt=catTotals[c]||0;
-    const pct=totalSpend>0?(amt/totalSpend*100).toFixed(0):'0';
+    if(c==='All') return `<button class="txf active" onclick="filterTx('${c}',this)" style="min-width:auto">All · ${fmt(allSpendForChips)}</button>`;
+    const amt=allCatTotals[c]||0;
+    const pct=allSpendForChips>0?(amt/allSpendForChips*100).toFixed(0):'0';
     const rule=RULES.find(r=>r.cat===c)||RULES[RULES.length-1];
     return `<button class="txf" onclick="filterTx('${c}',this)" style="min-width:auto"><span class="cat-dot" style="background:${rule.color};width:6px;height:6px;display:inline-block;border-radius:50%;margin-right:4px"></span>${c} · ${fmt(amt)} <span style="opacity:0.6;font-size:10px">${pct}%</span></button>`;
   }).join('');
