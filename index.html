@@ -2476,13 +2476,11 @@ function renderDonut(){
     if(ot>0){labels.push('Other');data.push(Math.round(ot));colors.push('#64748b');}
     const txD=filtered.map(t=>new Date(t.date)).filter(d=>!isNaN(d));
     const mC=(selectedPeriod==='thisMonth'||selectedPeriod==='lastMonth')?1:Math.max(1,((txD.length?new Date(Math.max(...txD)):new Date())-(txD.length?new Date(Math.min(...txD)):new Date()))/(1000*60*60*24)/30.44);
-    const surp=Math.max(0,FINANCIAL.income-totalSpend/mC);
-    if(surp>0){labels.push('Surplus');data.push(Math.round(surp));colors.push('#2dd4bf');}
     renderInlineInsights(ct,totalSpend,mC,FINANCIAL.income);
   } else {
     labels=['Bills & Mortgage','Food & Life','Savings','Kill Power'];data=[4003,1940,400,1107];colors=['#4d9fff','#a78bfa','#00c9a7','#ffc542'];legendSize=11;legendPad=12;cutPct='68%';
   }
-  charts.donut=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:0,hoverOffset:6}]},options:{cutout:cutPct,responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#cbd5e1',font:{family:'DM Sans',size:12},padding:10,boxWidth:10,generateLabels:function(ch){const ds=ch.data.datasets[0];const tot=ds.data.reduce((a,b)=>a+b,0);return ch.data.labels.map((l,i)=>({text:`${l} ${(ds.data[i]/tot*100).toFixed(0)}%`,fillStyle:ds.backgroundColor[i],hidden:false,index:i}));}}},tooltip:{callbacks:{label:c=>{const tot=c.dataset.data.reduce((a,b)=>a+b,0);return` ${fmt(c.raw)} (${(c.raw/tot*100).toFixed(1)}%)`;}}},}}});
+  charts.donut=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:0,hoverOffset:6}]},options:{cutout:cutPct,responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#f1f5f9',font:{family:'DM Sans',size:13,weight:'500'},padding:10,boxWidth:12,generateLabels:function(ch){const ds=ch.data.datasets[0];const tot=ds.data.reduce((a,b)=>a+b,0);return ch.data.labels.map((l,i)=>({text:`${l} ${(ds.data[i]/tot*100).toFixed(0)}%`,fillStyle:ds.backgroundColor[i],hidden:false,index:i}));}}},tooltip:{callbacks:{label:c=>{const tot=c.dataset.data.reduce((a,b)=>a+b,0);return` ${fmt(c.raw)} (${(c.raw/tot*100).toFixed(1)}%)`;}}},}}});
 }
 function renderInlineInsights(ct,totalSpend,mC,income){
   const w=document.getElementById('ai-insights-wrap'),co=document.getElementById('ai-insights-content');
