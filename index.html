@@ -573,6 +573,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         <div class="panel">
           <div class="panel-title"><span class="dot d-teal"></span>Spending Breakdown</div>
           <div class="chart-wrap"><canvas id="donut-chart"></canvas></div>
+          <div id="donut-legend" style="display:flex;flex-wrap:wrap;gap:6px 16px;padding:8px 4px"></div>
           <div id="ai-insights-wrap" style="margin-top:10px;display:none">
             <div id="ai-insights-content" style="font-size:12px;color:var(--text-mid);line-height:1.6"></div>
           </div>
@@ -2478,9 +2479,13 @@ function renderDonut(){
     const mC=(selectedPeriod==='thisMonth'||selectedPeriod==='lastMonth')?1:Math.max(1,((txD.length?new Date(Math.max(...txD)):new Date())-(txD.length?new Date(Math.min(...txD)):new Date()))/(1000*60*60*24)/30.44);
     renderInlineInsights(ct,totalSpend,mC,FINANCIAL.income);
   } else {
-    labels=['Bills & Mortgage','Food & Life','Savings','Kill Power'];data=[4003,1940,400,1107];colors=['#4d9fff','#a78bfa','#00c9a7','#ffc542'];legendSize=11;legendPad=12;cutPct='68%';
+    labels=['Bills & Mortgage','Food & Life','Savings','Kill Power'];data=[4003,1940,400,1107];colors=['#4d9fff','#a78bfa','#00c9a7','#ffc542'];cutPct='68%';
   }
-  charts.donut=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:0,hoverOffset:6}]},options:{cutout:cutPct,responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#f1f5f9',font:{family:'DM Sans',size:13,weight:'500'},padding:10,boxWidth:12,generateLabels:function(ch){const ds=ch.data.datasets[0];const tot=ds.data.reduce((a,b)=>a+b,0);return ch.data.labels.map((l,i)=>({text:`${l} ${(ds.data[i]/tot*100).toFixed(0)}%`,fillStyle:ds.backgroundColor[i],hidden:false,index:i}));}}},tooltip:{callbacks:{label:c=>{const tot=c.dataset.data.reduce((a,b)=>a+b,0);return` ${fmt(c.raw)} (${(c.raw/tot*100).toFixed(1)}%)`;}}},}}});
+  charts.donut=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:0,hoverOffset:6}]},options:{cutout:cutPct,responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{const tot=c.dataset.data.reduce((a,b)=>a+b,0);return` ${fmt(c.raw)} (${(c.raw/tot*100).toFixed(1)}%)`;}}},}}});
+
+  const tot=data.reduce((a,b)=>a+b,0);
+  const leg=document.getElementById('donut-legend');
+  if(leg)leg.innerHTML=labels.map((l,i)=>`<div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;border-radius:50%;background:${colors[i]};flex-shrink:0"></div><span style="font-size:14px;color:#e2e8f0;font-weight:500;font-family:DM Sans,sans-serif">${l}</span><span style="font-size:14px;color:#94a3b8;font-family:DM Sans,sans-serif">${(data[i]/tot*100).toFixed(0)}%</span></div>`).join('');
 }
 function renderInlineInsights(ct,totalSpend,mC,income){
   const w=document.getElementById('ai-insights-wrap'),co=document.getElementById('ai-insights-content');
@@ -3249,8 +3254,8 @@ function updateDebtMetrics(){
   // Daily cost banner
   const daily = document.getElementById('daily-debt-cost');
   if(daily) daily.innerHTML = `This debt costs you <strong>$${dailyInterest.toFixed(2)}/day</strong> in interest`;
-  // Freedom countdown using kill weapon ($1,107/month extra above minimums)
-  // KBB v2.4: Kill weapon = $554/paycheck = $1,107/month ABOVE minimums
+
+
   const KILL_WEAPON_MONTHLY = 1107;
   const sc = calcPayoff(KILL_WEAPON_MONTHLY,'avalanche');
   const freedomMonths = sc.length;
