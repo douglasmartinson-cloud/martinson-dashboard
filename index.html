@@ -912,8 +912,8 @@ const PIN = "1234"; // Douglas's view PIN for Jamie
 const WEEKLY_BUDGET = 200;
 const CARDS = [
   {name:"Best Buy 1345",balance:3438,apr:0.2999,min:144,color:"#ffc542"},
-  // v41: NE Furniture added — 18% APR deferred interest. Promos expire Oct/Nov 2026.
-  // KBB v2.4 kill order: Best Buy → NE Furniture → Chase → BofA (deferred interest priority)
+
+
   {name:"NE Furniture 6282",balance:3550,apr:0.18,min:190,color:"#81c784"},
   {name:"Chase 0690",balance:5280,apr:0.2724,min:164,color:"#ff9f43"},
   {name:"BofA 9362",balance:13567.18,apr:0.2374,min:384,color:"#ff6b6b"},
@@ -2351,8 +2351,21 @@ function resyncTransactionsToFirebase() {
 }
 function renderBVA(){
   document.getElementById('bva-empty').style.display='none';document.getElementById('bva-loaded').style.display='block';
-  const ct={};transactions.filter(t=>t.amount<0).forEach(t=>{ct[t.cat]=(ct[t.cat]||0)+Math.abs(t.amount);});
-  const rows=Object.entries(BUDGETS).map(([cat,budget])=>{const mapped=BVA_MAP[cat]||[cat];const actual=mapped.reduce((s,c)=>s+(ct[c]||0),0);return{cat,budget,actual};});
+  // v41: Time-normalize budget vs actual — both must be same period
+  const filtered = typeof getFilteredTransactions === 'function' ? getFilteredTransactions() : transactions;
+  const ct={};filtered.filter(t=>t.amount<0).forEach(t=>{ct[t.cat]=(ct[t.cat]||0)+Math.abs(t.amount);});
+  // Calculate months covered for normalization
+  const txDates = filtered.map(t=>new Date(t.date)).filter(d=>!isNaN(d));
+  const monthsCov = (selectedPeriod==='thisMonth'||selectedPeriod==='lastMonth') ? 1 : txDates.length > 1 ? Math.max(1,((new Date(Math.max(...txDates)))-(new Date(Math.min(...txDates))))/(1000*60*60*24)/30.44) : 1;
+  const rows=Object.entries(BUDGETS).map(([cat,monthlyBudget])=>{
+    const mapped=BVA_MAP[cat]||[cat];
+    const rawActual=mapped.reduce((s,c)=>s+(ct[c]||0),0);
+    // Scale budget to match period, normalize actual to monthly
+    const budget = Math.round(monthlyBudget * monthsCov);
+    const actual = Math.round(rawActual);
+    return{cat, budget, actual, monthlyBudget, monthlyActual: rawActual/monthsCov};
+  });
+  const periodLabel = monthsCov <= 1.1 ? '' : ` (${monthsCov.toFixed(1)} months)`;
   document.getElementById('bva-tbody').innerHTML=rows.map(r=>{
     const diff=r.budget-r.actual;const hasA=r.actual>0;
     const ds=hasA?(diff>=0?`<span style="color:var(--teal);font-weight:600">+${fmt(diff)}</span>`:`<span style="color:var(--red);font-weight:600">-${fmt(Math.abs(diff))}</span>`):'—';
@@ -2361,7 +2374,7 @@ function renderBVA(){
   }).join('');
   const labels=rows.map(r=>r.cat);const bd=rows.map(r=>r.budget);const ad=rows.map(r=>r.actual||0);
   if(charts.bar){charts.bar.destroy();charts.bar=null;}
-  {const ctx=document.getElementById('bar-chart').getContext('2d');charts.bar=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Budget',data:bd,backgroundColor:'rgba(77,159,255,0.6)',borderRadius:4},{label:'Actual',data:ad,backgroundColor:'rgba(0,201,167,0.6)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8b92a8',font:{family:'DM Sans'},boxWidth:10}}},scales:{x:{ticks:{color:'#8b92a8',font:{size:10}},grid:{color:'rgba(42,48,69,0.4)'}},y:{ticks:{color:'#8b92a8',callback:v=>'$'+v.toLocaleString()},grid:{color:'rgba(42,48,69,0.4)'}}}}}); }
+  {const ctx=document.getElementById('bar-chart').getContext('2d');charts.bar=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Budget'+periodLabel,data:bd,backgroundColor:'rgba(77,159,255,0.6)',borderRadius:4},{label:'Actual',data:ad,backgroundColor:'rgba(0,201,167,0.6)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8b92a8',font:{family:'DM Sans'},boxWidth:10}}},scales:{x:{ticks:{color:'#8b92a8',font:{size:10}},grid:{color:'rgba(42,48,69,0.4)'}},y:{ticks:{color:'#8b92a8',callback:v=>'$'+v.toLocaleString()},grid:{color:'rgba(42,48,69,0.4)'}}}}}); }
 }
 function updateDonutFromTransactions(){
   if(!transactions.length) return;
@@ -2383,9 +2396,7 @@ function updateDonutFromTransactions(){
   const monthsCovered = (selectedPeriod === 'thisMonth' || selectedPeriod === 'lastMonth') ? 1 : Math.max(1,daysCovered/30.44);
   const totalSpendRaw = Object.values(ct).reduce((s,v)=>s+v,0);
   const monthlySpend = totalSpendRaw / monthsCovered;
-  // v41: KBB v2.4 corrected: Bills $4,003 + Subs $688 + FF $2,400 + Cash $200 + Debt mins from CARDS
-  // NE Furniture ($190) and Upgrade ($248) are in fixed bills, not in CARDS.reduce for mins
-  // Only BB ($144) + Chase ($164) + BofA ($384) = $692 in CARDS mins (NE Furn + Upgrade have min 0 for this calc)
+  // v41: KBB v2.4: Bills $4,003 + Subs $688 + FF $2,400 + Cash $200 + CC mins $692
   const KBB_MONTHLY_OBLIGATIONS = 4003 + 688 + 2400 + 200 + 692;
   const killWeapon = monthlyIncome - KBB_MONTHLY_OBLIGATIONS;
   const rawSurplus = monthlyIncome - monthlySpend;
@@ -2396,10 +2407,8 @@ function updateDonutFromTransactions(){
   const food = ((ct['Food & Life']||0)+(ct['Groceries']||0)+(ct['Amazon']||0)) / monthsCovered;
   const other = Math.max(0, monthlySpend - bills - food);
   if(charts.donut){
-    // Donut always uses raw spending data for visual breakdown
-    charts.donut.data.datasets[0].data=[Math.round(bills),Math.round(food),Math.round(other),Math.max(0,Math.round(rawSurplus))];
-    charts.donut.options.plugins.tooltip.callbacks.label = c=>`${fmt(c.raw)} (${(c.raw/monthlyIncome*100).toFixed(1)}%)`;
-    charts.donut.update();
+  
+    renderDonut();
   }
   // Update metric cards — jar system
   const surplusEl=document.getElementById('d-surplus-val');
@@ -2454,7 +2463,41 @@ function loadCrossDeviceCsvData(data){
 function renderDonut(){
   if(charts.donut){charts.donut.destroy();charts.donut=null;}
   const ctx=document.getElementById('donut-chart').getContext('2d');
-  charts.donut=new Chart(ctx,{type:'doughnut',data:{labels:['Bills & Mortgage','Food & Life','Savings','Surplus'],datasets:[{data:[5502,1940,400,393],backgroundColor:['#4d9fff','#a78bfa','#00c9a7','#ffc542'],borderWidth:0,hoverOffset:6}]},options:{cutout:'68%',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#8b92a8',font:{family:'DM Sans',size:11},padding:12,boxWidth:10}},tooltip:{callbacks:{label:c=>` ${fmt(c.raw)} (${(c.raw/9090*100).toFixed(1)}%)`}}}}});
+  const EXCLUDE=['Transfers','Income'];
+  const filtered=typeof getFilteredTransactions==='function'&&transactions.length?getFilteredTransactions():[];
+  const ct={};filtered.filter(t=>t.amount<0&&!EXCLUDE.includes(t.cat)).forEach(t=>{ct[t.cat]=(ct[t.cat]||0)+Math.abs(t.amount);});
+  const totalSpend=Object.values(ct).reduce((s,v)=>s+v,0);
+  const CC={'Mortgage':'#4d9fff','Utilities':'#6dd5fa','Phone & Internet':'#a78bfa','Insurance':'#ce93d8','Loan Payment':'#f7971e','Debt Payments':'#ff6b6b','Subscriptions':'#ff9f43','Groceries':'#00c9a7','Food & Life':'#81c784','Amazon':'#ffc542','Shopping':'#e879f9','Transportation':'#38bdf8','Personal Care':'#fb923c','Entertainment':'#a3e635','Health':'#f472b6','Dining':'#c084fc','Home':'#4d9fff','Kids':'#fbbf24','Known Unknowns':'#94a3b8','Other':'#64748b'};
+  let labels,data,colors,legendSize=10,legendPad=8,cutPct='65%';
+  if(totalSpend>0){
+    const sorted=Object.entries(ct).sort((a,b)=>b[1]-a[1]);
+    const thr=totalSpend*0.03;labels=[];data=[];colors=[];let ot=0;
+    sorted.forEach(([c,a])=>{if(a>=thr&&labels.length<8){labels.push(c);data.push(Math.round(a));colors.push(CC[c]||'#64748b');}else{ot+=a;}});
+    if(ot>0){labels.push('Other');data.push(Math.round(ot));colors.push('#64748b');}
+    const txD=filtered.map(t=>new Date(t.date)).filter(d=>!isNaN(d));
+    const mC=(selectedPeriod==='thisMonth'||selectedPeriod==='lastMonth')?1:Math.max(1,((txD.length?new Date(Math.max(...txD)):new Date())-(txD.length?new Date(Math.min(...txD)):new Date()))/(1000*60*60*24)/30.44);
+    const surp=Math.max(0,FINANCIAL.income-totalSpend/mC);
+    if(surp>0){labels.push('Surplus');data.push(Math.round(surp));colors.push('#2dd4bf');}
+    renderInlineInsights(ct,totalSpend,mC,FINANCIAL.income);
+  } else {
+    labels=['Bills & Mortgage','Food & Life','Savings','Kill Power'];data=[4003,1940,400,1107];colors=['#4d9fff','#a78bfa','#00c9a7','#ffc542'];legendSize=11;legendPad=12;cutPct='68%';
+  }
+  charts.donut=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:0,hoverOffset:6}]},options:{cutout:cutPct,responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#8b92a8',font:{family:'DM Sans',size:legendSize},padding:legendPad,boxWidth:8,generateLabels:function(ch){const ds=ch.data.datasets[0];const tot=ds.data.reduce((a,b)=>a+b,0);return ch.data.labels.map((l,i)=>({text:`${l} ${(ds.data[i]/tot*100).toFixed(0)}%`,fillStyle:ds.backgroundColor[i],hidden:false,index:i}));}}},tooltip:{callbacks:{label:c=>{const tot=c.dataset.data.reduce((a,b)=>a+b,0);return` ${fmt(c.raw)} (${(c.raw/tot*100).toFixed(1)}%)`;}}},}}});
+}
+function renderInlineInsights(ct,totalSpend,mC,income){
+  const w=document.getElementById('ai-insights-wrap'),co=document.getElementById('ai-insights-content');
+  if(!w||!co)return;w.style.display='block';
+  const sorted=Object.entries(ct).sort((a,b)=>b[1]-a[1]);
+  const ms=totalSpend/mC,topC=sorted[0]?sorted[0][0]:'N/A',topA=sorted[0]?sorted[0][1]/mC:0,topP=totalSpend>0?(sorted[0][1]/totalSpend*100).toFixed(0):0;
+  const txD=(typeof getFilteredTransactions==='function'?getFilteredTransactions():[]).map(t=>new Date(t.date)).filter(d=>!isNaN(d));
+  const days=txD.length>1?Math.max(1,(Math.max(...txD)-Math.min(...txD))/(864e5)):1;
+  const dv=totalSpend/days;
+  const ob=[];Object.entries(BUDGETS).forEach(([c,b])=>{const mp=(typeof BVA_MAP!=='undefined'&&BVA_MAP[c])?BVA_MAP[c]:[c];const a=mp.reduce((s,x)=>s+(ct[x]||0),0)/mC;if(a>b*1.1)ob.push({c,o:a-b});});
+  let h=`<div style="padding:10px 12px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--teal)"><div style="font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">📊 Spending Insights</div><div style="font-size:12px;color:var(--text-mid);line-height:1.7">`;
+  h+=`<strong>${topC}</strong> is #1 at ${fmt(topA)}/mo (${topP}%).<br>Pace: <strong>${fmt(dv)}/day</strong> · ${fmt(ms)}/mo rate.<br>`;
+  if(ob.length>0)h+=`<span style="color:var(--gold)">⚠️ Over:</span> ${ob.slice(0,3).map(o=>`${o.c} (+${fmt(o.o)})`).join(', ')}.<br>`;
+  const kp=income-ms;h+=kp>0?`<span style="color:var(--teal)">💪 ${fmt(kp)}</span> available for debt kills.`:`<span style="color:var(--red)">⚠️ Overspending by ${fmt(Math.abs(kp))}/mo.</span>`;
+  h+=`</div></div>`;co.innerHTML=h;
 }
 // Critical fix: minimum payment must always >= monthly interest charged
 // Otherwise low minimums on high-APR cards cause balances to grow forever
