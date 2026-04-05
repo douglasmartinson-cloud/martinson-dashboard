@@ -571,8 +571,23 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
           </div>
         </div>
         <div class="panel">
-          <div class="panel-title"><span class="dot d-teal"></span>Spending Breakdown</div>
-          <div class="chart-wrap"><canvas id="donut-chart"></canvas></div>
+          <div class="panel-title"><span class="dot d-teal"></span>Where Your Money Goes</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div>
+              <div style="font-size:11px;font-weight:700;color:var(--text-mid);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;text-align:center">What You Spent</div>
+              <div class="chart-wrap" style="height:180px"><canvas id="donut-chart"></canvas></div>
+              <div id="donut-spent-label" style="font-size:12px;color:var(--text-mid);text-align:center;margin-top:4px"></div>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:700;color:var(--text-mid);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;text-align:center">The Plan · Every Dollar Has a Job</div>
+              <div class="chart-wrap" style="height:180px"><canvas id="plan-donut-chart"></canvas></div>
+              <div style="font-size:12px;color:var(--text-mid);text-align:center;margin-top:4px">$9,090/month allocated</div>
+            </div>
+          </div>
+          <div id="donut-ai-insight" style="margin-top:14px;padding:12px;background:linear-gradient(135deg,var(--teal-dim),var(--blue-dim));border:1px solid rgba(0,201,167,0.15);border-radius:10px;display:none">
+            <div style="font-size:11px;font-weight:700;color:var(--teal);margin-bottom:6px">🧠 What The Numbers Tell Me</div>
+            <div id="donut-ai-text" style="font-size:12px;color:var(--text);line-height:1.6"></div>
+          </div>
           <div id="ai-insights-wrap" style="margin-top:10px;display:none">
             <div id="ai-insights-content" style="font-size:12px;color:var(--text-mid);line-height:1.6"></div>
           </div>
@@ -1111,7 +1126,7 @@ let currentUser = ''; // 'douglas' or 'jamie' — controls AI personality
 let aiChatHistory = []; // conversation history for AI panel
 let aiPanelOpen = false;
 let simplefinConnected = false; // whether SimpleFIN bank is linked
-let selectedPeriod = 'thisMonth'; // v40: time period filter — 'thisMonth', 'lastMonth', '3months', 'all'
+let selectedPeriod = 'thisMonth';
 // v40: Filter transactions by selected time period
 function getFilteredTransactions() {
   if (!transactions.length || selectedPeriod === 'all') return transactions;
@@ -1195,7 +1210,7 @@ function updateBigNumber() {
     rangeEl.textContent = `${filtered.length} transactions · ${mn} – ${mx}`;
   }
 }
-let learnedCategories = {}; // v40: User-taught merchant→category mappings {merchantPattern: category}
+let learnedCategories = {};
 // Default stores - Jamie can add/remove/rename via ⚙️
 const DEFAULT_STORES = [
   { id: 'aldi', name: 'Aldi', emoji: '🛒' },
@@ -1704,7 +1719,6 @@ function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t
 function sfSan(s){ return String(s||'').replace(/[\x00-\x1F\x7F]/g,' ').trim(); }
 function categorize(d){
   const u=d.toUpperCase();
-  // v40: Check learned categories first (user-taught mappings)
   for(const [pattern, cat] of Object.entries(learnedCategories)){
     if(u.includes(pattern)){
       const rule = RULES.find(r => r.cat === cat);
@@ -2048,7 +2062,6 @@ function renderCatTable(){
   const tot={};
   filtered.filter(t=>t.amount<0 && !EXCLUDE_CAT.includes(t.cat))
     .forEach(t=>{tot[t.cat]=(tot[t.cat]||0)+Math.abs(t.amount);});
-  // For single-month view, don't pro-rate — show actual totals
   const txDates=filtered.map(t=>new Date(t.date)).filter(d=>!isNaN(d));
   const days=txDates.length>1?(Math.max(...txDates)-Math.min(...txDates))/(1000*60*60*24):30;
   const months = (selectedPeriod === 'thisMonth' || selectedPeriod === 'lastMonth') ? 1 : Math.max(1,days/30.44);
@@ -2065,7 +2078,6 @@ function renderTx(){
   document.getElementById('tx-empty-state').style.display='none';document.getElementById('tx-loaded').style.display='block';
   const filtered = getFilteredTransactions();
   const EXCL=['Transfers','Income'];
-  // v40: Calculate category totals
   const catTotals={};
   let totalSpend=0, totalIncome=0, txCount=filtered.length;
   filtered.forEach(t=>{
@@ -2076,7 +2088,6 @@ function renderTx(){
       totalIncome+=t.amount;
     }
   });
-  // v40: Summary bar
   const topCat = Object.entries(catTotals).sort((a,b)=>b[1]-a[1])[0];
   const avgPerDay = filtered.length ? totalSpend / Math.max(1, new Set(filtered.map(t=>t.date)).size) : 0;
   document.getElementById('tx-summary-bar').innerHTML=`
@@ -2096,7 +2107,6 @@ function renderTx(){
       <div style="font-size:10px;text-transform:uppercase;color:var(--text-soft);letter-spacing:0.5px">Categories</div>
       <div style="font-family:var(--font-d);font-size:18px;color:var(--blue);margin-top:2px">${Object.keys(catTotals).length}</div>
     </div>`;
-  // v40: Filter chips with dollar amounts — ALL categories including Transfers
   const allCatTotals={};
   filtered.forEach(t=>{
     if(t.amount<0){
@@ -2130,7 +2140,6 @@ function renderTxRows(cat){
   const filtered = getFilteredTransactions();
   const f=cat==='All'?filtered:filtered.filter(t=>t.cat===cat);
   document.getElementById('tx-count').textContent=f.length+' transactions';
-  // v40: Category detail bar when filtering
   const detailBar = document.getElementById('tx-cat-detail');
   if(cat!=='All' && detailBar){
     const EXCL=['Transfers','Income'];
@@ -2151,7 +2160,6 @@ function renderTxRows(cat){
   } else if(detailBar){
     detailBar.style.display='none';
   }
-  // v40: Group by date with daily subtotals
   const byDate={};
   f.forEach(t=>{if(!byDate[t.date])byDate[t.date]=[];byDate[t.date].push(t);});
   const sortedDates=Object.keys(byDate).sort((a,b)=>new Date(b)-new Date(a));
@@ -2362,7 +2370,6 @@ function renderBVA(){
 function updateDonutFromTransactions(){
   if(!transactions.length) return;
   
-  // Show period bar now that we have data
   document.getElementById('period-bar').style.display='block';
   updateBigNumber();
   const EXCLUDE = ['Transfers','Income'];
@@ -2371,7 +2378,6 @@ function updateDonutFromTransactions(){
   filtered.filter(t=>t.amount<0 && !EXCLUDE.includes(t.cat))
     .forEach(t=>{ct[t.cat]=(ct[t.cat]||0)+Math.abs(t.amount);});
   const monthlyIncome = FINANCIAL.income;
-  // For single-month views, don't pro-rate
   const txDates = filtered.map(t=>new Date(t.date)).filter(d=>!isNaN(d));
   const minDate = txDates.length ? new Date(Math.min(...txDates)) : new Date();
   const maxDate = txDates.length ? new Date(Math.max(...txDates)) : new Date();
@@ -2379,25 +2385,64 @@ function updateDonutFromTransactions(){
   const monthsCovered = (selectedPeriod === 'thisMonth' || selectedPeriod === 'lastMonth') ? 1 : Math.max(1,daysCovered/30.44);
   const totalSpendRaw = Object.values(ct).reduce((s,v)=>s+v,0);
   const monthlySpend = totalSpendRaw / monthsCovered;
-  // v40: For current month, show PROJECTED surplus after all KBB obligations
   // Raw surplus (income - spending so far) is misleading early in month when bills haven't hit
   // KBB v2.3: Bills $3,890 + Subs $688 + FF $2,400 + Cash $200 + Debt mins $692 = $7,870
   const KBB_MONTHLY_OBLIGATIONS = 3890 + 688 + 2400 + 200 + CARDS.reduce((s,c)=>s+c.min,0);
   const killWeapon = monthlyIncome - KBB_MONTHLY_OBLIGATIONS;
   const rawSurplus = monthlyIncome - monthlySpend;
   const dayOfMonth = new Date().getDate();
-  // Use projected (kill weapon) for current month; actual for historical periods
   const surplus = (selectedPeriod === 'thisMonth') ? killWeapon : rawSurplus;
   const bills = ((ct['Mortgage']||0)+(ct['Utilities']||0)+(ct['Phone & Internet']||0)+(ct['Loan Payment']||0)+(ct['Insurance']||0)+(ct['Subscriptions']||0)) / monthsCovered;
   const food = ((ct['Food & Life']||0)+(ct['Groceries']||0)+(ct['Amazon']||0)) / monthsCovered;
   const other = Math.max(0, monthlySpend - bills - food);
   if(charts.donut){
-    // Donut always uses raw spending data for visual breakdown
-    charts.donut.data.datasets[0].data=[Math.round(bills),Math.round(food),Math.round(other),Math.max(0,Math.round(rawSurplus))];
-    charts.donut.options.plugins.tooltip.callbacks.label = c=>`${fmt(c.raw)} (${(c.raw/monthlyIncome*100).toFixed(1)}%)`;
+    const sortedSpend = Object.entries(ct).sort((a,b)=>b[1]-a[1]);
+    const topN = sortedSpend.slice(0,6); // Top 6 categories
+    const otherAmt = sortedSpend.slice(6).reduce((s,[,v])=>s+v,0);
+    const catLabels = topN.map(([k])=>k);
+    const catData = topN.map(([,v])=>Math.round(v/monthsCovered));
+    if(otherAmt > 0){ catLabels.push('Other'); catData.push(Math.round(otherAmt/monthsCovered)); }
+    const CAT_COLORS={'Mortgage':'#4d9fff','Phone & Internet':'#a78bfa','Utilities':'#6dd5fa','Loan Payment':'#f7971e','Debt Payments':'#ff6b6b','Groceries':'#00c9a7','Subscriptions':'#ffc542','Food & Life':'#fd9644','Health & Fitness':'#26de81','Home & Repairs':'#a55eea','Home':'#a55eea','Shopping':'#e056fd','Insurance':'#778ca3','Kids & Family':'#fd79a8','Transportation':'#00b894','Amazon':'#ff9900','Travel':'#74b9ff','Transfers':'#4a5168','Income':'#00c9a7','Venmo/Other':'#778ca3','Personal Care':'#fdcb6e','Entertainment':'#e17055','Dining':'#ff6348','Other':'#8b92a8'};
+    const catColors = catLabels.map(c=>CAT_COLORS[c]||'#8b92a8');
+    charts.donut.data.labels = catLabels;
+    charts.donut.data.datasets[0].data = catData;
+    charts.donut.data.datasets[0].backgroundColor = catColors;
+    charts.donut.options.plugins.tooltip.callbacks.label = c=>{const t=c.dataset.data.reduce((s,v)=>s+v,0);return` ${c.label}: ${fmt(c.raw)} (${(c.raw/t*100).toFixed(1)}%)`;};
     charts.donut.update();
+    const spentLabel=document.getElementById('donut-spent-label');
+    if(spentLabel) spentLabel.textContent=`${fmt(totalSpendRaw/monthsCovered)} spent · ${Object.keys(ct).length} categories`;
   }
-  // Update metric cards — jar system
+  const insightEl=document.getElementById('donut-ai-insight');
+  const insightText=document.getElementById('donut-ai-text');
+  if(insightEl && insightText && Object.keys(ct).length > 0){
+    insightEl.style.display='block';
+    const insights=[];
+    const sortedCats=Object.entries(ct).sort((a,b)=>b[1]-a[1]);
+    const topCat=sortedCats[0];
+    const totalS=Object.values(ct).reduce((s,v)=>s+v,0);
+    if(topCat){
+      const pct=(topCat[1]/totalS*100).toFixed(0);
+      if(pct>50) insights.push(`<strong>${topCat[0]}</strong> dominates at ${pct}% of spending. ${topCat[0]==='Home'?'That\'s mortgage — expected and on plan.':'This category needs attention if it stays this high.'}`);
+      else insights.push(`Spending is well-distributed. <strong>${topCat[0]}</strong> leads at ${pct}% — no single category is dominating.`);
+    }
+    const dayOfMo=new Date().getDate();
+    const daysInMo=new Date(new Date().getFullYear(),new Date().getMonth()+1,0).getDate();
+    const monthPct=(dayOfMo/daysInMo*100).toFixed(0);
+    const spendPct=(totalS/monthlyIncome*100).toFixed(0);
+    if(selectedPeriod==='thisMonth'){
+      if(parseFloat(spendPct) < parseFloat(monthPct)*0.8) insights.push(`You're <strong>${monthPct}% through the month</strong> but only spent <strong>${spendPct}%</strong> of income. Ahead of pace — bills will catch up but you're in control.`);
+      else if(parseFloat(spendPct) > parseFloat(monthPct)*1.2) insights.push(`⚠️ Spending is <strong>${spendPct}%</strong> of income at day ${dayOfMo} — that's faster than the month's pace of ${monthPct}%. Watch for non-essential purchases this week.`);
+      else insights.push(`Spending is tracking proportionally to the month — <strong>${spendPct}%</strong> spent, <strong>${monthPct}%</strong> through April.`);
+    }
+    const killW = monthlyIncome - KBB_MONTHLY_OBLIGATIONS;
+    insights.push(`Your plan allocates every dollar: <strong>${fmt(KBB_MONTHLY_OBLIGATIONS)}</strong> to obligations, <strong>${fmt(killW)}</strong> to debt kill. At this rate, Best Buy ($${Math.round(CARDS[0].balance).toLocaleString()}) dies in ~${Math.ceil(CARDS[0].balance/killW)} months.`);
+    const grocerySpend=ct['Groceries']||0;
+    if(grocerySpend > 0){
+      const groceryPct=(grocerySpend/800*100).toFixed(0);
+      insights.push(`🛒 Groceries: <strong>${fmt(grocerySpend)}</strong> of $800 budget (<strong>${groceryPct}%</strong>). ${grocerySpend<=600?'Jamie\'s keeping it tight — great discipline.':grocerySpend<=800?'On track for the month.':'Trending over budget — check Sunday.'}`);
+    }
+    insightText.innerHTML=insights.map(i=>`<div style="margin-bottom:6px;padding-left:10px;border-left:2px solid var(--teal)">${i}</div>`).join('');
+  }
   const surplusEl=document.getElementById('d-surplus-val');
   const surplusSubEl=document.getElementById('d-surplus-sub');
   if(surplusEl){
@@ -2411,7 +2456,6 @@ function updateDonutFromTransactions(){
       : `Monthly avg · ${monthsCovered.toFixed(1)}mo`;
     surplusSubEl.textContent = periodLabel;
   }
-  // Update jar displays with latest balances
   updateJarDisplay();
 }
 // Load cross-device CSV data — always replaces whatever is currently loaded
@@ -2450,7 +2494,11 @@ function loadCrossDeviceCsvData(data){
 function renderDonut(){
   if(charts.donut){charts.donut.destroy();charts.donut=null;}
   const ctx=document.getElementById('donut-chart').getContext('2d');
-  charts.donut=new Chart(ctx,{type:'doughnut',data:{labels:['Bills & Mortgage','Food & Life','Savings','Surplus'],datasets:[{data:[5502,1940,400,393],backgroundColor:['#4d9fff','#a78bfa','#00c9a7','#ffc542'],borderWidth:0,hoverOffset:6}]},options:{cutout:'68%',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#8b92a8',font:{family:'DM Sans',size:11},padding:12,boxWidth:10}},tooltip:{callbacks:{label:c=>` ${fmt(c.raw)} (${(c.raw/9090*100).toFixed(1)}%)`}}}}});
+  charts.donut=new Chart(ctx,{type:'doughnut',data:{labels:['Home','Shopping','Groceries','Transport','Other'],datasets:[{data:[1288,671,165,155,413],backgroundColor:['#4d9fff','#ff9f43','#00c9a7','#36d399','#a78bfa'],borderWidth:0,hoverOffset:6}]},options:{cutout:'65%',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{const t=c.dataset.data.reduce((s,v)=>s+v,0);return` ${c.label}: ${fmt(c.raw)} (${(c.raw/t*100).toFixed(1)}%)`;}}}}}});
+  if(charts.planDonut){charts.planDonut.destroy();charts.planDonut=null;}
+  const ctx2=document.getElementById('plan-donut-chart').getContext('2d');
+  const KBB_BILLS=4013,KBB_SUBS=688,KBB_FF=2400,KBB_CASH=200,KBB_MINS=692,KBB_KILL=1097;
+  charts.planDonut=new Chart(ctx2,{type:'doughnut',data:{labels:['Bills & Housing','Subscriptions','Family Fuel','Cash','Debt Minimums','Kill Weapon'],datasets:[{data:[KBB_BILLS,KBB_SUBS,KBB_FF,KBB_CASH,KBB_MINS,KBB_KILL],backgroundColor:['#4d9fff','#ffc542','#ff9f43','#8b92a8','#ff6b6b','#00c9a7'],borderWidth:0,hoverOffset:6}]},options:{cutout:'65%',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{return` ${c.label}: ${fmt(c.raw)} (${(c.raw/9090*100).toFixed(1)}%)`;}}}}}});
 }
 // Critical fix: minimum payment must always >= monthly interest charged
 // Otherwise low minimums on high-APR cards cause balances to grow forever
@@ -2541,7 +2589,6 @@ function updateProj(){
   const scB=calcPayoff(0,strat);
   const startTotal = CARDS.reduce((s,c)=>s+c.balance,0);
   const baseMonthlyPmt = CARDS.reduce((s,c)=>s+c.min,0);
-  // v40b: Freedom countdown banner
   const freedomDate=document.getElementById('proj-freedom-date');
   const freedomSub=document.getElementById('proj-freedom-sub');
   if(freedomDate) freedomDate.textContent=mlabel(sc.length);
@@ -2557,7 +2604,6 @@ function updateProj(){
     const monthlyInterest=(c.balance*c.apr/12);
     return`<div class="payoff-card"><div class="pc-name">${c.name}</div><div class="pc-mo" style="color:${c.color}">${mo>=0?'Mo '+(mo+1):'36+'}</div><div class="pc-date">${mo>=0?mlabel(mo+1):'—'}</div>${sv>0?`<div class="pc-saved">-${sv} mo faster</div>`:''}<div style="font-size:10px;color:var(--text-soft);margin-top:4px">${(c.apr*100).toFixed(1)}% APR · $${Math.round(monthlyInterest)}/mo interest</div></div>`;
   }).join('');
-  // v40b: Strategy comparison — Avalanche vs Snowball side by side
   const scAval=calcPayoff(extra,'avalanche');
   const scSnow=calcPayoff(extra,'snowball');
   const iAval=Math.max(0,(baseMonthlyPmt+extra)*scAval.length-startTotal);
@@ -2587,7 +2633,6 @@ function updateProj(){
   const iE = Math.max(0, extraMonthlyPmt * sc.length - startTotal);
   const sv = Math.max(0, iB - iE);
   document.getElementById('int-summary').innerHTML=`<div style="padding:12px;background:var(--surface2);border-radius:10px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-mid);margin-bottom:4px">Minimums only</div><div style="font-family:var(--font-d);font-size:22px;color:var(--red)">$${Math.round(iB).toLocaleString()}</div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">total interest · debt free ${mlabel(scB.length)}</div></div><div style="padding:12px;background:var(--surface2);border-radius:10px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-mid);margin-bottom:4px">With +$${extra.toLocaleString()}/mo extra</div><div style="font-family:var(--font-d);font-size:22px;color:${extra>0?'var(--teal)':'var(--red)'}">$${Math.round(iE).toLocaleString()}</div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">total interest · debt free ${mlabel(sc.length)}</div></div>${extra>0?`<div style="padding:12px;background:var(--teal-dim);border:1px solid rgba(0,201,167,0.2);border-radius:10px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--teal);margin-bottom:4px">You save</div><div style="font-family:var(--font-d);font-size:26px;color:var(--teal)">$${Math.round(sv).toLocaleString()}</div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">${scB.length-sc.length} months earlier</div></div>`:''}`;
-  // v40b: What-If Scenarios
   const scenarios=[
     {label:'Tax refund ($914)',extra:914,icon:'💰',desc:'Apply KS refund to Best Buy'},
     {label:'$200 raise',extra:extra+200,icon:'📈',desc:'If paycheck grows $200/mo'},
@@ -2605,7 +2650,6 @@ function updateProj(){
       <div style="font-size:10px;color:var(--text-soft);margin-top:4px">${s.desc}</div>
     </div>`;
   }).join('');
-  // v40b: Daily interest ticker
   const dailyInterest=CARDS.reduce((s,c)=>s+(c.balance*(c.apr/365)),0);
   const projDaily=document.getElementById('proj-daily-cost');
   const projHourly=document.getElementById('proj-hourly');
@@ -3124,7 +3168,6 @@ function updateCCDisplay(){
 function updateGoalsDisplay(){
   const ef=document.getElementById('d-ef-val');
   if(ef)ef.textContent=fmt(jarBalances.foundation);
-  // v40: Sync savings panel with Foundation balance
   const efPanel=document.getElementById('ef-panel-display');
   const efBar=document.getElementById('ef-panel-bar');
   const efPct=document.getElementById('ef-panel-pct');
@@ -3209,7 +3252,6 @@ function updateDebtMetrics(){
   // Also update the banner style — green for plan, not default
   const banner = document.getElementById('debt-freedom-banner');
   if(banner) banner.innerHTML = `🎯 Debt free in <strong>${freedomMonths} months</strong> — <span>${mlabel(freedomMonths)}</span> · Kill weapon: $${KILL_WEAPON_MONTHLY.toLocaleString()}/mo`;
-  // v40: Sync CC table rows to match CARDS array (prevents metric vs table mismatch)
   const ccTable = document.getElementById('cc-table');
   if(ccTable){
     const tbody = ccTable.querySelector('tbody');
@@ -3610,7 +3652,6 @@ function buildFinancialContext(){
   const EXCL=['Transfers','Income'];
   let spendingSummary='No transaction data loaded.';
   let mealContext='';
-  // v40: Use filtered transactions for current period context
   const filtered = getFilteredTransactions();
   if(filtered.length){
     const ct={};
@@ -3889,7 +3930,6 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
     const amount = parseFloat(t.amount) || 0;
     if(amount === 0 || desc.includes('Beginning balance') || desc.includes('balance as of')) return;
     
-    // v40: Re-run local 717-keyword engine when server returns 'Other'
     const cat = (t.category && t.category !== 'Other') ? t.category : categorize(desc).cat;
     const rule = RULES.find(r => r.cat === cat) || RULES[RULES.length - 1];
     
@@ -3918,7 +3958,6 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
     // Savings account balance — may not be Foundation (7708). Store but verify mapping.
     // BofA shows Foundation = $5,000.00 exactly. SimpleFIN may map to a different account.
     if (accountBalances.savings) {
-      // v40: Don't auto-update Foundation from unverified SimpleFIN savings mapping
       // familyGoals.efund tracks the savings panel, jarBalances.foundation tracks The Foundation
       // Only update if the balance matches what we expect (Foundation is exactly $5,000)
       const savBal = Math.round(accountBalances.savings.balance);
@@ -3936,7 +3975,6 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
       fbSet('cc_balances', ccBalances);
       updateCCDisplay();
     }
-    // v40: Checking accounts → Mission Control (9289) and Family Fuel (2307)
     if (accountBalances.checking) {
       jarBalances.mc = Math.round(accountBalances.checking.balance);
     }
