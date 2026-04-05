@@ -2396,7 +2396,7 @@ function updateDonutFromTransactions(){
   const monthsCovered = (selectedPeriod === 'thisMonth' || selectedPeriod === 'lastMonth') ? 1 : Math.max(1,daysCovered/30.44);
   const totalSpendRaw = Object.values(ct).reduce((s,v)=>s+v,0);
   const monthlySpend = totalSpendRaw / monthsCovered;
-  // v41: KBB v2.4: Bills $4,003 + Subs $688 + FF $2,400 + Cash $200 + CC mins $692
+
   const KBB_MONTHLY_OBLIGATIONS = 4003 + 688 + 2400 + 200 + 692;
   const killWeapon = monthlyIncome - KBB_MONTHLY_OBLIGATIONS;
   const rawSurplus = monthlyIncome - monthlySpend;
@@ -2482,7 +2482,7 @@ function renderDonut(){
   } else {
     labels=['Bills & Mortgage','Food & Life','Savings','Kill Power'];data=[4003,1940,400,1107];colors=['#4d9fff','#a78bfa','#00c9a7','#ffc542'];legendSize=11;legendPad=12;cutPct='68%';
   }
-  charts.donut=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:0,hoverOffset:6}]},options:{cutout:cutPct,responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#8b92a8',font:{family:'DM Sans',size:legendSize},padding:legendPad,boxWidth:8,generateLabels:function(ch){const ds=ch.data.datasets[0];const tot=ds.data.reduce((a,b)=>a+b,0);return ch.data.labels.map((l,i)=>({text:`${l} ${(ds.data[i]/tot*100).toFixed(0)}%`,fillStyle:ds.backgroundColor[i],hidden:false,index:i}));}}},tooltip:{callbacks:{label:c=>{const tot=c.dataset.data.reduce((a,b)=>a+b,0);return` ${fmt(c.raw)} (${(c.raw/tot*100).toFixed(1)}%)`;}}},}}});
+  charts.donut=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:0,hoverOffset:6}]},options:{cutout:cutPct,responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#cbd5e1',font:{family:'DM Sans',size:12},padding:10,boxWidth:10,generateLabels:function(ch){const ds=ch.data.datasets[0];const tot=ds.data.reduce((a,b)=>a+b,0);return ch.data.labels.map((l,i)=>({text:`${l} ${(ds.data[i]/tot*100).toFixed(0)}%`,fillStyle:ds.backgroundColor[i],hidden:false,index:i}));}}},tooltip:{callbacks:{label:c=>{const tot=c.dataset.data.reduce((a,b)=>a+b,0);return` ${fmt(c.raw)} (${(c.raw/tot*100).toFixed(1)}%)`;}}},}}});
 }
 function renderInlineInsights(ct,totalSpend,mC,income){
   const w=document.getElementById('ai-insights-wrap'),co=document.getElementById('ai-insights-content');
@@ -2496,7 +2496,10 @@ function renderInlineInsights(ct,totalSpend,mC,income){
   let h=`<div style="padding:10px 12px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--teal)"><div style="font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">📊 Spending Insights</div><div style="font-size:12px;color:var(--text-mid);line-height:1.7">`;
   h+=`<strong>${topC}</strong> is #1 at ${fmt(topA)}/mo (${topP}%).<br>Pace: <strong>${fmt(dv)}/day</strong> · ${fmt(ms)}/mo rate.<br>`;
   if(ob.length>0)h+=`<span style="color:var(--gold)">⚠️ Over:</span> ${ob.slice(0,3).map(o=>`${o.c} (+${fmt(o.o)})`).join(', ')}.<br>`;
-  const kp=income-ms;h+=kp>0?`<span style="color:var(--teal)">💪 ${fmt(kp)}</span> available for debt kills.`:`<span style="color:var(--red)">⚠️ Overspending by ${fmt(Math.abs(kp))}/mo.</span>`;
+  const kp=income-ms;
+  const dayOfMo=new Date().getDate();
+  if(dayOfMo<=7&&(selectedPeriod==='thisMonth'))h+=`<span style="color:var(--text-mid)">📅 Early month — only ${dayOfMo} days of data. Pace will normalize.</span><br>`;
+  h+=`<span style="color:var(--teal)">💪 Kill weapon: ${fmt(1107)}/mo</span> locked on Best Buy.`;
   h+=`</div></div>`;co.innerHTML=h;
 }
 // Critical fix: minimum payment must always >= monthly interest charged
