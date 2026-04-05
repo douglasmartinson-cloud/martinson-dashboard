@@ -922,16 +922,13 @@ const CARDS = [
 ];
 const BUDGETS = {"Mortgage":2578,"Utilities":568,"Phone & Internet":364,"Loan Payment":248,"Debt Payments":776,"Subscriptions":552,"Groceries":800,"Food & Life":1140,"Known Unknowns":455};
 const RULES = [
-  // ═══ HOUSING & UTILITIES ═══
   {cat:"Mortgage",color:"#4d9fff",kw:["ROCKET MORTGAGE","ROCKET MTG","QUICKEN LOANS","WELLS FARGO MTG","CHASE MTG","USAA MTG","NAVY FEDERAL MTG","PNC MTG"]},
   {cat:"Phone & Internet",color:"#a78bfa",kw:["ATT* BILL","AT&T","GOOGLE *FIBER","GOOGLE FIBER","AT&T FIBER","SPECTRUM","COX COMM","XFINITY","COMCAST","VERIZON WIRELESS","VERIZON WL","T-MOBILE","TMOBILE","US CELLULAR","CRICKET","METRO PCS","MINT MOBILE","VISIBLE","BOOST MOBILE","STRAIGHT TALK","CONSUMER CELLULAR"]},
   {cat:"Utilities",color:"#6dd5fa",kw:["SPIRE","EVERGY","KANSAS CITY WATER","CLAY COUNTY MO UTIL","ATMOS ENERGY","DUKE ENERGY","DOMINION ENERGY","AMEREN","CONSUMERS ENERGY","PSE&G","PEPCO","BGE","PIEDMONT GAS","NICOR GAS","CENTERPOINT","XCEL ENERGY","NATIONAL GRID","CONEDISON","WATER UTILITY","SEWER UTILITY","TRASH BILL","WASTE MGMT","REPUBLIC SERVICES"]},
   
-  // ═══ DEBT & LOANS ═══
   {cat:"Loan Payment",color:"#f7971e",kw:["UPGRADE, INC","NEFURNMART","PROSPER","LENDING CLUB","SOFI","UPSTART","AVANT","LIGHTSTREAM","MARCUS","EARNEST","CREDIBLE","LAUREL ROAD","FIRSTMARK"]},
   {cat:"Debt Payments",color:"#ff6b6b",kw:["U.S. BANK DES:WEB PYMT","BEST BUY DES:PAYMENT","CITICTP","CITI CARD","CHASE CREDIT CRD","CHASE EPAY","BANK OF AMERICA","BOFA","DISCOVER BANK","DISCOVER CARD","CAPITAL ONE PYMT","CAPITAL ONE","SYNCHRONY","AMEX","AMERICAN EXPRESS","BARCLAYS","WELLS FARGO CARD","US BANK CARD"]},
   
-  // ═══ GROCERIES (EXPANDED) ═══
   {cat:"Groceries",color:"#00c9a7",kw:[
     // National chains
     "ALDI","PRICE CHOPPER","HY-VEE","HYVEE","WM SUPERCENTER","WAL-MART","WALMART","WAL MART","COSTCO","TARGET T-","TARGET 000","TARGET DEBIT","DOLLAR TREE","WHOLE FOODS","TRADER JOE","SPROUTS","SAVE A LOT","FRESH THYME","SCHNUCKS","DILLONS","RULER FOODS",
@@ -943,7 +940,6 @@ const RULES = [
     "H MART","HMART","99 RANCH","RANCH 99","MITSUWA","ASIAN MARKET"
   ]},
   
-  // ═══ SUBSCRIPTIONS (EXPANDED) ═══
   {cat:"Subscriptions",color:"#ffc542",kw:[
     // Streaming
     "NETFLIX","HULU","SPOTIFY","DISNEY","APPLE.COM/BILL","PEACOCK","PARAMOUNT","ESPN+","MAX ","HBO","AMAZON PRIME","PRIME VIDEO","GOOGLE *YOUTUB","YOUTUBE PREMIUM","YOUTUBE TV","SLING TV","FUBO","PHILO","CRUNCHYROLL","FUNIMATION","DISCOVERY+","SHOWTIME","AMC+","STARZ","BET+","TUBI",
@@ -955,7 +951,6 @@ const RULES = [
     "AUDIBLE","KINDLE UNLIMITED","NOOM","HEADSPACE","CALM APP","DUOLINGO","COURSERA","SKILLSHARE","MASTERCLASS","LINKEDIN PREMIUM","GOOGLE *LINKED","GOOGLE *INSTAG","GOOGLE *GOOGL","GOOGLE *TRUECA","SIRIUSXM","SIRIUS XM","PANDORA","APPLE MUSIC","TIDAL","DEEZER","NEWSPAPER","SUBSCRIPTION","PATREON","ONLYFANS"
   ]},
   
-  // ═══ FOOD & DINING (EXPANDED) ═══
   {cat:"Food & Life",color:"#fd9644",kw:[
     // Fast food
     "MCDONALD","MCDONALDS","BURGER KING","WENDY","WENDYS","TACO BELL","CHICK-FIL","CHICKFILA","SONIC ","ARBYS","ARBY'S","JACK IN THE BOX","CARL'S JR","CARLS JR","HARDEE","POPEYES","KFC","KENTUCKY FRIED","RAISING CANE","JIMMY JOHN","JERSEY MIKE","SUBWAY ","FIREHOUSE SUB","WHICH WICH","POTBELLY","QUIZNOS","JASONS DELI","JASON'S DELI","MCALISTER","FIVE GUYS","SHAKE SHACK","IN-N-OUT","INNOUT","WHATABURGER","CULVERS","CULVER'S","CHECKERS","RALLYS","ZAXBY","WINGSTOP","BUFFALO WILD","BWW ","HOOTERS",
@@ -977,10 +972,8 @@ const RULES = [
     "BUBBLES WINE","SP COMFRT","FOOTHILLS PROF","DAIRY QUEEN","DQ ","BASKIN","COLD STONE","KRISPY KREME","CINNABON","AUNTIE ANNE","JAMBA","SMOOTHIE KING","TROPICAL SMOOTH"
   ]},
   
-  // ═══ INSURANCE ═══
   {cat:"Insurance",color:"#778ca3",kw:["STATE FARM","GEICO","PROGRESSIVE","ALLSTATE","NATIONWIDE","USAA","LIBERTY MUTUAL","FARMERS INS","TRAVELERS INS","ERIE INS","AMERICAN FAMILY","SAFECO","ESURANCE","METLIFE","PRUDENTIAL","AETNA","CIGNA","ANTHEM","BLUE CROSS","UNITED HEALTH","KAISER","HUMANA","OSCAR HEALTH"]},
   
-  // ═══ HEALTH & FITNESS ═══
   {cat:"Health & Fitness",color:"#26de81",kw:[
     // Pharmacies
     "CVS/PHARMACY","CVS ","WALGREEN","RITE AID","PHARMACY","GOOD RX","PILL PACK",
@@ -990,7 +983,6 @@ const RULES = [
     "MpPNorthKansas","URGENT CARE","DENTIST","OPTOMETRIST","MEDICAL","CLINIC","DOCTOR","THERAPY","LABCORP","QUEST DIAG","HOSPITAL","PHYSICIAN","PEDIATRIC","DERMATOL","ORTHOPEDIC","CHIROPRACT","PHYSICAL THERAPY","MENTAL HEALTH","PSYCHIATR","PSYCHOLOG","COUNSELING","EYE CARE","VISION CENTER","LENSCRAFTERS","PEARLE VISION","COSTCO OPTICAL"
   ]},
   
-  // ═══ SHOPPING ═══
   {cat:"Amazon",color:"#ff9900",kw:["AMAZON MKTPL","AMAZON.COM","AMZN MKTP","AMZN","AMAZON PRIME","AMAZON FRESH","WHOLE FOODS AMAZON"]},
   {cat:"Home & Repairs",color:"#a55eea",kw:[
     // Hardware
@@ -1003,7 +995,6 @@ const RULES = [
     "CLAY COUNTY","PROPERTY TAX","HOA ","HOME OWNERS ASSOC"
   ]},
   
-  // ═══ SHOPPING (GENERAL) ═══
   {cat:"Shopping",color:"#e056fd",kw:[
     // Department stores
     "KOHLS","KOHL'S","MACYS","MACY'S","NORDSTROM","JC PENNEY","JCPENNEY","DILLARDS","BELK","SEARS","MARSHALLS","TJ MAXX","TJMAXX","ROSS DRESS","BURLINGTON","HOMEGOODS","TUESDAY MORNING",
@@ -1019,7 +1010,6 @@ const RULES = [
     "BED BATH","PIER 1","POTTERY BARN","CRATE & BARREL","WILLIAMS SONOMA","SUR LA TABLE","WEST ELM","CB2","IKEA","AT HOME","WORLD MARKET"
   ]},
   
-  // ═══ KIDS & FAMILY ═══
   {cat:"Kids & Family",color:"#fd79a8",kw:[
     // Kids retail
     "CARTERS","CARTER'S","OSHKOSH","CHILDREN'S PLACE","ONCE UPON A CHILD","KID TO KID","GYMBOREE","JUSTICE ",
@@ -1031,7 +1021,6 @@ const RULES = [
     "TUTOR","KUMON","MATHNASIUM","SYLVAN","SCHOOL SUPPLY","DANCE CLASS","MUSIC LESSON","KARATE","MARTIAL ART","SWIM LESSON","LITTLE LEAGUE","YOUTH SPORT"
   ]},
   
-  // ═══ TRANSPORTATION ═══
   {cat:"Transportation",color:"#00b894",kw:[
     // Auto services
     "OIL CHANGE","JIFFY LUBE","VALVOLINE","GREASE MONKEY","TAKE 5 OIL","EXPRESS OIL","PENSKE","UHAUL","U-HAUL","BUDGET TRUCK","ENTERPRISE","HERTZ","AVIS","NATIONAL CAR","ALAMO RENT",
@@ -1045,7 +1034,6 @@ const RULES = [
     "UBER ","LYFT","UBER TRIP"
   ]},
   
-  // ═══ TRAVEL ═══
   {cat:"Travel",color:"#74b9ff",kw:[
     // Airlines
     "SOUTHWEST","AMERICAN AIR","DELTA AIR","UNITED AIR","JETBLUE","SPIRIT AIR","FRONTIER AIR","ALASKA AIR","HAWAIIAN AIR","ALLEGIANT",
@@ -1055,16 +1043,12 @@ const RULES = [
     "EXPEDIA","BOOKING.COM","HOTELS.COM","KAYAK","PRICELINE","TRAVELOCITY","ORBITZ"
   ]},
   
-  // ═══ INCOME ═══
   {cat:"Income",color:"#00c9a7",kw:["SYMPHONYAI","PAYROLL","DIRECT DEP","SALARY","WAGES","TAX REFUND","VENMO CASHOUT","DIVIDEND","INTEREST PAYMENT"]},
   
-  // ═══ TRANSFERS ═══
   {cat:"Transfers",color:"#4a5168",kw:["ONLINE BANKING TRANSFER","OVERDRAFT PROTECTION","TRANSFER FROM","TRANSFER TO","ACH TRANSFER","WIRE TRANSFER","INTERNAL TFR","MOBILE DEPOSIT"]},
   
-  // ═══ PEER-TO-PEER ═══
   {cat:"Venmo/Other",color:"#778ca3",kw:["VENMO","SENDWAVE","ZELLE","CASH APP","PAYPAL","APPLE CASH","GOOGLE PAY"]},
   
-  // ═══ CATCH-ALL ═══
   {cat:"Other",color:"#8b92a8",kw:[]},
 ];
 const BVA_MAP = {"Mortgage":["Mortgage"],"Utilities":["Utilities"],"Phone & Internet":["Phone & Internet"],"Loan Payment":["Loan Payment"],"Debt Payments":["Debt Payments"],"Subscriptions":["Subscriptions"],"Groceries":["Groceries"],"Food & Life":["Food & Life","Amazon"],"Known Unknowns":["Home & Repairs","Health & Fitness","Insurance","Venmo/Other"]};
@@ -1263,7 +1247,7 @@ let _syncPaused = false;
 function applyServerState(all) {
   if (!all) return;
   if (_syncPaused) return;
-  // Apply non-CSV keys always
+
   const keys = ['meal_plan','week_hist','custom_meals','hidden_meals',
                  'financial_settings','cc_balances','family_goals',
                  'grocery_stores','store_items'];
@@ -1273,9 +1257,9 @@ function applyServerState(all) {
       applyKey(k, all[k]);
     }
   });
-  // CSV DECISION: server is the sole source of truth.
-  // If server has real tx data (not cleared marker) → show it
-  // If server has cleared marker or no data → show empty
+
+
+
   // _syncPaused prevents race conditions during the clear write.
   const csv = all.last_csv_data;
   if (csv && !csv.cleared && csv.uploadedAt && (csv.txData || csv.txList)) {
@@ -1625,7 +1609,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   startSync();
   updateBankSyncBar();
   rehydrateSimpleFINState();
+  checkAutoSyncData();
 });
+function checkAutoSyncData(){
+  FB_ROOT.child('auto_sync_data').once('value').then(snap=>{
+    const raw=snap.val();
+    if(!raw||!raw.transactions||!raw.syncedAt)return;
+    const lastManual=parseInt(localStorage.getItem('last_processed_sync')||'0');
+    if(raw.syncedAt>lastManual&&raw.transactions.length>0){
+      processSimpleFINTransactions(raw.transactions,raw.accountBalances,raw.transactions.length);
+      localStorage.setItem('last_processed_sync',String(raw.syncedAt));
+      const sub=document.getElementById('bank-sync-sub');
+      if(sub)sub.textContent='Auto-synced: '+raw.syncedAtHuman;
+      toast('\u2705 Auto-sync: '+raw.count+' transactions loaded');
+    }
+  }).catch(()=>{});
+}
 function getWeekOf(){const n=new Date();const d=n.getDate()-n.getDay()+(n.getDay()===0?-6:1);const m=new Date(n.setDate(d));return m.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
 function fmt(n){return '$'+Math.abs(n).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,',');}
 function fmtD(n){return '$'+Math.abs(n).toFixed(2);}
@@ -3937,6 +3936,7 @@ async function syncFromBank(){
       processSimpleFINTransactions(data.transactions, data.accountBalances, data.newCount);
       const now = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
       localStorage.setItem('simplefin_last_sync', now);
+      localStorage.setItem('last_processed_sync', String(Date.now()));
       fbSet('simplefin_state', {connected:true, lastSync:now, syncAt:Date.now()});
       
     
