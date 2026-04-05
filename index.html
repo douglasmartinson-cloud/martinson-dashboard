@@ -1591,7 +1591,7 @@ function renderFromTransactions() {
   updateProj();
   renderMilestones();
   renderFreedomChart();
-  // v35: update Money Flow tab
+
   renderSankey();
 }
 document.addEventListener('DOMContentLoaded', async () => {
@@ -1624,6 +1624,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initStoreGrocery(); // v38: Re-render after sync
   startSync();
   updateBankSyncBar();
+  rehydrateSimpleFINState();
 });
 function getWeekOf(){const n=new Date();const d=n.getDate()-n.getDay()+(n.getDay()===0?-6:1);const m=new Date(n.setDate(d));return m.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
 function fmt(n){return '$'+Math.abs(n).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,',');}
@@ -1687,7 +1688,7 @@ function jPage(id,btn){
   document.querySelectorAll('.jn-item').forEach(b=>b.classList.remove('active'));
   document.getElementById('j-'+id).classList.add('active');
   if(btn)btn.classList.add('active');
-  // v38: Re-render store grocery tabs when switching to grocery
+
   if(id==='grocery') {
     renderStoreTabs();
     renderStoreItems();
@@ -1709,7 +1710,7 @@ function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t
 function sfSan(s){ return String(s||'').replace(/[\x00-\x1F\x7F]/g,' ').trim(); }
 function categorize(d){
   const u=d.toUpperCase();
-  // v40: Check learned categories first (user-taught mappings)
+
   for(const [pattern, cat] of Object.entries(learnedCategories)){
     if(u.includes(pattern)){
       const rule = RULES.find(r => r.cat === cat);
@@ -1900,7 +1901,7 @@ function clearCSVDisplay(){
   updateProj();
   // Reset milestones
   renderMilestones();
-  // v35: Reset Sankey
+
   const mfEmpty=document.getElementById('mf-empty');
   const mfLoaded=document.getElementById('mf-loaded');
   if(mfEmpty) mfEmpty.style.display='block';
@@ -2070,7 +2071,7 @@ function renderTx(){
   document.getElementById('tx-empty-state').style.display='none';document.getElementById('tx-loaded').style.display='block';
   const filtered = getFilteredTransactions();
   const EXCL=['Transfers','Income'];
-  // v40: Calculate category totals
+
   const catTotals={};
   let totalSpend=0, totalIncome=0, txCount=filtered.length;
   filtered.forEach(t=>{
@@ -2081,7 +2082,7 @@ function renderTx(){
       totalIncome+=t.amount;
     }
   });
-  // v40: Summary bar
+
   const topCat = Object.entries(catTotals).sort((a,b)=>b[1]-a[1])[0];
   const avgPerDay = filtered.length ? totalSpend / Math.max(1, new Set(filtered.map(t=>t.date)).size) : 0;
   document.getElementById('tx-summary-bar').innerHTML=`
@@ -2101,7 +2102,7 @@ function renderTx(){
       <div style="font-size:10px;text-transform:uppercase;color:var(--text-soft);letter-spacing:0.5px">Categories</div>
       <div style="font-family:var(--font-d);font-size:18px;color:var(--blue);margin-top:2px">${Object.keys(catTotals).length}</div>
     </div>`;
-  // v40: Filter chips with dollar amounts — ALL categories including Transfers
+
   const allCatTotals={};
   filtered.forEach(t=>{
     if(t.amount<0){
@@ -2135,7 +2136,7 @@ function renderTxRows(cat){
   const filtered = getFilteredTransactions();
   const f=cat==='All'?filtered:filtered.filter(t=>t.cat===cat);
   document.getElementById('tx-count').textContent=f.length+' transactions';
-  // v40: Category detail bar when filtering
+
   const detailBar = document.getElementById('tx-cat-detail');
   if(cat!=='All' && detailBar){
     const EXCL=['Transfers','Income'];
@@ -2156,7 +2157,7 @@ function renderTxRows(cat){
   } else if(detailBar){
     detailBar.style.display='none';
   }
-  // v40: Group by date with daily subtotals
+
   const byDate={};
   f.forEach(t=>{if(!byDate[t.date])byDate[t.date]=[];byDate[t.date].push(t);});
   const sortedDates=Object.keys(byDate).sort((a,b)=>new Date(b)-new Date(a));
@@ -2352,7 +2353,7 @@ function resyncTransactionsToFirebase() {
 }
 function renderBVA(){
   document.getElementById('bva-empty').style.display='none';document.getElementById('bva-loaded').style.display='block';
-  // v41: Time-normalize budget vs actual — both must be same period
+
   const filtered = typeof getFilteredTransactions === 'function' ? getFilteredTransactions() : transactions;
   const ct={};filtered.filter(t=>t.amount<0).forEach(t=>{ct[t.cat]=(ct[t.cat]||0)+Math.abs(t.amount);});
   // Calculate months covered for normalization
@@ -2594,7 +2595,7 @@ function updateProj(){
   const scB=calcPayoff(0,strat);
   const startTotal = CARDS.reduce((s,c)=>s+c.balance,0);
   const baseMonthlyPmt = CARDS.reduce((s,c)=>s+c.min,0);
-  // v40b: Freedom countdown banner
+
   const freedomDate=document.getElementById('proj-freedom-date');
   const freedomSub=document.getElementById('proj-freedom-sub');
   if(freedomDate) freedomDate.textContent=mlabel(sc.length);
@@ -2610,7 +2611,7 @@ function updateProj(){
     const monthlyInterest=(c.balance*c.apr/12);
     return`<div class="payoff-card"><div class="pc-name">${c.name}</div><div class="pc-mo" style="color:${c.color}">${mo>=0?'Mo '+(mo+1):'36+'}</div><div class="pc-date">${mo>=0?mlabel(mo+1):'—'}</div>${sv>0?`<div class="pc-saved">-${sv} mo faster</div>`:''}<div style="font-size:10px;color:var(--text-soft);margin-top:4px">${(c.apr*100).toFixed(1)}% APR · $${Math.round(monthlyInterest)}/mo interest</div></div>`;
   }).join('');
-  // v40b: Strategy comparison — Avalanche vs Snowball side by side
+
   const scAval=calcPayoff(extra,'avalanche');
   const scSnow=calcPayoff(extra,'snowball');
   const iAval=Math.max(0,(baseMonthlyPmt+extra)*scAval.length-startTotal);
@@ -2640,7 +2641,7 @@ function updateProj(){
   const iE = Math.max(0, extraMonthlyPmt * sc.length - startTotal);
   const sv = Math.max(0, iB - iE);
   document.getElementById('int-summary').innerHTML=`<div style="padding:12px;background:var(--surface2);border-radius:10px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-mid);margin-bottom:4px">Minimums only</div><div style="font-family:var(--font-d);font-size:22px;color:var(--red)">$${Math.round(iB).toLocaleString()}</div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">total interest · debt free ${mlabel(scB.length)}</div></div><div style="padding:12px;background:var(--surface2);border-radius:10px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-mid);margin-bottom:4px">With +$${extra.toLocaleString()}/mo extra</div><div style="font-family:var(--font-d);font-size:22px;color:${extra>0?'var(--teal)':'var(--red)'}">$${Math.round(iE).toLocaleString()}</div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">total interest · debt free ${mlabel(sc.length)}</div></div>${extra>0?`<div style="padding:12px;background:var(--teal-dim);border:1px solid rgba(0,201,167,0.2);border-radius:10px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--teal);margin-bottom:4px">You save</div><div style="font-family:var(--font-d);font-size:26px;color:var(--teal)">$${Math.round(sv).toLocaleString()}</div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">${scB.length-sc.length} months earlier</div></div>`:''}`;
-  // v40b: What-If Scenarios
+
   const scenarios=[
     {label:'Tax refund ($914)',extra:914,icon:'💰',desc:'Apply KS refund to Best Buy'},
     {label:'$200 raise',extra:extra+200,icon:'📈',desc:'If paycheck grows $200/mo'},
@@ -2658,7 +2659,7 @@ function updateProj(){
       <div style="font-size:10px;color:var(--text-soft);margin-top:4px">${s.desc}</div>
     </div>`;
   }).join('');
-  // v40b: Daily interest ticker
+
   const dailyInterest=CARDS.reduce((s,c)=>s+(c.balance*(c.apr/365)),0);
   const projDaily=document.getElementById('proj-daily-cost');
   const projHourly=document.getElementById('proj-hourly');
@@ -3181,7 +3182,7 @@ function updateCCDisplay(){
 function updateGoalsDisplay(){
   const ef=document.getElementById('d-ef-val');
   if(ef)ef.textContent=fmt(jarBalances.foundation);
-  // v40: Sync savings panel with Foundation balance
+
   const efPanel=document.getElementById('ef-panel-display');
   const efBar=document.getElementById('ef-panel-bar');
   const efPct=document.getElementById('ef-panel-pct');
@@ -3811,6 +3812,26 @@ function updateBankSyncBar(){
     disconnectBtn.style.display = 'none';
   }
 }
+// v41: Rehydrate SimpleFIN state from Firebase (fixes phone cache clear issue)
+function rehydrateSimpleFINState(){
+  FB_ROOT.child('simplefin_state').once('value').then(snap=>{
+    const state = snap.val();
+    if(state && state.connected){
+      if(localStorage.getItem('simplefin_connected') !== 'true'){
+        localStorage.setItem('simplefin_connected','true');
+        if(state.lastSync) localStorage.setItem('simplefin_last_sync', state.lastSync);
+        simplefinConnected = true;
+        updateBankSyncBar();
+      }
+    } else {
+      if(localStorage.getItem('simplefin_connected') === 'true'){
+        localStorage.removeItem('simplefin_connected');
+        simplefinConnected = false;
+        updateBankSyncBar();
+      }
+    }
+  }).catch(()=>{});
+}
 function showBankConnect(){
   const existing = document.getElementById('bank-connect-overlay');
   if(existing) existing.remove();
@@ -3864,6 +3885,7 @@ async function claimSimpleFINToken(){
     }
     if(data.status === 'ok' && data.accounts){
       localStorage.setItem('simplefin_connected', 'true');
+      fbSet('simplefin_state', {connected:true, connectedAt:Date.now()});
       simplefinConnected = true;
       status.textContent = '\u2705 Connected! Found ' + data.accounts + ' account(s). Syncing transactions...';
       status.style.color = 'var(--teal)';
@@ -3884,7 +3906,7 @@ async function claimSimpleFINToken(){
   }
 }
 async function syncFromBank(){
-  // v39a: Always try sync - server will tell us if not connected
+
   const syncBtn = document.getElementById('bank-sync-btn');
   const sub = document.getElementById('bank-sync-sub');
   if(syncBtn) syncBtn.textContent = '\u23F3 Syncing...';
@@ -3903,6 +3925,7 @@ async function syncFromBank(){
       // If auth failed, mark as disconnected
       if(data.error.includes('403') || data.error.includes('auth')){
         localStorage.removeItem('simplefin_connected');
+        fbSet('simplefin_state', {connected:false, error:'auth_failed', at:Date.now()});
         simplefinConnected = false;
         updateBankSyncBar();
         toast('Bank connection expired \u2014 reconnect to continue');
@@ -3910,12 +3933,13 @@ async function syncFromBank(){
       return;
     }
     if(data.transactions && data.transactions.length > 0){
-      // v39: Process with new format including accountBalances
+    
       processSimpleFINTransactions(data.transactions, data.accountBalances, data.newCount);
       const now = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
       localStorage.setItem('simplefin_last_sync', now);
+      fbSet('simplefin_state', {connected:true, lastSync:now, syncAt:Date.now()});
       
-      // v39: Show new vs total count
+    
       const newMsg = data.newCount > 0 ? data.newCount + ' new, ' : '';
       toast('\u2705 ' + newMsg + data.transactions.length + ' total transactions');
     } else {
@@ -3929,12 +3953,12 @@ async function syncFromBank(){
   }
 }
 function processSimpleFINTransactions(txns, accountBalances, newCount){
-  // v39: Transactions now come pre-categorized from Apps Script (AI + learned mappings)
-  // Format: {date, description, amount, category, merchant, accountId, accountName, fingerprint, source}
+
+
   transactions = [];
   
   txns.forEach(t => {
-    // Handle both old format (posted timestamp) and new format (date string)
+  
     let dateStr = t.date;
     if (t.posted && !t.date) {
       const d = new Date(t.posted * 1000);
@@ -4080,6 +4104,7 @@ function disconnectBank(){
   }).catch(()=>{});
   localStorage.removeItem('simplefin_connected');
   localStorage.removeItem('simplefin_last_sync');
+  fbSet('simplefin_state', {connected:false, disconnectedAt:Date.now()});
   simplefinConnected = false;
   updateBankSyncBar();
   toast('Bank disconnected');
