@@ -506,7 +506,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
     <!-- OVERVIEW -->
     <div class="page active" id="d-overview">
       <!-- BANK SYNC BAR -->
-      <div id="bank-sync-bar" style="margin-bottom:12px;padding:14px 20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div id="bank-sync-bar" style="margin-bottom:12px;padding:14px 20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);display:none;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
         <div id="bank-sync-content" style="display:flex;align-items:center;gap:10px">
           <span style="font-size:20px">🏦</span>
           <div>
@@ -3762,33 +3762,24 @@ Rules: Keep it simple and warm. Use plain language. Celebrate wins. If she's ove
 // Apps Script → store Access URL → fetch transactions on demand.
 // No more CSV downloads.
 function updateBankSyncBar(){
-  // If transactions are loaded, the bank IS connected — no matter what localStorage says
   const hasData = transactions.length > 0;
   const lsConnected = localStorage.getItem('simplefin_connected') === 'true';
   const connected = hasData || lsConnected;
   if(hasData && !lsConnected) localStorage.setItem('simplefin_connected','true');
   simplefinConnected = connected;
-  const label = document.getElementById('bank-sync-label');
-  const sub = document.getElementById('bank-sync-sub');
-  const connectBtn = document.getElementById('bank-connect-btn');
-  const syncBtn = document.getElementById('bank-sync-btn');
-  const disconnectBtn = document.getElementById('bank-disconnect-btn');
-  if(!label) return;
+  const bar = document.getElementById('bank-sync-bar');
+  if(!bar) return;
   if(connected){
-    const lastSync = localStorage.getItem('simplefin_last_sync');
-    label.textContent = '\u2705 Bank Connected';
-    label.style.color = 'var(--teal)';
-    sub.textContent = lastSync ? 'Last synced: ' + lastSync : hasData ? transactions.length + ' transactions loaded' : 'Tap Sync Now to pull transactions';
-    connectBtn.style.display = 'none';
-    syncBtn.style.display = 'inline-block';
-    disconnectBtn.style.display = 'inline-block';
+    bar.style.display = 'none';
   } else {
-    label.textContent = 'Connect Your Bank';
-    label.style.color = 'var(--text)';
-    sub.textContent = 'Automatic transactions \u2014 no more CSV downloads';
-    connectBtn.style.display = 'inline-block';
-    syncBtn.style.display = 'none';
-    disconnectBtn.style.display = 'none';
+    bar.style.display = 'flex';
+    const label = document.getElementById('bank-sync-label');
+    const sub = document.getElementById('bank-sync-sub');
+    if(label){label.textContent='Connect Your Bank';label.style.color='var(--text)';}
+    if(sub) sub.textContent='Automatic transactions \u2014 no more CSV downloads';
+    document.getElementById('bank-connect-btn').style.display='inline-block';
+    document.getElementById('bank-sync-btn').style.display='none';
+    document.getElementById('bank-disconnect-btn').style.display='none';
   }
 }
 // v41: Rehydrate SimpleFIN state from Firebase (fixes phone cache clear issue)
