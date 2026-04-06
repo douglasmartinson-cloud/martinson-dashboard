@@ -913,8 +913,6 @@ const PIN = "1234"; // Douglas's view PIN for Jamie
 const WEEKLY_BUDGET = 200;
 const CARDS = [
   {name:"Best Buy 1345",balance:3438,apr:0.2999,min:144,color:"#ffc542"},
-
-
   {name:"NE Furniture 6282",balance:3550,apr:0.18,min:190,color:"#81c784"},
   {name:"Chase 0690",balance:5280,apr:0.2724,min:164,color:"#ff9f43"},
   {name:"BofA 9362",balance:13567.18,apr:0.2374,min:384,color:"#ff6b6b"},
@@ -1247,7 +1245,6 @@ let _syncPaused = false;
 function applyServerState(all) {
   if (!all) return;
   if (_syncPaused) return;
-
   const keys = ['meal_plan','week_hist','custom_meals','hidden_meals',
                  'financial_settings','cc_balances','family_goals',
                  'grocery_stores','store_items'];
@@ -1258,9 +1255,6 @@ function applyServerState(all) {
     }
   });
 
-
-
-  // _syncPaused prevents race conditions during the clear write.
   const csv = all.last_csv_data;
   if (csv && !csv.cleared && csv.uploadedAt && (csv.txData || csv.txList)) {
     // Server has real data → show it, update localStorage to match
@@ -1283,7 +1277,7 @@ function applyServerState(all) {
 }
 let _loadedUploadedAt = 0;
 function loadCsvFromServer(data) {
-  // Don't reload if we already have this exact version
+
   if (data.uploadedAt === _loadedUploadedAt && transactions.length > 0) return;
   _loadedUploadedAt = data.uploadedAt;
   applyKey('last_csv_data', data);
@@ -1295,7 +1289,7 @@ function loadCsvFromServer(data) {
 // makes uploads work). SDK is fallback. This is the most reliable
 // write path available — a simple HTTP PUT to a known URL.
 function clearCsvOnAllDevices() {
-  // 1. Pause sync
+
   _syncPaused = true;
   // 2. Clear locally — instant
   transactions = [];
@@ -1341,7 +1335,7 @@ function clearCsvOnAllDevices() {
 // New data replaces the cleared marker. Clear the localStorage guard.
 function uploadCsvToServer(syncData) {
   _syncPaused = false;
-  // Clear the localStorage cleared marker so applyServerState accepts new data
+
   localStorage.setItem('fb_last_csv_data', JSON.stringify(syncData));
   return fbSet('last_csv_data', syncData);
 }
@@ -1575,8 +1569,8 @@ function renderFromTransactions() {
   updateProj();
   renderMilestones();
   renderFreedomChart();
-
   renderSankey();
+  updateBankSyncBar();
 }
 document.addEventListener('DOMContentLoaded', async () => {
   renderDonut();
@@ -1687,7 +1681,6 @@ function jPage(id,btn){
   document.querySelectorAll('.jn-item').forEach(b=>b.classList.remove('active'));
   document.getElementById('j-'+id).classList.add('active');
   if(btn)btn.classList.add('active');
-
   if(id==='grocery') {
     renderStoreTabs();
     renderStoreItems();
@@ -1709,7 +1702,6 @@ function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t
 function sfSan(s){ return String(s||'').replace(/[\x00-\x1F\x7F]/g,' ').trim(); }
 function categorize(d){
   const u=d.toUpperCase();
-
   for(const [pattern, cat] of Object.entries(learnedCategories)){
     if(u.includes(pattern)){
       const rule = RULES.find(r => r.cat === cat);
@@ -1900,7 +1892,6 @@ function clearCSVDisplay(){
   updateProj();
   // Reset milestones
   renderMilestones();
-
   const mfEmpty=document.getElementById('mf-empty');
   const mfLoaded=document.getElementById('mf-loaded');
   if(mfEmpty) mfEmpty.style.display='block';
@@ -2070,7 +2061,6 @@ function renderTx(){
   document.getElementById('tx-empty-state').style.display='none';document.getElementById('tx-loaded').style.display='block';
   const filtered = getFilteredTransactions();
   const EXCL=['Transfers','Income'];
-
   const catTotals={};
   let totalSpend=0, totalIncome=0, txCount=filtered.length;
   filtered.forEach(t=>{
@@ -2081,7 +2071,6 @@ function renderTx(){
       totalIncome+=t.amount;
     }
   });
-
   const topCat = Object.entries(catTotals).sort((a,b)=>b[1]-a[1])[0];
   const avgPerDay = filtered.length ? totalSpend / Math.max(1, new Set(filtered.map(t=>t.date)).size) : 0;
   document.getElementById('tx-summary-bar').innerHTML=`
@@ -2101,7 +2090,6 @@ function renderTx(){
       <div style="font-size:10px;text-transform:uppercase;color:var(--text-soft);letter-spacing:0.5px">Categories</div>
       <div style="font-family:var(--font-d);font-size:18px;color:var(--blue);margin-top:2px">${Object.keys(catTotals).length}</div>
     </div>`;
-
   const allCatTotals={};
   filtered.forEach(t=>{
     if(t.amount<0){
@@ -2135,7 +2123,6 @@ function renderTxRows(cat){
   const filtered = getFilteredTransactions();
   const f=cat==='All'?filtered:filtered.filter(t=>t.cat===cat);
   document.getElementById('tx-count').textContent=f.length+' transactions';
-
   const detailBar = document.getElementById('tx-cat-detail');
   if(cat!=='All' && detailBar){
     const EXCL=['Transfers','Income'];
@@ -2156,7 +2143,6 @@ function renderTxRows(cat){
   } else if(detailBar){
     detailBar.style.display='none';
   }
-
   const byDate={};
   f.forEach(t=>{if(!byDate[t.date])byDate[t.date]=[];byDate[t.date].push(t);});
   const sortedDates=Object.keys(byDate).sort((a,b)=>new Date(b)-new Date(a));
@@ -2352,7 +2338,6 @@ function resyncTransactionsToFirebase() {
 }
 function renderBVA(){
   document.getElementById('bva-empty').style.display='none';document.getElementById('bva-loaded').style.display='block';
-
   const filtered = typeof getFilteredTransactions === 'function' ? getFilteredTransactions() : transactions;
   const ct={};filtered.filter(t=>t.amount<0).forEach(t=>{ct[t.cat]=(ct[t.cat]||0)+Math.abs(t.amount);});
   // Calculate months covered for normalization
@@ -2397,7 +2382,6 @@ function updateDonutFromTransactions(){
   const monthsCovered = (selectedPeriod === 'thisMonth' || selectedPeriod === 'lastMonth') ? 1 : Math.max(1,daysCovered/30.44);
   const totalSpendRaw = Object.values(ct).reduce((s,v)=>s+v,0);
   const monthlySpend = totalSpendRaw / monthsCovered;
-
   const KBB_MONTHLY_OBLIGATIONS = 4003 + 688 + 2400 + 200 + 692;
   const killWeapon = monthlyIncome - KBB_MONTHLY_OBLIGATIONS;
   const rawSurplus = monthlyIncome - monthlySpend;
@@ -2482,7 +2466,6 @@ function renderDonut(){
     labels=['Bills & Mortgage','Food & Life','Savings','Kill Power'];data=[4003,1940,400,1107];colors=['#4d9fff','#a78bfa','#00c9a7','#ffc542'];cutPct='68%';
   }
   charts.donut=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:0,hoverOffset:6}]},options:{cutout:cutPct,responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{const tot=c.dataset.data.reduce((a,b)=>a+b,0);return` ${fmt(c.raw)} (${(c.raw/tot*100).toFixed(1)}%)`;}}},}}});
-
   const tot=data.reduce((a,b)=>a+b,0);
   const leg=document.getElementById('donut-legend');
   if(leg)leg.innerHTML=labels.map((l,i)=>`<div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;border-radius:50%;background:${colors[i]};flex-shrink:0"></div><span style="font-size:14px;color:#e2e8f0;font-weight:500;font-family:DM Sans,sans-serif">${l}</span><span style="font-size:14px;color:#94a3b8;font-family:DM Sans,sans-serif">${(data[i]/tot*100).toFixed(0)}%</span></div>`).join('');
@@ -2594,7 +2577,6 @@ function updateProj(){
   const scB=calcPayoff(0,strat);
   const startTotal = CARDS.reduce((s,c)=>s+c.balance,0);
   const baseMonthlyPmt = CARDS.reduce((s,c)=>s+c.min,0);
-
   const freedomDate=document.getElementById('proj-freedom-date');
   const freedomSub=document.getElementById('proj-freedom-sub');
   if(freedomDate) freedomDate.textContent=mlabel(sc.length);
@@ -2610,7 +2592,6 @@ function updateProj(){
     const monthlyInterest=(c.balance*c.apr/12);
     return`<div class="payoff-card"><div class="pc-name">${c.name}</div><div class="pc-mo" style="color:${c.color}">${mo>=0?'Mo '+(mo+1):'36+'}</div><div class="pc-date">${mo>=0?mlabel(mo+1):'—'}</div>${sv>0?`<div class="pc-saved">-${sv} mo faster</div>`:''}<div style="font-size:10px;color:var(--text-soft);margin-top:4px">${(c.apr*100).toFixed(1)}% APR · $${Math.round(monthlyInterest)}/mo interest</div></div>`;
   }).join('');
-
   const scAval=calcPayoff(extra,'avalanche');
   const scSnow=calcPayoff(extra,'snowball');
   const iAval=Math.max(0,(baseMonthlyPmt+extra)*scAval.length-startTotal);
@@ -2640,7 +2621,6 @@ function updateProj(){
   const iE = Math.max(0, extraMonthlyPmt * sc.length - startTotal);
   const sv = Math.max(0, iB - iE);
   document.getElementById('int-summary').innerHTML=`<div style="padding:12px;background:var(--surface2);border-radius:10px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-mid);margin-bottom:4px">Minimums only</div><div style="font-family:var(--font-d);font-size:22px;color:var(--red)">$${Math.round(iB).toLocaleString()}</div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">total interest · debt free ${mlabel(scB.length)}</div></div><div style="padding:12px;background:var(--surface2);border-radius:10px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-mid);margin-bottom:4px">With +$${extra.toLocaleString()}/mo extra</div><div style="font-family:var(--font-d);font-size:22px;color:${extra>0?'var(--teal)':'var(--red)'}">$${Math.round(iE).toLocaleString()}</div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">total interest · debt free ${mlabel(sc.length)}</div></div>${extra>0?`<div style="padding:12px;background:var(--teal-dim);border:1px solid rgba(0,201,167,0.2);border-radius:10px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--teal);margin-bottom:4px">You save</div><div style="font-family:var(--font-d);font-size:26px;color:var(--teal)">$${Math.round(sv).toLocaleString()}</div><div style="font-size:11px;color:var(--text-mid);margin-top:2px">${scB.length-sc.length} months earlier</div></div>`:''}`;
-
   const scenarios=[
     {label:'Tax refund ($914)',extra:914,icon:'💰',desc:'Apply KS refund to Best Buy'},
     {label:'$200 raise',extra:extra+200,icon:'📈',desc:'If paycheck grows $200/mo'},
@@ -2658,7 +2638,6 @@ function updateProj(){
       <div style="font-size:10px;color:var(--text-soft);margin-top:4px">${s.desc}</div>
     </div>`;
   }).join('');
-
   const dailyInterest=CARDS.reduce((s,c)=>s+(c.balance*(c.apr/365)),0);
   const projDaily=document.getElementById('proj-daily-cost');
   const projHourly=document.getElementById('proj-hourly');
@@ -3181,7 +3160,6 @@ function updateCCDisplay(){
 function updateGoalsDisplay(){
   const ef=document.getElementById('d-ef-val');
   if(ef)ef.textContent=fmt(jarBalances.foundation);
-
   const efPanel=document.getElementById('ef-panel-display');
   const efBar=document.getElementById('ef-panel-bar');
   const efPct=document.getElementById('ef-panel-pct');
@@ -3254,8 +3232,6 @@ function updateDebtMetrics(){
   // Daily cost banner
   const daily = document.getElementById('daily-debt-cost');
   if(daily) daily.innerHTML = `This debt costs you <strong>$${dailyInterest.toFixed(2)}/day</strong> in interest`;
-
-
   const KILL_WEAPON_MONTHLY = 1107;
   const sc = calcPayoff(KILL_WEAPON_MONTHLY,'avalanche');
   const freedomMonths = sc.length;
@@ -3786,7 +3762,11 @@ Rules: Keep it simple and warm. Use plain language. Celebrate wins. If she's ove
 // Apps Script → store Access URL → fetch transactions on demand.
 // No more CSV downloads.
 function updateBankSyncBar(){
-  const connected = localStorage.getItem('simplefin_connected') === 'true';
+  // If transactions are loaded, the bank IS connected — no matter what localStorage says
+  const hasData = transactions.length > 0;
+  const lsConnected = localStorage.getItem('simplefin_connected') === 'true';
+  const connected = hasData || lsConnected;
+  if(hasData && !lsConnected) localStorage.setItem('simplefin_connected','true');
   simplefinConnected = connected;
   const label = document.getElementById('bank-sync-label');
   const sub = document.getElementById('bank-sync-sub');
@@ -3798,7 +3778,7 @@ function updateBankSyncBar(){
     const lastSync = localStorage.getItem('simplefin_last_sync');
     label.textContent = '\u2705 Bank Connected';
     label.style.color = 'var(--teal)';
-    sub.textContent = lastSync ? 'Last synced: ' + lastSync : 'Tap Sync Now to pull transactions';
+    sub.textContent = lastSync ? 'Last synced: ' + lastSync : hasData ? transactions.length + ' transactions loaded' : 'Tap Sync Now to pull transactions';
     connectBtn.style.display = 'none';
     syncBtn.style.display = 'inline-block';
     disconnectBtn.style.display = 'inline-block';
@@ -3905,7 +3885,6 @@ async function claimSimpleFINToken(){
   }
 }
 async function syncFromBank(){
-
   const syncBtn = document.getElementById('bank-sync-btn');
   const sub = document.getElementById('bank-sync-sub');
   if(syncBtn) syncBtn.textContent = '\u23F3 Syncing...';
@@ -3953,8 +3932,6 @@ async function syncFromBank(){
   }
 }
 function processSimpleFINTransactions(txns, accountBalances, newCount){
-
-
   transactions = [];
   
   txns.forEach(t => {
