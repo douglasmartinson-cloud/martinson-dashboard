@@ -1587,7 +1587,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderFreedomChart();
   document.getElementById('j-week-of').textContent = getWeekOf();
   document.getElementById('j-gauge-week').textContent = 'Week ' + currentWeek;
-  // Load non-CSV state from localStorage for instant startup
+  // Load cached state
   ['custom_meals','hidden_meals','week_hist','meal_plan',
    'cc_balances','family_goals','financial_settings',
    'grocery_stores','store_items','learned_categories'].forEach(k => {
@@ -1597,17 +1597,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   refreshAllUI();
   updateNetWorth();
   updateDebtMetrics();
-  initStoreGrocery(); // v38: Initialize multi-store grocery tabs
-  // Start Google-style sync: server is always right
-  // 1. REST fetch immediately for fast initial load
-  // 2. SDK WebSocket listener for instant push updates
-  // 3. REST polling every 8s as bulletproof backup
+  initStoreGrocery(); // v38: Init grocery tabs
+  // Start sync
+  // REST + SDK + polling
+  
+  
   updateSyncBadge('syncing');
   await syncAll();
   refreshAllUI();
   updateNetWorth();
   updateDebtMetrics();
-  initStoreGrocery(); // v38: Re-render after sync
+  initStoreGrocery(); // Re-render after sync
   startSync();
   updateBankSyncBar();
   rehydrateSimpleFINState();
@@ -1842,7 +1842,7 @@ function parseCSV(text,fname){
     count: transactions.length,
     uploadedAt: Date.now()
   };
-  // Write to Firebase using SDK — WebSocket push to ALL devices instantly
+  // Write to Firebase
   const el = document.getElementById('tx-sync-status');
   if(el){ el.style.color='var(--text-mid)'; el.textContent='⟳ Syncing to all devices...'; }
   uploadCsvToServer(syncData)
@@ -1855,7 +1855,7 @@ function parseCSV(text,fname){
       if(el){ el.style.color='var(--red)'; el.textContent='⚠ Sync error: ' + err.message; }
       updateSyncBadge('error');
     });
-  // Archive to Firebase history (2-year rolling archive by month)
+  // Archive to Firebase history
   archiveToHistory(transactions, mn + ' – ' + mx);
   // Show AI insights button
   const aiBtn = document.getElementById('ai-btn-wrap');
@@ -2503,7 +2503,7 @@ function renderInlineInsights(ct,totalSpend,mC,income){
 }
 // Critical fix: minimum payment must always >= monthly interest charged
 // Otherwise low minimums on high-APR cards cause balances to grow forever
-// Real credit cards work this way — your minimum adjusts as balance grows
+// Min adjusts as balance grows
 function calcPayoff(extra, strat) {
   // Deep copy with current balances
   let bal = CARDS.map(c => ({
@@ -2519,7 +2519,7 @@ function calcPayoff(extra, strat) {
     if (!bal.some(c => c.balance > 0.01)) break;
     // Step 1: Apply monthly interest & compute effective minimum
     // Effective minimum = max(stated minimum, monthly interest + $1)
-    // This prevents any card from growing — matches how real cards work
+    // Prevents balance growth
     let totalEffectiveMin = 0;
     bal.forEach(c => {
       if (c.balance > 0.01) {
@@ -3958,7 +3958,7 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
     const amount = parseFloat(t.amount) || 0;
     if(amount === 0 || desc.includes('Beginning balance') || desc.includes('balance as of')) return;
     
-    // v40: Re-run local 717-keyword engine when server returns 'Other'
+    // v40: Fallback to local categorization
     const cat = (t.category && t.category !== 'Other') ? t.category : categorize(desc).cat;
     const rule = RULES.find(r => r.cat === cat) || RULES[RULES.length - 1];
     
@@ -3984,47 +3984,55 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
   _loadedUploadedAt = 0;
   // v39: Update account balances if provided
   if (accountBalances) {
-    // Savings account — verify mapping before updating Foundation
-    // SimpleFIN may map to different account
-    if (accountBalances.savings) {
-      // v40: Don't auto-update Foundation from unverified SimpleFIN
-      // efund tracks savings panel, jarBalances.foundation tracks Foundation
-      // Only update if balance matches expected
-      const savBal = Math.round(accountBalances.savings.balance);
-      if (savBal !== jarBalances.foundation) {
-        // SimpleFIN savings ≠ Foundation — log but don't override
-        console.log('SimpleFIN savings balance (' + savBal + ') differs from Foundation (' + jarBalances.foundation + '). Not auto-updating.');
-      }
-      fbSet('family_goals', familyGoals);
-      updateGoalsDisplay();
+    // v42: Robust balance mapping — handles both old and new Apps Script keys
+    // Mission Control (9289)
+    if (accountBalances.missionControl) {
+      jarBalances.mc = Math.round(accountBalances.missionControl.balance);
+    } else if (accountBalances.checking) {
+      jarBalances.mc = Math.round(accountBalances.checking.balance);
     }
-    
+    // Family Fuel (2307)
+    if (accountBalances.familyFuel) {
+      jarBalances.ff = Math.round(accountBalances.familyFuel.balance);
+    } else if (accountBalances.checking2) {
+      jarBalances.ff = Math.round(accountBalances.checking2.balance);
+    }
+    // The Foundation (7708)
+    if (accountBalances.foundation) {
+      jarBalances.foundation = Math.round(accountBalances.foundation.balance);
+    } else if (accountBalances.savings) {
+      var savBal = Math.round(accountBalances.savings.balance);
+      if (Math.abs(savBal - jarBalances.foundation) < 500) {
+        jarBalances.foundation = savBal;
+      }
+    }
+    // Merrill IRA
+    if (accountBalances.retirement) {
+      jarBalances.merrill = Math.round(accountBalances.retirement.balance);
+    }
     // BofA Credit Card (9362)
     if (accountBalances.bofaCC) {
       ccBalances.bofa = Math.abs(accountBalances.bofaCC.balance);
       fbSet('cc_balances', ccBalances);
       updateCCDisplay();
     }
-    // v40: Checking accounts → Mission Control (9289) and Family Fuel (2307)
-    if (accountBalances.checking) {
-      jarBalances.mc = Math.round(accountBalances.checking.balance);
-    }
-    if (accountBalances.missionControl) {
-      jarBalances.mc = Math.round(accountBalances.missionControl.balance);
-    }
-    if (accountBalances.familyFuel) {
-      jarBalances.ff = Math.round(accountBalances.familyFuel.balance);
-    }
-    if (accountBalances.checking2) {
-      jarBalances.ff = Math.round(accountBalances.checking2.balance);
+    // Auto-sync raw balances: try to map by account name/id containing last-4
+    if (!accountBalances.missionControl && !accountBalances.checking) {
+      Object.values(accountBalances).forEach(function(acc){
+        if(!acc||!acc.name) return;
+        var n=acc.name||'',b=Math.round(parseFloat(acc.balance)||0);
+        if(n.includes('9289')){jarBalances.mc=b;}
+        else if(n.includes('2307')){jarBalances.ff=b;}
+        else if(n.includes('7708')){jarBalances.foundation=b;}
+        else if(n.includes('9362')||n.includes('Mastercard')){ccBalances.bofa=Math.abs(b);fbSet('cc_balances',ccBalances);updateCCDisplay();}
+        else if(n.includes('6043')||n.includes('Merrill')||n.includes('Retire')){jarBalances.merrill=b;}
+      });
     }
     fbSet('jar_balances', jarBalances);
     updateJarDisplay();
-    
-    // Store balances for display
     localStorage.setItem('account_balances', JSON.stringify(accountBalances));
   }
-  // Update drop zone to show loaded state
+  // Update drop zone
   const dz = document.getElementById('drop-zone');
   dz.classList.add('loaded');
   const dropInp = document.getElementById('drop-input');
@@ -4034,7 +4042,7 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
   const mx = new Date(Math.max(...dates)).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
   const now = new Date().toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'});
   
-  // v39: Show new count if available
+  // Show new count
   const newBadge = (newCount && newCount > 0) 
     ? `<span style="font-size:11px;background:var(--teal);color:#000;padding:2px 8px;border-radius:100px;font-weight:600">${newCount} new</span>` 
     : '';
@@ -4045,7 +4053,7 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
     <span style="font-size:12px;color:var(--purple)">\uD83D\uDD04 ${now}</span>
     <span style="font-size:12px;color:var(--red);cursor:pointer;text-decoration:underline;position:relative;z-index:10" onclick="event.stopPropagation();resetCSV(false)">\u2715 Clear</span>
   </div>`;
-  // Run the full rendering pipeline
+  // Render all views
   renderCatTable();
   renderTx();
   renderBVA();
@@ -4055,7 +4063,7 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
   renderFreedomChart();
   renderSankey();
   toast('\u2705 ' + transactions.length + ' transactions loaded');
-  // Sync to Firebase so Jamie sees it on her phone
+  // Sync to Firebase
   const EXCL_SYNC = ['Transfers','Income'];
   const catTotals = {};
   transactions.filter(t => t.amount < 0 && !EXCL_SYNC.includes(t.cat))
