@@ -3931,7 +3931,9 @@ async function syncFromBank(){
         at: Date.now()
       });
       var _dbgKeys = data.accountBalances ? Object.keys(data.accountBalances).join(', ') : 'NONE';
-      toast('DEBUG balance keys: ' + _dbgKeys);
+      var _dbgFirst = '';
+      if(data.accountBalances){var _v=Object.values(data.accountBalances);if(_v[0]&&typeof _v[0]==='object')_dbgFirst=JSON.stringify(_v[0]).substring(0,200);}
+      alert('DEBUG - Balance keys: [' + _dbgKeys + ']\n\nFirst value: ' + _dbgFirst);
       processSimpleFINTransactions(data.transactions, data.accountBalances, data.newCount);
       const now = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
       localStorage.setItem('simplefin_last_sync', now);
