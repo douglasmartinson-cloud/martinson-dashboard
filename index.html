@@ -1209,10 +1209,10 @@ const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw0q-7XhX6OztGR54bXX5
 // Clear uses direct REST PUT (not SDK) for maximum reliability.
 // localStorage caches the cleared marker as a fallback guard.
 //
-// v35: Money Flow (Sankey), AI Assistant panel
-// v36: AI calls routed through Apps Script proxy (CORS fix)
-// v37: SimpleFIN bank integration — auto-pull transactions, no CSV
-// v38: Multi-store grocery lists with tabs
+
+
+
+
 const FB = 'https://martinson-family-default-rtdb.firebaseio.com';
 firebase.initializeApp({ databaseURL: FB });
 const FBDB = firebase.database();
@@ -1254,22 +1254,22 @@ function applyServerState(all) {
       applyKey(k, all[k]);
     }
   });
-  // v42: Promote auto_sync_data to last_csv_data if newer
+  
   if (all.auto_sync_data && all.auto_sync_data.transactions && all.auto_sync_data.syncedAt) {
     const csv = all.last_csv_data;
     if (!csv || csv.cleared || !csv.uploadedAt || all.auto_sync_data.syncedAt > csv.uploadedAt) {
       promoteAutoSync(all.auto_sync_data);
-      return; // promoteAutoSync handles rendering
+      return; 
     }
   }
 
   const csv = all.last_csv_data;
   if (csv && !csv.cleared && csv.uploadedAt && (csv.txData || csv.txList)) {
-    // Server has real data → show it, update localStorage to match
+    
     localStorage.setItem('fb_last_csv_data', JSON.stringify({uploadedAt: csv.uploadedAt}));
     loadCsvFromServer(csv);
   } else {
-    // Server says cleared or empty → clear locally
+    
     localStorage.setItem('fb_last_csv_data', JSON.stringify({cleared: true}));
     if (transactions.length > 0 || _loadedUploadedAt > 0) {
       transactions = [];
@@ -1293,7 +1293,7 @@ function loadCsvFromServer(data) {
   const aiBtn = document.getElementById('ai-btn-wrap');
   if(aiBtn) aiBtn.style.display = 'block';
 }
-// Direct REST PUT for clear
+
 
 
 function clearCsvOnAllDevices() {
@@ -1319,13 +1319,13 @@ function clearCsvOnAllDevices() {
   })
   .then(res => {
     if (!res.ok) throw new Error('REST PUT failed: ' + res.status);
-    // REST succeeded — restart sync
+    
     _syncPaused = false;
     startSync();
     toast('✓ Cleared on all devices');
   })
   .catch(() => {
-    // REST failed — try SDK as fallback
+    
     FB_ROOT.child('last_csv_data').set(marker)
       .then(() => {
         _syncPaused = false;
@@ -1333,14 +1333,14 @@ function clearCsvOnAllDevices() {
         toast('✓ Cleared on all devices');
       })
       .catch(() => {
-        // Both failed — resume sync anyway, localStorage has the marker
+        
         _syncPaused = false;
         startSync();
         toast('⚠ Clear saved locally — will sync when online');
       });
   });
 }
-// Upload replaces cleared marker
+
 function uploadCsvToServer(syncData) {
   _syncPaused = false;
 
@@ -1359,7 +1359,7 @@ function startSync() {
     }, 300); // 300ms debounce — lets multiple writes settle
   }, () => updateSyncBadge('error'));
   // 2. REST polling every 8 seconds — bulletproof fallback
-  // Increased from 4s to 8s since SDK handles instant sync already
+  
   if (_pollTimer) clearInterval(_pollTimer);
   _pollTimer = setInterval(async () => {
     const all = await fbGetAll();
@@ -1428,7 +1428,7 @@ function applyKey(key, value) {
       }
       break;
     case 'last_csv_data':
-      // GUARD: ignore cleared markers — they have no transaction data
+      
       if (value && value.cleared) break;
       if (value && (value.txData || value.txList)) {
         if (value.txData && typeof value.txData === 'string') {
@@ -1613,7 +1613,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   rehydrateSimpleFINState();
   checkAutoSyncData();
 });
-// v42: Promote 3AM auto_sync_data into the main pipeline
+
 function promoteAutoSync(ad){
   if(!ad||!ad.transactions||!ad.transactions.length) return;
   processSimpleFINTransactions(ad.transactions,ad.accountBalances,ad.transactions.length);
@@ -2425,7 +2425,7 @@ function updateDonutFromTransactions(){
   // Update jar displays with latest balances
   updateJarDisplay();
 }
-// Load cross-device CSV data
+
 function loadCrossDeviceCsvData(data){
   if(!data||!data.txList||!data.txList.length) return;
   transactions = data.txList.map(t=>({
@@ -3769,12 +3769,12 @@ Rules: Keep it simple and warm. Use plain language. Celebrate wins. If she's ove
   sendBtn.disabled=false;
   msgs.scrollTop=msgs.scrollHeight;
 }
-// v37: SimpleFIN
-// Bank auto-sync flow
 
 
 
-var _sfRehydrated=false; // v42: Don't flash Connect banner before Firebase check
+
+
+var _sfRehydrated=false; 
 function updateBankSyncBar(){
   const hasData = transactions.length > 0;
   const lsConnected = localStorage.getItem('simplefin_connected') === 'true';
@@ -3802,7 +3802,7 @@ function updateBankSyncBar(){
     document.getElementById('bank-disconnect-btn').style.display='none';
   }
 }
-// v41: Rehydrate SimpleFIN from Firebase
+
 function rehydrateSimpleFINState(){
   FB_ROOT.child('simplefin_state').once('value').then(function(snap){
     var state = snap.val();
@@ -3911,7 +3911,7 @@ async function syncFromBank(){
       toast('\u26A0 Bank sync error: ' + data.error);
       if(syncBtn) syncBtn.textContent = 'Sync Now';
       if(sub) sub.textContent = 'Sync failed \u2014 try again';
-      // If auth failed, mark as disconnected
+      
       if(data.error.includes('403') || data.error.includes('auth')){
         localStorage.removeItem('simplefin_connected');
         fbSet('simplefin_state', {connected:false, error:'auth_failed', at:Date.now()});
@@ -3923,6 +3923,15 @@ async function syncFromBank(){
     }
     if(data.transactions && data.transactions.length > 0){
     
+      // DEBUG
+      fbSet('debug_sync_response', {
+        hasAccountBalances: !!data.accountBalances,
+        accountBalanceKeys: data.accountBalances ? Object.keys(data.accountBalances) : [],
+        accountBalanceRaw: JSON.stringify(data.accountBalances || {}).substring(0, 2000),
+        at: Date.now()
+      });
+      var _dbgKeys = data.accountBalances ? Object.keys(data.accountBalances).join(', ') : 'NONE';
+      toast('DEBUG balance keys: ' + _dbgKeys);
       processSimpleFINTransactions(data.transactions, data.accountBalances, data.newCount);
       const now = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
       localStorage.setItem('simplefin_last_sync', now);
@@ -3984,8 +3993,8 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
   _loadedUploadedAt = 0;
   // v39: Update account balances if provided
   if (accountBalances) {
-    // v42: Bulletproof balance mapping — handles mapped keys, raw accounts, and generic names
-    // Try mapped keys first (from v42 Apps Script)
+    
+    
     if (accountBalances.missionControl) jarBalances.mc = Math.round(accountBalances.missionControl.balance);
     else if (accountBalances.checking) jarBalances.mc = Math.round(accountBalances.checking.balance);
     if (accountBalances.familyFuel) jarBalances.ff = Math.round(accountBalances.familyFuel.balance);
@@ -4000,7 +4009,7 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
       ccBalances.bofa = Math.abs(accountBalances.bofaCC.balance);
       fbSet('cc_balances', ccBalances); updateCCDisplay();
     }
-    // Fallback: scan ALL values in accountBalances (raw or mapped) by name
+    
     var foundMC=!!accountBalances.missionControl||!!accountBalances.checking;
     var foundFF=!!accountBalances.familyFuel||!!accountBalances.checking2;
     if(!foundMC||!foundFF){
@@ -4023,6 +4032,13 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
         if(!foundFF&&checkingAccts.length>1){jarBalances.ff=checkingAccts[1].balance;}
       }
     }
+    // v42 DEBUG: Log what SimpleFIN returned so we can fix mapping
+    var dbgNames=[];
+    var scanDbg=accountBalances._raw||Object.values(accountBalances);
+    scanDbg.forEach(function(a){if(a&&a.name)dbgNames.push(a.name+': $'+(a.balance||0));});
+    var dbgMsg=dbgNames.length>0?dbgNames.join(' | '):'NO RAW ACCTS. Keys: '+Object.keys(accountBalances).join(',');
+    toast('ACCTS: '+dbgMsg);
+    fbSet('debug_account_names',{names:dbgMsg,keys:Object.keys(accountBalances),raw:scanDbg,at:Date.now()});
     fbSet('jar_balances', jarBalances);
     updateJarDisplay();
     localStorage.setItem('account_balances', JSON.stringify(accountBalances));
