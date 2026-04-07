@@ -1742,11 +1742,11 @@ function onFileSel(e){
   if(f.name.endsWith('.csv')) processFile(f);
   else if(f.type==='application/pdf'||f.name.endsWith('.pdf')) processPDF(f);
 }
-// PDF processing — sends to Apps Script which extracts transaction text via AI
+// PDF processing via Apps Script
 async function processPDF(file){
   const dz=document.getElementById('drop-zone');
   dz.classList.add('loaded');
-  // Disable invisible file input so buttons in loaded state work correctly
+  // Disable file input in loaded state
   const dropInp=document.getElementById('drop-input');
   if(dropInp) dropInp.style.pointerEvents='none';
   document.getElementById('drop-content').innerHTML=`<div style="display:flex;align-items:center;justify-content:center;gap:10px">
@@ -1823,8 +1823,8 @@ function parseCSV(text,fname){
   const catTotals={};
   transactions.filter(t=>t.amount<0&&t.cat!=='Transfers'&&t.cat!=='Income')
     .forEach(t=>{catTotals[t.cat]=(catTotals[t.cat]||0)+Math.abs(t.amount);});
-  // Sanitize strings — remove any chars that break Firebase JSON parsing
-  // Firebase rejects null bytes, control chars, and improperly encoded strings
+  // Sanitize for Firebase
+  // Sanitize for Firebase
   function sanitize(s){ return String(s||'').replace(/[\x00-\x1F\x7F]/g,' ').trim(); }
   const txCompact = transactions.map(t=>({
     d: sanitize(t.date),
@@ -2399,7 +2399,7 @@ function updateDonutFromTransactions(){
   const killWeapon = monthlyIncome - KBB_MONTHLY_OBLIGATIONS;
   const rawSurplus = monthlyIncome - monthlySpend;
   const dayOfMonth = new Date().getDate();
-  // Use projected (kill weapon) for current month; actual for historical periods
+  // Projected for current month; actual for historical
   const surplus = (selectedPeriod === 'thisMonth') ? killWeapon : rawSurplus;
   const bills = ((ct['Mortgage']||0)+(ct['Utilities']||0)+(ct['Phone & Internet']||0)+(ct['Loan Payment']||0)+(ct['Insurance']||0)+(ct['Subscriptions']||0)) / monthsCovered;
   const food = ((ct['Food & Life']||0)+(ct['Groceries']||0)+(ct['Amazon']||0)) / monthsCovered;
@@ -2425,7 +2425,7 @@ function updateDonutFromTransactions(){
   // Update jar displays with latest balances
   updateJarDisplay();
 }
-// Load cross-device CSV data — always replaces whatever is currently loaded
+// Load cross-device CSV data
 function loadCrossDeviceCsvData(data){
   if(!data||!data.txList||!data.txList.length) return;
   transactions = data.txList.map(t=>({
@@ -2867,7 +2867,7 @@ function renderWeekHist(){
 }
 // v38 FEATURE: MULTI-STORE GROCERY LISTS
 // Jamie's stores: Aldi, Costco, Target, Walmart (configurable)
-// Each store has its own list. Per-store and cross-store budget tracking.
+// Per-store grocery lists with budget tracking
 // Syncs to Firebase for cross-device visibility.
 function renderStoreTabs() {
   const tabsEl = document.getElementById('store-tabs');
@@ -3265,7 +3265,7 @@ function updateDebtMetrics(){
     }
   }
 }
-// Browser → Apps Script (SHEET_URL) → Anthropic API → response back
+// AI via Apps Script proxy
 // This bypasses CORS restrictions that block direct browser→API calls.
 // The API key lives in Apps Script, never exposed to the browser.
 async function callClaudeProxy(opts) {
@@ -3783,12 +3783,18 @@ function updateBankSyncBar(){
   simplefinConnected = connected;
   const bar = document.getElementById('bank-sync-bar');
   if(!bar) return;
+  const label = document.getElementById('bank-sync-label');
+  const sub = document.getElementById('bank-sync-sub');
   if(connected){
-    bar.style.display = 'none';
+    bar.style.display = 'flex';
+    if(label){label.textContent='Bank Connected';label.style.color='var(--teal)';}
+    var lastSync = localStorage.getItem('simplefin_last_sync');
+    if(sub) sub.textContent = lastSync ? 'Last sync: '+lastSync : 'Tap Sync Now to pull fresh data';
+    document.getElementById('bank-connect-btn').style.display='none';
+    document.getElementById('bank-sync-btn').style.display='inline-block';
+    document.getElementById('bank-disconnect-btn').style.display='inline-block';
   } else if(_sfRehydrated) {
     bar.style.display = 'flex';
-    const label = document.getElementById('bank-sync-label');
-    const sub = document.getElementById('bank-sync-sub');
     if(label){label.textContent='Connect Your Bank';label.style.color='var(--text)';}
     if(sub) sub.textContent='Automatic transactions \u2014 no more CSV downloads';
     document.getElementById('bank-connect-btn').style.display='inline-block';
@@ -3796,7 +3802,7 @@ function updateBankSyncBar(){
     document.getElementById('bank-disconnect-btn').style.display='none';
   }
 }
-// v41: Rehydrate SimpleFIN state from Firebase (fixes phone cache clear issue)
+// v41: Rehydrate SimpleFIN from Firebase
 function rehydrateSimpleFINState(){
   FB_ROOT.child('simplefin_state').once('value').then(function(snap){
     var state = snap.val();
@@ -3979,11 +3985,11 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
   // v39: Update account balances if provided
   if (accountBalances) {
     // Savings account — verify mapping before updating Foundation
-    // BofA shows Foundation = $5,000.00 exactly. SimpleFIN may map to a different account.
+    // SimpleFIN may map to different account
     if (accountBalances.savings) {
       // v40: Don't auto-update Foundation from unverified SimpleFIN
-      // familyGoals.efund tracks the savings panel, jarBalances.foundation tracks The Foundation
-      // Only update if the balance matches what we expect (Foundation is exactly $5,000)
+      // efund tracks savings panel, jarBalances.foundation tracks Foundation
+      // Only update if balance matches expected
       const savBal = Math.round(accountBalances.savings.balance);
       if (savBal !== jarBalances.foundation) {
         // SimpleFIN savings ≠ Foundation — log but don't override
