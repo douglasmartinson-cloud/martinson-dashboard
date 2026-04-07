@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Martinson Family Dashboard v41</title>
+<title>Martinson Family Dashboard v42</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script src="https://unpkg.com/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
@@ -393,7 +393,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <!-- ENTRY SCREEN -->
 <div id="entry-screen">
   <div class="entry-logo">Martinson Family</div>
-  <div class="entry-sub">Kansas City, MO · Your Family Hub · v41</div>
+  <div class="entry-sub">Kansas City, MO · Your Family Hub · v42</div>
   <div class="entry-box">
     <div class="entry-title">🔒 Enter Password</div>
     <div class="entry-dots">
@@ -918,7 +918,7 @@ const CARDS = [
   {name:"BofA 9362",balance:13567.18,apr:0.2374,min:384,color:"#ff6b6b"},
   {name:"Upgrade Loan",balance:9446,apr:0.2198,min:248,color:"#ce93d8"},
 ];
-const BUDGETS = {"Mortgage":2578,"Utilities":568,"Phone & Internet":364,"Loan Payment":248,"Debt Payments":776,"Subscriptions":552,"Groceries":800,"Food & Life":1140,"Known Unknowns":455};
+const BUDGETS = {"Mortgage":2578,"Utilities":568,"Phone & Internet":364,"Loan Payment":248,"Debt Payments":692,"Subscriptions":688,"Groceries":800,"Food & Life":1140,"Known Unknowns":455};
 const RULES = [
   {cat:"Mortgage",color:"#4d9fff",kw:["ROCKET MORTGAGE","ROCKET MTG","QUICKEN LOANS","WELLS FARGO MTG","CHASE MTG","USAA MTG","NAVY FEDERAL MTG","PNC MTG"]},
   {cat:"Phone & Internet",color:"#a78bfa",kw:["ATT* BILL","AT&T","GOOGLE *FIBER","GOOGLE FIBER","AT&T FIBER","SPECTRUM","COX COMM","XFINITY","COMCAST","VERIZON WIRELESS","VERIZON WL","T-MOBILE","TMOBILE","US CELLULAR","CRICKET","METRO PCS","MINT MOBILE","VISIBLE","BOOST MOBILE","STRAIGHT TALK","CONSUMER CELLULAR"]},
@@ -1196,7 +1196,7 @@ let activeStoreId = 'aldi'; // currently selected store tab
 // ALWAYS use this URL — Apps Script for receipt scanning and PDF only
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw0q-7XhX6OztGR54bXX5_iFnUCYeaRVyfxbhoDdaIuWSeDZF7U-KYxqYXfaM4eKcJD/exec';
 // SYNC ENGINE — Google Sheets architecture
-// FIREBASE SYNC ENGINE — v40
+// FIREBASE SYNC ENGINE — v42
 //
 // One key controls everything: martinson/last_csv_data
 //
@@ -1212,7 +1212,7 @@ const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw0q-7XhX6OztGR54bXX5
 // v35: Money Flow (Sankey), AI Assistant panel
 // v36: AI calls routed through Apps Script proxy (CORS fix)
 // v37: SimpleFIN bank integration — auto-pull transactions, no CSV
-// v38: Jamie's multi-store grocery lists with tabs (Aldi, Costco, Target, Walmart)
+// v38: Multi-store grocery lists with tabs
 const FB = 'https://martinson-family-default-rtdb.firebaseio.com';
 firebase.initializeApp({ databaseURL: FB });
 const FBDB = firebase.database();
@@ -1247,13 +1247,21 @@ function applyServerState(all) {
   if (_syncPaused) return;
   const keys = ['meal_plan','week_hist','custom_meals','hidden_meals',
                  'financial_settings','cc_balances','family_goals',
-                 'grocery_stores','store_items'];
+                 'grocery_stores','store_items','jar_balances','learned_categories'];
   keys.forEach(k => {
     if (all[k] !== undefined && all[k] !== null) {
       localStorage.setItem('fb_' + k, JSON.stringify(all[k]));
       applyKey(k, all[k]);
     }
   });
+  // v42: Promote auto_sync_data to last_csv_data if newer
+  if (all.auto_sync_data && all.auto_sync_data.transactions && all.auto_sync_data.syncedAt) {
+    const csv = all.last_csv_data;
+    if (!csv || csv.cleared || !csv.uploadedAt || all.auto_sync_data.syncedAt > csv.uploadedAt) {
+      promoteAutoSync(all.auto_sync_data);
+      return; // promoteAutoSync handles rendering
+    }
+  }
 
   const csv = all.last_csv_data;
   if (csv && !csv.cleared && csv.uploadedAt && (csv.txData || csv.txList)) {
@@ -1605,19 +1613,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   rehydrateSimpleFINState();
   checkAutoSyncData();
 });
+// v42: Promote 3AM auto_sync_data into the main pipeline
+function promoteAutoSync(ad){
+  if(!ad||!ad.transactions||!ad.transactions.length) return;
+  processSimpleFINTransactions(ad.transactions,ad.accountBalances,ad.transactions.length);
+  fbSet('last_auto_processed',{syncedAt:ad.syncedAt,at:Date.now()});
+  var sub=document.getElementById('bank-sync-sub');
+  if(sub) sub.textContent='Auto-synced: '+(ad.syncedAtHuman||new Date(ad.syncedAt).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}));
+  toast('\u2705 Auto-sync: '+ad.count+' transactions loaded');
+}
 function checkAutoSyncData(){
-  FB_ROOT.child('auto_sync_data').once('value').then(snap=>{
-    const raw=snap.val();
-    if(!raw||!raw.transactions||!raw.syncedAt)return;
-    const lastManual=parseInt(localStorage.getItem('last_processed_sync')||'0');
-    if(raw.syncedAt>lastManual&&raw.transactions.length>0){
-      processSimpleFINTransactions(raw.transactions,raw.accountBalances,raw.transactions.length);
-      localStorage.setItem('last_processed_sync',String(raw.syncedAt));
-      const sub=document.getElementById('bank-sync-sub');
-      if(sub)sub.textContent='Auto-synced: '+raw.syncedAtHuman;
-      toast('\u2705 Auto-sync: '+raw.count+' transactions loaded');
-    }
-  }).catch(()=>{});
+  FB_ROOT.child('auto_sync_data').once('value').then(function(snap){
+    var raw=snap.val();
+    if(!raw||!raw.transactions||!raw.syncedAt) return;
+    FB_ROOT.child('last_auto_processed').once('value').then(function(ps){
+      var p=ps.val(), last=p&&p.syncedAt?p.syncedAt:0;
+      if(raw.syncedAt>last&&raw.transactions.length>0) promoteAutoSync(raw);
+    }).catch(function(){ promoteAutoSync(raw); });
+  }).catch(function(){});
 }
 function getWeekOf(){const n=new Date();const d=n.getDate()-n.getDay()+(n.getDay()===0?-6:1);const m=new Date(n.setDate(d));return m.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
 function fmt(n){return '$'+Math.abs(n).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,',');}
@@ -1799,14 +1812,14 @@ function parseCSV(text,fname){
   // Disable invisible file input so it can't intercept button clicks
   const dropInp=document.getElementById('drop-input');
   if(dropInp) dropInp.style.pointerEvents='none';
-  // ── FULL SAME-DEVICE REFRESH ──────────────────────────────────────
+  // ── FULL SAME-DEVICE REFRESH ──
   // Update every visual that depends on transaction data
   renderCatTable();
   renderTx();
   renderBVA();
   updateDonutFromTransactions();
   toast('✓ '+transactions.length+' transactions loaded — syncing...');
-  // ── CROSS-DEVICE SYNC ─────────────────────────────────────────────
+  // ── CROSS-DEVICE SYNC ──
   const catTotals={};
   transactions.filter(t=>t.amount<0&&t.cat!=='Transfers'&&t.cat!=='Income')
     .forEach(t=>{catTotals[t.cat]=(catTotals[t.cat]||0)+Math.abs(t.amount);});
@@ -1820,7 +1833,7 @@ function parseCSV(text,fname){
     c: sanitize(t.cat),
     m: sanitize(t.month)
   }));
-  // Build sync payload — Firebase SDK handles nested objects fine, no need to stringify arrays
+  // Build sync payload — stringify for size efficiency
   const syncData = {
     txData: JSON.stringify(txCompact), // keep as string for size efficiency
     cats: JSON.stringify(catTotals),
@@ -2418,7 +2431,7 @@ function loadCrossDeviceCsvData(data){
   transactions = data.txList.map(t=>({
     date: t.d||t.date||'',
     desc: t.n||t.desc||'',
-    // CRITICAL: use explicit null check not || for amounts (negative numbers are falsy issue)
+    // v40: Explicit null check for amounts (negative numbers are falsy)
     amount: (t.a !== undefined && t.a !== null) ? Number(t.a) : Number(t.amount||0),
     cat: t.c||t.cat||'Other',
     month: t.m||t.month||'',
@@ -3242,7 +3255,7 @@ function updateDebtMetrics(){
   // Also update the banner style — green for plan, not default
   const banner = document.getElementById('debt-freedom-banner');
   if(banner) banner.innerHTML = `🎯 Debt free in <strong>${freedomMonths} months</strong> — <span>${mlabel(freedomMonths)}</span> · Kill weapon: $${KILL_WEAPON_MONTHLY.toLocaleString()}/mo`;
-  // v40: Sync CC table rows to match CARDS array (prevents metric vs table mismatch)
+  // v40: Sync CC table rows to match CARDS array
   const ccTable = document.getElementById('cc-table');
   if(ccTable){
     const tbody = ccTable.querySelector('tbody');
@@ -3761,6 +3774,7 @@ Rules: Keep it simple and warm. Use plain language. Celebrate wins. If she's ove
 // creates Setup Token → pastes into dashboard → we claim it via
 // Apps Script → store Access URL → fetch transactions on demand.
 // No more CSV downloads.
+var _sfRehydrated=false; // v42: Don't flash Connect banner before Firebase check
 function updateBankSyncBar(){
   const hasData = transactions.length > 0;
   const lsConnected = localStorage.getItem('simplefin_connected') === 'true';
@@ -3771,7 +3785,7 @@ function updateBankSyncBar(){
   if(!bar) return;
   if(connected){
     bar.style.display = 'none';
-  } else {
+  } else if(_sfRehydrated) {
     bar.style.display = 'flex';
     const label = document.getElementById('bank-sync-label');
     const sub = document.getElementById('bank-sync-sub');
@@ -3784,23 +3798,23 @@ function updateBankSyncBar(){
 }
 // v41: Rehydrate SimpleFIN state from Firebase (fixes phone cache clear issue)
 function rehydrateSimpleFINState(){
-  FB_ROOT.child('simplefin_state').once('value').then(snap=>{
-    const state = snap.val();
+  FB_ROOT.child('simplefin_state').once('value').then(function(snap){
+    var state = snap.val();
     if(state && state.connected){
       if(localStorage.getItem('simplefin_connected') !== 'true'){
         localStorage.setItem('simplefin_connected','true');
         if(state.lastSync) localStorage.setItem('simplefin_last_sync', state.lastSync);
         simplefinConnected = true;
-        updateBankSyncBar();
       }
     } else {
       if(localStorage.getItem('simplefin_connected') === 'true'){
         localStorage.removeItem('simplefin_connected');
         simplefinConnected = false;
-        updateBankSyncBar();
       }
     }
-  }).catch(()=>{});
+    _sfRehydrated = true;
+    updateBankSyncBar();
+  }).catch(function(){ _sfRehydrated = true; updateBankSyncBar(); });
 }
 function showBankConnect(){
   const existing = document.getElementById('bank-connect-overlay');
@@ -3964,10 +3978,10 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
   _loadedUploadedAt = 0;
   // v39: Update account balances if provided
   if (accountBalances) {
-    // Savings account balance — may not be Foundation (7708). Store but verify mapping.
+    // Savings account — verify mapping before updating Foundation
     // BofA shows Foundation = $5,000.00 exactly. SimpleFIN may map to a different account.
     if (accountBalances.savings) {
-      // v40: Don't auto-update Foundation from unverified SimpleFIN savings mapping
+      // v40: Don't auto-update Foundation from unverified SimpleFIN
       // familyGoals.efund tracks the savings panel, jarBalances.foundation tracks The Foundation
       // Only update if the balance matches what we expect (Foundation is exactly $5,000)
       const savBal = Math.round(accountBalances.savings.balance);
