@@ -1193,7 +1193,7 @@ const DEFAULT_STORES = [
 let groceryStores = [...DEFAULT_STORES]; // user's configured stores
 let storeItems = {}; // { storeId: [{id, name, price, checked}, ...] }
 let activeStoreId = 'aldi'; // currently selected store tab
-// ALWAYS use this URL — Apps Script for receipt scanning and PDF only
+
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw0q-7XhX6OztGR54bXX5_iFnUCYeaRVyfxbhoDdaIuWSeDZF7U-KYxqYXfaM4eKcJD/exec';
 // SYNC ENGINE — Google Sheets architecture
 // FIREBASE SYNC ENGINE — v42
@@ -1293,25 +1293,25 @@ function loadCsvFromServer(data) {
   const aiBtn = document.getElementById('ai-btn-wrap');
   if(aiBtn) aiBtn.style.display = 'block';
 }
-// Uses DIRECT REST PUT as the primary write (same mechanism that
-// makes uploads work). SDK is fallback. This is the most reliable
-// write path available — a simple HTTP PUT to a known URL.
+// Direct REST PUT for clear
+
+
 function clearCsvOnAllDevices() {
 
   _syncPaused = true;
-  // 2. Clear locally — instant
+  // Clear locally
   transactions = [];
   _loadedUploadedAt = 0;
   clearCSVDisplay();
-  // 3. Stop all listeners so nothing can fight us
+  
   FB_ROOT.off('value');
   if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
   clearTimeout(_sdkDebounceTimer);
-  // 4. Build the cleared marker
+  
   const marker = { cleared: true, clearedAt: Date.now() };
-  // 5. Write to localStorage immediately (survives if network fails)
+  
   localStorage.setItem('fb_last_csv_data', JSON.stringify(marker));
-  // 6. Write to Firebase via DIRECT REST PUT — most reliable path
+  
   fetch(`${FB}/martinson/last_csv_data.json`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -1340,7 +1340,7 @@ function clearCsvOnAllDevices() {
       });
   });
 }
-// New data replaces the cleared marker. Clear the localStorage guard.
+// Upload replaces cleared marker
 function uploadCsvToServer(syncData) {
   _syncPaused = false;
 
@@ -3769,11 +3769,11 @@ Rules: Keep it simple and warm. Use plain language. Celebrate wins. If she's ove
   sendBtn.disabled=false;
   msgs.scrollTop=msgs.scrollHeight;
 }
-// v37 FEATURE: SimpleFIN Bank Integration
-// Flow: User signs up at SimpleFIN ($1.50/mo) → connects BofA →
-// creates Setup Token → pastes into dashboard → we claim it via
-// Apps Script → store Access URL → fetch transactions on demand.
-// No more CSV downloads.
+// v37: SimpleFIN
+// Bank auto-sync flow
+
+
+
 var _sfRehydrated=false; // v42: Don't flash Connect banner before Firebase check
 function updateBankSyncBar(){
   const hasData = transactions.length > 0;
@@ -3984,49 +3984,44 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
   _loadedUploadedAt = 0;
   // v39: Update account balances if provided
   if (accountBalances) {
-    // v42: Robust balance mapping — handles both old and new Apps Script keys
-    // Mission Control (9289)
-    if (accountBalances.missionControl) {
-      jarBalances.mc = Math.round(accountBalances.missionControl.balance);
-    } else if (accountBalances.checking) {
-      jarBalances.mc = Math.round(accountBalances.checking.balance);
-    }
-    // Family Fuel (2307)
-    if (accountBalances.familyFuel) {
-      jarBalances.ff = Math.round(accountBalances.familyFuel.balance);
-    } else if (accountBalances.checking2) {
-      jarBalances.ff = Math.round(accountBalances.checking2.balance);
-    }
-    // The Foundation (7708)
-    if (accountBalances.foundation) {
-      jarBalances.foundation = Math.round(accountBalances.foundation.balance);
-    } else if (accountBalances.savings) {
+    // v42: Bulletproof balance mapping — handles mapped keys, raw accounts, and generic names
+    // Try mapped keys first (from v42 Apps Script)
+    if (accountBalances.missionControl) jarBalances.mc = Math.round(accountBalances.missionControl.balance);
+    else if (accountBalances.checking) jarBalances.mc = Math.round(accountBalances.checking.balance);
+    if (accountBalances.familyFuel) jarBalances.ff = Math.round(accountBalances.familyFuel.balance);
+    else if (accountBalances.checking2) jarBalances.ff = Math.round(accountBalances.checking2.balance);
+    if (accountBalances.foundation) jarBalances.foundation = Math.round(accountBalances.foundation.balance);
+    else if (accountBalances.savings) {
       var savBal = Math.round(accountBalances.savings.balance);
-      if (Math.abs(savBal - jarBalances.foundation) < 500) {
-        jarBalances.foundation = savBal;
-      }
+      if (Math.abs(savBal - jarBalances.foundation) < 500) jarBalances.foundation = savBal;
     }
-    // Merrill IRA
-    if (accountBalances.retirement) {
-      jarBalances.merrill = Math.round(accountBalances.retirement.balance);
-    }
-    // BofA Credit Card (9362)
+    if (accountBalances.retirement) jarBalances.merrill = Math.round(accountBalances.retirement.balance);
     if (accountBalances.bofaCC) {
       ccBalances.bofa = Math.abs(accountBalances.bofaCC.balance);
-      fbSet('cc_balances', ccBalances);
-      updateCCDisplay();
+      fbSet('cc_balances', ccBalances); updateCCDisplay();
     }
-    // Auto-sync raw balances: try to map by account name/id containing last-4
-    if (!accountBalances.missionControl && !accountBalances.checking) {
-      Object.values(accountBalances).forEach(function(acc){
-        if(!acc||!acc.name) return;
-        var n=acc.name||'',b=Math.round(parseFloat(acc.balance)||0);
-        if(n.includes('9289')){jarBalances.mc=b;}
-        else if(n.includes('2307')){jarBalances.ff=b;}
-        else if(n.includes('7708')){jarBalances.foundation=b;}
-        else if(n.includes('9362')||n.includes('Mastercard')){ccBalances.bofa=Math.abs(b);fbSet('cc_balances',ccBalances);updateCCDisplay();}
-        else if(n.includes('6043')||n.includes('Merrill')||n.includes('Retire')){jarBalances.merrill=b;}
+    // Fallback: scan ALL values in accountBalances (raw or mapped) by name
+    var foundMC=!!accountBalances.missionControl||!!accountBalances.checking;
+    var foundFF=!!accountBalances.familyFuel||!!accountBalances.checking2;
+    if(!foundMC||!foundFF){
+      var checkingAccts=[];
+      var scanList=accountBalances._raw||Object.values(accountBalances);
+      scanList.forEach(function(acc){
+        if(!acc||typeof acc!=='object'||!acc.balance) return;
+        var n=(acc.name||'').toLowerCase(),b=Math.round(parseFloat(acc.balance)||0);
+        if(n.includes('9289')||n.includes('mission control')){jarBalances.mc=b;foundMC=true;}
+        else if(n.includes('2307')||n.includes('family fuel')){jarBalances.ff=b;foundFF=true;}
+        else if(n.includes('7708')||n.includes('foundation')){jarBalances.foundation=b;}
+        else if(n.includes('9362')||n.includes('mastercard')||n.includes('credit')){ccBalances.bofa=Math.abs(b);fbSet('cc_balances',ccBalances);updateCCDisplay();}
+        else if(n.includes('6043')||n.includes('merrill')||n.includes('retire')||n.includes('ira')){jarBalances.merrill=b;}
+        else if(n.includes('saving')&&!n.includes('7708')){if(Math.abs(b-jarBalances.foundation)<500)jarBalances.foundation=b;}
+        else if(n.includes('checking')||n.includes('banking')){checkingAccts.push({name:n,balance:b});}
       });
+      if(checkingAccts.length>0){
+        checkingAccts.sort(function(a,b){return b.balance-a.balance;});
+        if(!foundMC){jarBalances.mc=checkingAccts[0].balance;}
+        if(!foundFF&&checkingAccts.length>1){jarBalances.ff=checkingAccts[1].balance;}
+      }
     }
     fbSet('jar_balances', jarBalances);
     updateJarDisplay();
@@ -4093,7 +4088,7 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
 }
 function disconnectBank(){
   if(!confirm('Disconnect your bank? You can reconnect anytime with a new token.')) return;
-  // Tell Apps Script to clear stored access URL
+  
   fetch(SHEET_URL, {
     method:'POST', headers:{'Content-Type':'text/plain'},
     body:JSON.stringify({action:'simplefinDisconnect'})
