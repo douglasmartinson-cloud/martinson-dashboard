@@ -3896,61 +3896,33 @@ async function claimSimpleFINToken(){
   }
 }
 async function syncFromBank(){
-  const syncBtn = document.getElementById('bank-sync-btn');
-  const sub = document.getElementById('bank-sync-sub');
+  alert('STEP 1: syncFromBank called');
+  var syncBtn = document.getElementById('bank-sync-btn');
+  var sub = document.getElementById('bank-sync-sub');
   if(syncBtn) syncBtn.textContent = '\u23F3 Syncing...';
-  if(sub) sub.textContent = 'Pulling transactions from BofA...';
+  if(sub) sub.textContent = 'Pulling from BofA...';
   try {
-    const res = await fetch(SHEET_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ action: 'simplefinSync' })
-    });
-    const data = await res.json();
-    if(data.error){
-      toast('\u26A0 Bank sync error: ' + data.error);
-      if(syncBtn) syncBtn.textContent = 'Sync Now';
-      if(sub) sub.textContent = 'Sync failed \u2014 try again';
-      
-      if(data.error.includes('403') || data.error.includes('auth')){
-        localStorage.removeItem('simplefin_connected');
-        fbSet('simplefin_state', {connected:false, error:'auth_failed', at:Date.now()});
-        simplefinConnected = false;
-        updateBankSyncBar();
-        toast('Bank connection expired \u2014 reconnect to continue');
-      }
-      return;
-    }
-    if(data.transactions && data.transactions.length > 0){
-    
-      // DEBUG
-      fbSet('debug_sync_response', {
-        hasAccountBalances: !!data.accountBalances,
-        accountBalanceKeys: data.accountBalances ? Object.keys(data.accountBalances) : [],
-        accountBalanceRaw: JSON.stringify(data.accountBalances || {}).substring(0, 2000),
-        at: Date.now()
-      });
-      var _dbgKeys = data.accountBalances ? Object.keys(data.accountBalances).join(', ') : 'NONE';
-      var _dbgFirst = '';
-      if(data.accountBalances){var _v=Object.values(data.accountBalances);if(_v[0]&&typeof _v[0]==='object')_dbgFirst=JSON.stringify(_v[0]).substring(0,200);}
-      alert('DEBUG - Balance keys: [' + _dbgKeys + ']\n\nFirst value: ' + _dbgFirst);
-      processSimpleFINTransactions(data.transactions, data.accountBalances, data.newCount);
-      const now = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-      localStorage.setItem('simplefin_last_sync', now);
-      localStorage.setItem('last_processed_sync', String(Date.now()));
-      fbSet('simplefin_state', {connected:true, lastSync:now, syncAt:Date.now()});
-      
-    
-      const newMsg = data.newCount > 0 ? data.newCount + ' new, ' : '';
-      toast('\u2705 ' + newMsg + data.transactions.length + ' total transactions');
-    } else {
-      toast('No transactions found');
-    }
-    if(syncBtn) syncBtn.textContent = 'Sync Now';
+    var res = await fetch(SHEET_URL, {method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'simplefinSync'})});
+    alert('STEP 2: Response status=' + res.status);
+    var txt = await res.text();
+    alert('STEP 3: Body length=' + txt.length + '\nFirst 200:\n' + txt.substring(0,200));
+    var data;
+    try{data=JSON.parse(txt);}catch(pe){alert('JSON PARSE FAIL: '+pe.message);return;}
+    if(data.error){alert('STEP 4: ERROR from Apps Script: '+data.error);if(syncBtn)syncBtn.textContent='Sync Now';return;}
+    var balKeys=data.accountBalances?Object.keys(data.accountBalances).join(','):'NONE';
+    alert('STEP 4: OK! txns='+((data.transactions||[]).length)+' balKeys=['+balKeys+']');
+    if(data.transactions&&data.transactions.length>0){
+      processSimpleFINTransactions(data.transactions,data.accountBalances,data.newCount);
+      var now=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+      localStorage.setItem('simplefin_last_sync',now);
+      fbSet('simplefin_state',{connected:true,lastSync:now,syncAt:Date.now()});
+      toast('\u2705 '+data.transactions.length+' transactions loaded');
+    }else{toast('No transactions found');}
+    if(syncBtn)syncBtn.textContent='Sync Now';
     updateBankSyncBar();
-  } catch(e){
-    toast('\u26A0 Could not reach bank \u2014 try again');
-    if(syncBtn) syncBtn.textContent = 'Sync Now';
+  }catch(e){
+    alert('SYNC CATCH ERROR: '+e.message+'\n'+e.stack);
+    if(syncBtn)syncBtn.textContent='Sync Now';
   }
 }
 function processSimpleFINTransactions(txns, accountBalances, newCount){
