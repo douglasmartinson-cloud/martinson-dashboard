@@ -1089,6 +1089,7 @@ let ccBalances = {
 let familyGoals = { efund: 5145, lgfund: 0 };
 // v40: Three-jar balances + Merrill — synced from BofA via SimpleFIN
 let jarBalances = { mc: 7606, ff: 5262, foundation: 5000, merrill: 157532 };
+var _jarWriteTime = 0;
 let currentWeek = Math.max(1,Math.ceil((new Date()-new Date(2026,3,1))/(7*24*60*60*1000)));
 let pinBuffer = '';
 let pinTarget = '';
@@ -1406,7 +1407,9 @@ function applyKey(key, value) {
     case 'meal_plan': mealPlan = value; break;
     case 'cc_balances': ccBalances = value; break;
     case 'family_goals': familyGoals = value; break;
-    case 'jar_balances': jarBalances = value; updateJarDisplay(); break;
+    case 'jar_balances':
+      if(Date.now()-_jarWriteTime<10000) break; // v42: Skip if fresh bank sync wrote within 10s
+      jarBalances = value; updateJarDisplay(); break;
     case 'grocery_stores': 
       if (Array.isArray(value) && value.length > 0) {
         groceryStores = value;
@@ -3896,32 +3899,35 @@ async function claimSimpleFINToken(){
   }
 }
 async function syncFromBank(){
-  alert('STEP 1: syncFromBank called');
   var syncBtn = document.getElementById('bank-sync-btn');
   var sub = document.getElementById('bank-sync-sub');
   if(syncBtn) syncBtn.textContent = '\u23F3 Syncing...';
   if(sub) sub.textContent = 'Pulling from BofA...';
   try {
     var res = await fetch(SHEET_URL, {method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'simplefinSync'})});
-    alert('STEP 2: Response status=' + res.status);
-    var txt = await res.text();
-    alert('STEP 3: Body length=' + txt.length + '\nFirst 200:\n' + txt.substring(0,200));
-    var data;
-    try{data=JSON.parse(txt);}catch(pe){alert('JSON PARSE FAIL: '+pe.message);return;}
-    if(data.error){alert('STEP 4: ERROR from Apps Script: '+data.error);if(syncBtn)syncBtn.textContent='Sync Now';return;}
-    var balKeys=data.accountBalances?Object.keys(data.accountBalances).join(','):'NONE';
-    alert('STEP 4: OK! txns='+((data.transactions||[]).length)+' balKeys=['+balKeys+']');
+    var data = await res.json();
+    if(data.error){
+      toast('\u26A0 Bank sync error: '+data.error);
+      if(syncBtn)syncBtn.textContent='Sync Now';
+      if(sub)sub.textContent='Sync failed';
+      if(data.error.includes('403')||data.error.includes('auth')){
+        localStorage.removeItem('simplefin_connected');
+        fbSet('simplefin_state',{connected:false,error:'auth_failed',at:Date.now()});
+        simplefinConnected=false;updateBankSyncBar();
+      }
+      return;
+    }
     if(data.transactions&&data.transactions.length>0){
       processSimpleFINTransactions(data.transactions,data.accountBalances,data.newCount);
       var now=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
       localStorage.setItem('simplefin_last_sync',now);
       fbSet('simplefin_state',{connected:true,lastSync:now,syncAt:Date.now()});
-      toast('\u2705 '+data.transactions.length+' transactions loaded');
+      toast('\u2705 '+data.transactions.length+' txns | MC $'+jarBalances.mc+' | FF $'+jarBalances.ff+' | Merrill $'+(jarBalances.merrill||0));
     }else{toast('No transactions found');}
     if(syncBtn)syncBtn.textContent='Sync Now';
     updateBankSyncBar();
   }catch(e){
-    alert('SYNC CATCH ERROR: '+e.message+'\n'+e.stack);
+    toast('\u26A0 Could not reach bank: '+e.message);
     if(syncBtn)syncBtn.textContent='Sync Now';
   }
 }
@@ -4013,6 +4019,7 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
     var dbgMsg=dbgNames.length>0?dbgNames.join(' | '):'NO RAW ACCTS. Keys: '+Object.keys(accountBalances).join(',');
     toast('ACCTS: '+dbgMsg);
     fbSet('debug_account_names',{names:dbgMsg,keys:Object.keys(accountBalances),raw:scanDbg,at:Date.now()});
+    _jarWriteTime = Date.now();
     fbSet('jar_balances', jarBalances);
     updateJarDisplay();
     localStorage.setItem('account_balances', JSON.stringify(accountBalances));
