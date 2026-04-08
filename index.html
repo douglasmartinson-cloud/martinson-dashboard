@@ -3973,7 +3973,7 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
   _loadedUploadedAt = 0;
   // v39: Update account balances if provided
   if (accountBalances) {
-    
+    try {
     
     if (accountBalances.missionControl) jarBalances.mc = Math.round(accountBalances.missionControl.balance);
     else if (accountBalances.checking) jarBalances.mc = Math.round(accountBalances.checking.balance);
@@ -4022,7 +4022,9 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
     _jarWriteTime = Date.now();
     fbSet('jar_balances', jarBalances);
     updateJarDisplay();
+    alert('BALANCES SET: MC=$'+jarBalances.mc+' FF=$'+jarBalances.ff+' Foundation=$'+jarBalances.foundation+' Merrill=$'+(jarBalances.merrill||0));
     localStorage.setItem('account_balances', JSON.stringify(accountBalances));
+    } catch(balErr) { alert('BALANCE ERROR: '+balErr.message); }
   }
   // Update drop zone
   const dz = document.getElementById('drop-zone');
