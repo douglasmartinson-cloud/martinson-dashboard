@@ -1258,9 +1258,11 @@ function applyServerState(all) {
   
   if (all.auto_sync_data && all.auto_sync_data.transactions && all.auto_sync_data.syncedAt) {
     const csv = all.last_csv_data;
-    if (!csv || csv.cleared || !csv.uploadedAt || all.auto_sync_data.syncedAt > csv.uploadedAt) {
+    if (csv && csv.cleared) {
+      // User explicitly cleared — don't re-promote auto_sync data
+    } else if (!csv || !csv.uploadedAt || all.auto_sync_data.syncedAt > csv.uploadedAt) {
       promoteAutoSync(all.auto_sync_data);
-      return; 
+      return;
     }
   }
 
@@ -3973,7 +3975,6 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
   _loadedUploadedAt = 0;
   // v39: Update account balances if provided
   if (accountBalances) {
-    try {
     
     if (accountBalances.missionControl) jarBalances.mc = Math.round(accountBalances.missionControl.balance);
     else if (accountBalances.checking) jarBalances.mc = Math.round(accountBalances.checking.balance);
@@ -4012,19 +4013,10 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
         if(!foundFF&&checkingAccts.length>1){jarBalances.ff=checkingAccts[1].balance;}
       }
     }
-    // v42 DEBUG: Log what SimpleFIN returned so we can fix mapping
-    var dbgNames=[];
-    var scanDbg=accountBalances._raw||Object.values(accountBalances);
-    scanDbg.forEach(function(a){if(a&&a.name)dbgNames.push(a.name+': $'+(a.balance||0));});
-    var dbgMsg=dbgNames.length>0?dbgNames.join(' | '):'NO RAW ACCTS. Keys: '+Object.keys(accountBalances).join(',');
-    toast('ACCTS: '+dbgMsg);
-    fbSet('debug_account_names',{names:dbgMsg,keys:Object.keys(accountBalances),raw:scanDbg,at:Date.now()});
     _jarWriteTime = Date.now();
     fbSet('jar_balances', jarBalances);
     updateJarDisplay();
-    alert('BALANCES SET: MC=$'+jarBalances.mc+' FF=$'+jarBalances.ff+' Foundation=$'+jarBalances.foundation+' Merrill=$'+(jarBalances.merrill||0));
     localStorage.setItem('account_balances', JSON.stringify(accountBalances));
-    } catch(balErr) { alert('BALANCE ERROR: '+balErr.message); }
   }
   // Update drop zone
   const dz = document.getElementById('drop-zone');
