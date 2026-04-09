@@ -3795,52 +3795,60 @@ function closeAIPanel(){
 }
 function buildFinancialContext(){
   const EXCL=['Transfers','Income'];
-  let spendingSummary='No transaction data loaded.';
-  let mealContext='';
-  // v40: Use filtered transactions for current period context
-  const filtered = getFilteredTransactions();
+  const totalDebt=CARDS.reduce((s,c)=>s+c.balance,0);
+  const cardDetails=CARDS.map(c=>`${c.name}: $${c.balance.toFixed(0)} at ${(c.apr*100).toFixed(1)}% APR, min $${c.min}`).join('; ');
+  // Recent transactions — last 50 with full detail
+  let txDetail='No transaction data loaded.';
+  let spendingSummary='';
+  const filtered=getFilteredTransactions();
   if(filtered.length){
     const ct={};
-    filtered.filter(t=>t.amount<0&&!EXCL.includes(t.cat))
-      .forEach(t=>{ct[t.cat]=(ct[t.cat]||0)+Math.abs(t.amount);});
-    const sorted=Object.entries(ct).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${k}: $${v.toFixed(0)}`).join(', ');
-    const totalSpend=Object.values(ct).reduce((s,v)=>s+v,0);
-    const periodLabel = selectedPeriod === 'thisMonth' ? 'this month so far' : selectedPeriod === 'lastMonth' ? 'last month' : 'recent months';
-    spendingSummary=`Spending ${periodLabel}: ${sorted}. Total: $${totalSpend.toFixed(0)}.`;
+    filtered.filter(t=>t.amount<0&&!EXCL.includes(t.cat)).forEach(t=>{ct[t.cat]=(ct[t.cat]||0)+Math.abs(t.amount);});
+    spendingSummary=Object.entries(ct).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${k}: $${v.toFixed(0)}`).join(', ');
+    const recent=transactions.slice(0,50);
+    txDetail='RECENT TRANSACTIONS (newest first):\n'+recent.map(t=>`${t.date} | ${t.desc} | ${t.amount<0?'-':''}$${Math.abs(t.amount).toFixed(2)} | ${t.cat}`).join('\n');
   }
-  const totalDebt=CARDS.reduce((s,c)=>s+c.balance,0);
-  const cardDetails=CARDS.map(c=>`${c.name}: $${c.balance.toFixed(0)} at ${(c.apr*100).toFixed(1)}% APR`).join('; ');
-  const grocerySpent=weekHist.reduce((s,w)=>s+w.t,0);
-  const plannedMeals=DAYS.map(d=>{const k=d.substr(0,3);return mealPlan[k]?`${d}: ${mealPlan[k].n}`:`${d}: not planned`;}).join(', ');
-  mealContext=`This week's meals: ${plannedMeals}. Grocery budget: $200/week, $800/month. Spent this month on groceries: $${grocerySpent.toFixed(0)}.`;
-  return `MARTINSON FAMILY FINANCIAL PLAN (verified data — follow these rules):
-Income: $9,090/mo net (SymphonyAI, Kansas City). Paycheck $4,545 biweekly.
-THREE JAR SYSTEM:
-- Mission Control (MC): Bills, debt kills, strategy. $700 MINIMUM FLOOR — NEVER suggest going below $700.
-- Family Fuel (FF): Groceries, gas, kids, household. $1,200/paycheck transfer + $100 cash.
-- The Foundation: $5,000 emergency savings. Job loss ONLY. Do NOT suggest touching it.
-DEBT KILL PLAN (in this exact order):
-${cardDetails}. Total: $${totalDebt.toFixed(0)}.
-Kill weapon: $1,107/month ($554/paycheck) applied to highest-priority debt first.
-2 cards already killed (USB 6925 + USB 2405 on April 3).
-Next target: Best Buy 1345. Then NE Furniture 6282 (deferred interest deadline Oct 2026). Then Chase 0690. Then BofA 9362.
-Debt-free target: Aug-Sep 2027.
-PROTECTED SUBSCRIPTIONS (do NOT suggest cutting these):
-Noom $279 (medical), Planet Fitness x2 $107, Hulu+LiveTV+Disney+ $90, ChatGPT $20, Perplexity $20.
-CURRENT SPENDING:
-${spendingSummary}
-Monthly fixed bills: $4,003. Subscriptions: $688. FF budget: $2,400.
-${mealContext}
-RULES FOR YOUR ADVICE:
-- NEVER suggest cutting protected subscriptions
-- NEVER suggest Mission Control go below $700
-- NEVER suggest touching The Foundation or Merrill retirement
-- NEVER suggest new credit card debt
-- Frame advice around the kill order — redirect savings to Best Buy kill first, then NE Furniture before Oct 2026
-- Be encouraging about the plan — 2 debts already killed, 17 months to debt-free
-- If speaking to Jamie: ONE number, ONE action, warm, no jargon
-The Foundation: $${jarBalances.foundation}. Retirement: $${(jarBalances.merrill||157532).toLocaleString()} (Merrill — DO NOT TOUCH).
-Net worth: $${((jarBalances.merrill||157532)+jarBalances.foundation+(familyGoals.lgfund||0)+jarBalances.mc+jarBalances.ff-totalDebt).toFixed(0)}.`;
+  // Grocery lists — every item in every store
+  let groceryDetail='No grocery list items currently.';
+  const allItems=[];
+  Object.entries(storeItems).forEach(([sid,items])=>{
+    if(!Array.isArray(items)||!items.length)return;
+    const store=(groceryStores.find(s=>s.id===sid)||{}).name||sid;
+    items.forEach(i=>allItems.push(`${i.name}${i.price?' $'+i.price:''}${i.checked?' ✓':''} (${store})`));
+  });
+  if(allItems.length)groceryDetail='CURRENT GROCERY LIST:\n'+allItems.join('\n');
+  // Meal plan with ingredients
+  const mealDetail=DAYS.map(d=>{const k=d.substr(0,3);if(!mealPlan[k])return`${d}: not planned`;const m=mealPlan[k];const items=(m.items||[]).map(i=>i.n||i.name).join(', ');return`${d}: ${m.n}${items?' (needs: '+items+')':''}`;}).join('\n');
+  // Past shopping trips
+  let histDetail='';
+  if(weekHist.length){
+    histDetail='PAST SHOPPING TRIPS:\n'+weekHist.slice(0,4).map(w=>{
+      const items=(w.items||[]).map(i=>i.name+(i.price?' $'+i.price.toFixed(2):'')).join(', ');
+      return`${w.label} (${w.date}): $${w.t.toFixed(2)}${items?' — Items: '+items:''}`;
+    }).join('\n');
+  }
+  // Grocery spending this month from bank
+  const now=new Date();const mo=now.getMonth();const yr=now.getFullYear();
+  const grocTx=transactions.filter(t=>t.cat==='Groceries'&&t.amount<0&&new Date(t.date).getMonth()===mo&&new Date(t.date).getFullYear()===yr);
+  const moGrocSpent=grocTx.reduce((s,t)=>s+Math.abs(t.amount),0);
+  return `MARTINSON FAMILY DASHBOARD — FULL DATA ACCESS
+You have access to ALL family financial data. Answer questions using the ACTUAL data below.
+FAMILY: Douglas (analytics manager, $150K), Jamie (stay-at-home mom, painter, 3 kids: Aven, Aker 5, Vaila baby). Kansas City, MO.
+ACCOUNTS:
+- Mission Control: $${jarBalances.mc.toLocaleString()} (bills & debt kills, $700 floor)
+- Family Fuel: $${jarBalances.ff.toLocaleString()} (Jamie's account — groceries, gas, kids, household. $2,400/mo budget)
+- The Foundation: $${(jarBalances.foundation||5000).toLocaleString()} (emergency ONLY)
+- Merrill Retirement: $${(jarBalances.merrill||157532).toLocaleString()} (DO NOT TOUCH)
+DEBTS: ${cardDetails}. Total: $${totalDebt.toFixed(0)}. Kill weapon $1,107/mo. 2 killed Apr 3. Debt-free ~Aug 2027.
+SPENDING SUMMARY: ${spendingSummary||'No data'}
+GROCERY BUDGET: $200/week, $800/month. Spent this month: $${moGrocSpent.toFixed(0)}. Remaining: $${(800-moGrocSpent).toFixed(0)}.
+${groceryDetail}
+MEAL PLAN THIS WEEK:
+${mealDetail}
+${histDetail}
+${txDetail}
+PROTECTED SUBSCRIPTIONS (never suggest cutting): Noom $279, Planet Fitness $107, Hulu+Live $90, ChatGPT $20, Perplexity $20.
+Net worth: $${((jarBalances.merrill||157532)+(jarBalances.foundation||5000)+(familyGoals.lgfund||0)+jarBalances.mc+jarBalances.ff-totalDebt).toFixed(0)}.`;
 }
 async function sendAIMessage(){
   const input=document.getElementById('ai-input');
@@ -3869,15 +3877,15 @@ async function sendAIMessage(){
   const financialCtx=buildFinancialContext();
   let systemPrompt;
   if(currentUser==='douglas'){
-    systemPrompt=`You are Claudette, Douglas Martinson's financial co-pilot. He's a Senior Manager of Data Analytics at SymphonyAI in Kansas City. You have access to his REAL family financial data below.
-Be direct, analytical, and encouraging. Use specific numbers from the data. Reference actual card names, APR rates, and spending categories. Think like a Bloomberg terminal that can talk. If he asks about projections, do the math. If he asks about optimization, model the scenarios. Be concise — Douglas respects efficiency.
-${financialCtx}
-Rules: Be specific with numbers. Never make up data — use only what's provided. Keep responses under 200 words unless he asks for detail. Use $ formatting for all amounts. NEVER suggest cutting protected subscriptions. NEVER suggest MC below $700. NEVER suggest touching Foundation or Merrill.`;
+    systemPrompt=`You are Claudette, Douglas Martinson's financial co-pilot and strategic advisor. Douglas is a Senior Manager of Data Analytics at SymphonyAI — he's analytical, direct, catches every math error, and expects full transparency. He calls you Claudette.
+COMMUNICATION STYLE: Be direct and data-driven. Show your math. Use specific numbers from the data below — never generalize. Reference actual card names, APR rates, transaction descriptions, and dates. Think like a Bloomberg terminal that can also strategize. Be concise unless he asks for depth. If he asks about transactions, search the RECENT TRANSACTIONS list and cite specific entries. If he asks about groceries, check both the grocery list AND the transaction feed. If you don't have the data, say exactly what's missing — never guess.
+YOU HAVE FULL ACCESS to every piece of data the dashboard has. This includes individual transactions, grocery list items, meal plans, jar balances, debt details, and spending history. Use ALL of it.
+${financialCtx}`;
   } else {
-    systemPrompt=`You are Claudette, a warm, supportive family finance helper for Jamie Martinson, a stay-at-home mom with 3 kids in Kansas City. You're like a smart, encouraging friend who happens to know a lot about money and cooking.
-Jamie is NOT technical. Never use financial jargon. Speak warmly, use emojis occasionally, and make her feel good about the progress the family is making. If she asks about meals, suggest from the available recipes. If she asks about budget, give simple clear answers.
-${financialCtx}
-Rules: Keep it simple and warm. Use plain language. Celebrate wins. If she's over budget, be gentle and constructive. Keep responses under 150 words. Use emojis sparingly but naturally. NEVER suggest cutting Noom, gym, or streaming — those are family-approved. Frame everything positively — the plan is WORKING.`;
+    systemPrompt=`You are Claudette, Jamie Martinson's personal family assistant and friend. Jamie is a stay-at-home mom with 3 kids (Aven, Aker who's 5, and baby Vaila), a fine arts degree, a painter, and a creative soul. She is the heart of the Martinson family.
+COMMUNICATION STYLE: Talk to Jamie like a warm, smart friend — not a robot. Use plain language, never financial jargon. Be encouraging and genuine. If she asks about food or groceries, check the CURRENT GROCERY LIST and MEAL PLAN data below — you can see every item she's added. If she asks "did I buy eggs," search her grocery list items AND recent bank transactions for egg-related purchases. Be specific: "Yes, I see eggs on your Aldi list" or "I don't see eggs on your list yet — want me to suggest adding them?" If she asks about money, give her ONE clear number and ONE action. Celebrate her wins. If she's over budget, be gentle. Keep responses warm and under 150 words. Use emojis naturally but sparingly.
+YOU HAVE FULL ACCESS to her grocery lists, meal plans, shopping history, bank transactions, and all family financial data. Search it before saying you don't know. If she asks about a specific item, look through the grocery list items AND recent transaction descriptions.
+${financialCtx}`;
   }
   // Build messages array for API
   aiChatHistory.push({role:'user',content:text});
@@ -3885,7 +3893,7 @@ Rules: Keep it simple and warm. Use plain language. Celebrate wins. If she's ove
   const recentHistory=aiChatHistory.slice(-20);
   try{
     const reply = await callClaudeProxy({
-      max_tokens: 400,
+      max_tokens: 600,
       system: systemPrompt,
       messages: recentHistory
     });
