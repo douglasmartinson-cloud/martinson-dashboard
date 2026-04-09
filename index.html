@@ -230,6 +230,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 #jamie-app .si-price:focus{outline:none;border-color:var(--ja-sage)}
 #jamie-app .si-del{width:28px;height:28px;border-radius:8px;background:transparent;border:none;color:var(--ja-text3);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 #jamie-app .si-del:hover{background:var(--ja-coral-soft);color:var(--ja-coral)}
+#jamie-app .si-price-wrap{flex-shrink:0}
+#jamie-app .si-add-price{font-size:12px;color:var(--ja-text3);cursor:pointer;padding:6px 10px;border:1px dashed var(--ja-border);border-radius:8px;white-space:nowrap;transition:all 0.15s}
+#jamie-app .si-add-price:hover{color:var(--ja-sage);border-color:var(--ja-sage)}
 #jamie-app .store-add-row{display:flex;gap:8px;margin-bottom:16px}
 #jamie-app .store-add-inp{flex:1;padding:12px 14px;border:1.5px solid var(--ja-border);border-radius:12px;background:var(--ja-card);color:var(--ja-text);font-family:var(--font-b);font-size:14px}
 #jamie-app .store-add-inp:focus{outline:none;border-color:var(--ja-sage)}
@@ -856,6 +859,13 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       <div id="store-list-items"></div>
     </div>
     <button class="btn btn-primary" id="store-done-btn" style="display:none;margin-top:12px" onclick="finishStoreShopping()">✅ Done Shopping — Save Total</button>
+    <!-- Receipt Scanner -->
+    <div class="receipt-zone" id="receipt-zone" ondragover="onReceiptDragOver(event)" ondragleave="onReceiptDragLeave()" ondrop="onReceiptDrop(event)">
+      <input type="file" accept="image/*" capture="environment" class="receipt-inp" id="receipt-inp" onchange="onReceiptSel(event)">
+      <div id="receipt-content"><div style="font-size:24px;margin-bottom:6px">📸</div><div style="font-size:14px;font-weight:600;margin-bottom:3px">Scan Your Receipt</div><div style="font-size:12px;color:#7a8e8a">Take a photo or upload a receipt — AI reads it, matches items to your list, and fills in prices</div></div>
+    </div>
+    <!-- Past Grocery Lists -->
+    <div id="j-past-lists"></div>
   </div>
   <!-- TRACKER (hidden — content merged into Home) -->
   <div class="j-page" id="j-tracker"></div>
@@ -1724,7 +1734,10 @@ function jPage(id,btn){
   if(id==='grocery') {
     renderStoreTabs();
     renderStoreItems();
+    j_renderPastLists();
   }
+  if(id==='home') j_refreshAll();
+  if(id==='goals') j_updateGoals();
 }
 function pinPrompt(target){pinTarget=target;pinBuffer='';updatePinDots();document.getElementById('pin-error').textContent='';document.getElementById('pin-overlay').classList.remove('hidden');}
 function pinCancel(){document.getElementById('pin-overlay').classList.add('hidden');pinBuffer='';}
@@ -2020,8 +2033,7 @@ function scanReceipt(file){
         headers:{'Content-Type':'text/plain'},
         body:JSON.stringify({
           action:'scanReceipt',
-          imageBase64:base64,
-          mediaType:mediaType
+          imageData:base64
         })
       });
       const data=await response.json();
@@ -2046,24 +2058,26 @@ function scanReceipt(file){
   reader.readAsDataURL(file);
 }
 function applyReceiptToList(receiptItems){
+  const items=storeItems[activeStoreId]||[];
   receiptItems.forEach(ri=>{
-    const name=ri.item.toLowerCase();
+    const rName=(ri.name||ri.item||'').toLowerCase();
     const price=parseFloat(ri.price)||0;
-    // Try to match to existing grocery item
-    const match=grocItems.find(gi=>{
-      const giName=(gi.n||gi.name||'').toLowerCase();
-      return giName.includes(name)||name.includes(giName.split(' ')[0]);
+    const match=items.find(si=>{
+      const siName=(si.name||'').toLowerCase();
+      return siName.includes(rName)||rName.includes(siName)||rName.split(' ').some(w=>w.length>3&&siName.includes(w));
     });
     if(match){
-      match.actual=price.toFixed(2);
+      match.price=price.toFixed(2);
       match.checked=true;
+      match.receiptMatch=rName;
     } else {
-      // Add as new item
-      grocItems.push({id:gid(),n:ri.item,s:'custom',sec:'From Receipt',e:price,checked:true,actual:price.toFixed(2),custom:true});
+      items.push({id:'si_'+Date.now()+'_'+Math.random().toString(36).substr(2,5),name:ri.name||ri.item,price:price.toFixed(2),checked:true,fromReceipt:true});
     }
   });
-  renderGrocList();
-  updateCartTotal();
+  storeItems[activeStoreId]=items;
+  saveStoreItems();
+  renderStoreItems();
+  updateStoreBudgetDisplay();
 }
 function resetReceipt(){
   const zone=document.getElementById('receipt-zone');
@@ -2820,20 +2834,6 @@ function buildList(){
 function renderGrocList(){
   renderStoreItems();updateStoreBudgetDisplay();
 }
-function giHTML(item){
-  const name=item.n||item.name||'Item';
-  const est=item.e||item.est||0;
-  return`<div class="g-item ${item.checked?'chk':''}" id="gi-${item.id}">
-    <div class="gi-cb" onclick="toggleGI('${item.id}')">${item.checked?'✓':''}</div>
-    <div style="flex:1;cursor:pointer" onclick="toggleGI('${item.id}')">
-      <div class="gi-name">${name}</div>
-      <div class="gi-est">Est. $${est.toFixed(2)}</div>
-    </div>
-    <input type="number" class="gi-price-inp" placeholder="$" value="${item.actual||''}" step="0.01" min="0" onclick="event.stopPropagation()" oninput="updateGIPrice('${item.id}',this.value)">
-  </div>`;
-}
-function toggleGI(id){const i=grocItems.find(x=>x.id===id);if(!i)return;i.checked=!i.checked;const el=document.getElementById('gi-'+id);if(el){el.classList.toggle('chk',i.checked);el.querySelector('.gi-cb').textContent=i.checked?'✓':'';}updateCartTotal();}
-function updateGIPrice(id,val){const i=grocItems.find(x=>x.id===id);if(i){i.actual=val;updateCartTotal();}}
 function addCustom(){addStoreItem();}
 function updateCartTotal(){
   updateStoreBudgetDisplay();
@@ -2918,16 +2918,18 @@ function renderStoreItems() {
   }
   empty.style.display = 'none';
   if (doneBtn) doneBtn.style.display = 'block';
-  wrap.innerHTML = items.map(item => `
-    <div class="store-item ${item.checked ? 'checked' : ''}" id="si-${item.id}">
+  wrap.innerHTML = items.map(item => {
+    const hasPrice = item.price !== '' && item.price !== undefined && item.price !== null;
+    const priceHTML = hasPrice 
+      ? `<input type="number" class="si-price" value="${item.price}" step="0.01" min="0" onclick="event.stopPropagation()" oninput="updateStoreItemPrice('${item.id}', this.value)">`
+      : `<span class="si-add-price" onclick="event.stopPropagation();j_showPrice('${item.id}')">add price</span>`;
+    return `<div class="store-item ${item.checked ? 'checked' : ''}" id="si-${item.id}">
       <div class="si-cb" onclick="toggleStoreItem('${item.id}')">${item.checked ? '✓' : ''}</div>
       <div class="si-name" onclick="toggleStoreItem('${item.id}')">${item.name}</div>
-      <input type="number" class="si-price" placeholder="$" value="${item.price || ''}" 
-             step="0.01" min="0" onclick="event.stopPropagation()" 
-             oninput="updateStoreItemPrice('${item.id}', this.value)">
+      <div class="si-price-wrap" id="si-pw-${item.id}">${priceHTML}</div>
       <button class="si-del" onclick="deleteStoreItem('${item.id}')" title="Remove">🗑</button>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
   updateStoreBudgetDisplay();
 }
 function addStoreItem() {
@@ -3143,32 +3145,34 @@ function saveAndCloseStores() {
   toast('✓ Stores saved');
 }
 function finishStoreShopping() {
-  // Calculate total across all stores
   let total = 0;
-  Object.values(storeItems).forEach(items => {
+  const archivedItems=[];
+  Object.entries(storeItems).forEach(([storeId, items]) => {
     if (Array.isArray(items)) {
+      const storeName=(groceryStores.find(s=>s.id===storeId)||{}).name||storeId;
       items.forEach(i => {
         total += parseFloat(i.price) || 0;
+        archivedItems.push({name:i.name,price:parseFloat(i.price)||0,store:storeName,checked:i.checked});
       });
     }
   });
-  // Save to week history
-  weekHist.unshift({
+  const listArchive={
     wk: currentWeek,
     label: 'Week ' + currentWeek,
     date: new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}),
     t: +total.toFixed(2),
-    budget: WEEKLY_BUDGET
-  });
+    budget: WEEKLY_BUDGET,
+    items: archivedItems
+  };
+  weekHist.unshift(listArchive);
   fbSet('week_hist', weekHist);
   currentWeek++;
-  // Clear all store items
   storeItems = {};
   fbSet('store_items', storeItems);
   renderStoreItems();
   renderWeekHist();
+  j_renderPastLists();
   syncJamieToDoug();
-  
   toast('✓ Week saved! Total: $' + total.toFixed(2));
 }
 function initStoreGrocery() {
@@ -3450,6 +3454,29 @@ function j_renderRecentTx(){
     const color=t.cat==='Groceries'?'#5a9e8a':'#7a8e8a';
     return`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(232,226,217,0.5)"><div><div style="font-size:13px;font-weight:600;color:#2c3e3a">${desc}</div><div style="font-size:11px;color:#7a8e8a">${ds} · ${t.cat}</div></div><div style="font-family:var(--font-d);font-size:15px;font-weight:700;color:${color}">-${fmtD(Math.abs(t.amount))}</div></div>`;
   }).join('');
+}
+function j_showPrice(itemId){
+  const wrap=document.getElementById('si-pw-'+itemId);
+  if(!wrap)return;
+  wrap.innerHTML=`<input type="number" class="si-price" placeholder="$" step="0.01" min="0" onclick="event.stopPropagation()" oninput="updateStoreItemPrice('${itemId}', this.value)" autofocus>`;
+  wrap.querySelector('input').focus();
+}
+function j_renderPastLists(){
+  const wrap=document.getElementById('j-past-lists');
+  if(!wrap)return;
+  const listsWithItems=weekHist.filter(w=>w.items&&w.items.length);
+  if(!listsWithItems.length){wrap.innerHTML='';return;}
+  wrap.innerHTML=`<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#7a8e8a;margin:16px 0 8px">📋 Past Grocery Lists</div>`+
+    listsWithItems.slice(0,4).map(w=>{
+      const under=w.t<=w.budget;
+      return`<div class="ja-card" style="padding:14px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div><span style="font-weight:700;font-size:14px">${w.label}</span><span style="font-size:12px;color:#7a8e8a;margin-left:8px">${w.date}</span></div>
+          <span style="font-family:var(--font-d);font-size:16px;font-weight:700;color:${under?'#5a9e8a':'#e8846b'}">$${w.t.toFixed(2)}</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">${w.items.slice(0,10).map(i=>`<span style="font-size:11px;padding:3px 8px;background:rgba(90,158,138,0.08);border-radius:100px;color:#2c3e3a">${i.name}${i.price?' $'+i.price.toFixed(2):''}</span>`).join('')}${w.items.length>10?`<span style="font-size:11px;padding:3px 8px;color:#7a8e8a">+${w.items.length-10} more</span>`:''}</div>
+      </div>`;
+    }).join('');
 }
 function j_showInsight(){
   const el=document.getElementById('j-ai-insight');
