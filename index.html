@@ -122,159 +122,163 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .pc-mo{font-family:var(--font-d);font-size:20px}
 .pc-date{font-size:11px;color:var(--text-mid);margin-top:2px}
 .pc-saved{font-size:11px;color:var(--teal);margin-top:2px}
-/* ── JAMIE SIDE ── */
-.jamie-bg{background:linear-gradient(135deg,#1a2818 0%,#0f1117 100%)}
-.j-header{background:linear-gradient(135deg,#2d5a3d,#1a3d2a);padding:24px;border-bottom:1px solid rgba(90,158,138,0.2)}
-.j-greeting{font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:2px}
-.j-name{font-family:var(--font-d);font-size:26px;color:#fff}
-.j-sub{font-size:12px;color:rgba(255,255,255,0.55);margin-top:3px}
-.j-budget-strip{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:14px;background:rgba(255,255,255,0.04);border-bottom:1px solid rgba(90,158,138,0.15)}
-.jbs-val{font-family:var(--font-d);font-size:22px;font-weight:600;text-align:center}
-.jbs-label{font-size:10px;color:var(--text-mid);text-align:center;margin-top:2px;text-transform:uppercase;letter-spacing:0.4px;font-weight:600}
-.gauge-card{background:var(--surface);margin:14px;border-radius:var(--r);padding:16px}
-.gauge-title{font-size:13px;font-weight:600;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
-.gauge-bar-bg{background:var(--surface2);border-radius:100px;height:10px;overflow:hidden;margin-bottom:6px}
-.gauge-bar-fill{height:100%;border-radius:100px;transition:width 0.5s,background 0.3s}
-.gauge-sub{display:flex;justify-content:space-between;font-size:12px;color:var(--text-mid)}
-/* meal planner */
-.j-page{display:none;padding:14px}.j-page.active{display:block}
-.j-sec-title{font-family:var(--font-d);font-size:20px;margin-bottom:4px}
-.j-sec-sub{font-size:13px;color:var(--text-mid);margin-bottom:14px}
-.day-card{background:var(--surface);border-radius:var(--r);margin-bottom:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.15)}
-.day-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;background:var(--surface2)}
-.day-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-mid)}
-.day-meal-name{font-size:14px;font-weight:600;color:var(--sage)}
-.day-empty-txt{font-size:13px;color:var(--text-soft);font-style:italic}
-.day-chev{font-size:11px;color:var(--text-soft);transition:transform 0.2s}
-.day-chev.open{transform:rotate(180deg)}
-.meal-chips{display:none;padding:12px;flex-wrap:wrap;gap:4px}
-.meal-chips.open{display:flex}
-.m-chip-wrap{display:inline-flex;align-items:center;gap:2px;margin:3px 0}
-.m-chip{padding:7px 12px;border-radius:100px;border:1.5px solid var(--border);background:transparent;color:var(--text-mid);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;white-space:nowrap;font-family:var(--font-b)}
-.m-chip.sel{background:var(--sage);border-color:var(--sage);color:#fff}
-.m-chip:active{transform:scale(0.96)}
-.m-chip-rm{background:rgba(255,107,107,0.12);border:none;color:var(--red);font-size:11px;border-radius:100px;width:20px;height:20px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;transition:background 0.15s;line-height:1;margin-right:4px}
-.m-chip-rm:hover{background:rgba(255,107,107,0.28)}
-/* grocery */
-.spend-summary{background:var(--surface);border-radius:var(--r);padding:14px 16px;margin-bottom:14px}
-.ss-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0}
-.ss-label{font-size:13px;color:var(--text-mid);font-weight:500}
-.ss-val{font-size:17px;font-weight:700;font-family:var(--font-d)}
-.add-row{display:flex;gap:8px;margin-bottom:14px}
-.add-inp{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font-family:var(--font-b);font-size:14px}
-.add-inp:focus{outline:none;border-color:var(--sage)}
-.add-btn-go{padding:10px 16px;background:var(--sage);color:#fff;border:none;border-radius:10px;font-family:var(--font-b);font-size:14px;font-weight:700;cursor:pointer}
-.store-hdr{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;margin-bottom:7px}
-.store-hdr.aldi{background:linear-gradient(90deg,rgba(90,158,138,0.2),transparent)}
-.store-hdr.other{background:linear-gradient(90deg,rgba(255,197,66,0.15),transparent)}
-.s-badge{font-size:10px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;padding:2px 7px;border-radius:100px}
-.s-badge.aldi{background:var(--sage-dim);color:var(--sage)}.s-badge.other{background:var(--gold-dim);color:var(--gold)}
-.sec-label{font-size:10px;font-weight:700;color:var(--text-soft);text-transform:uppercase;letter-spacing:0.4px;padding:4px 6px;margin-bottom:3px}
-.g-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border-radius:10px;margin-bottom:5px;cursor:pointer;transition:opacity 0.2s;border:1px solid var(--border)}
-.g-item.chk{opacity:0.45;background:var(--surface2)}
-.g-item.chk .gi-name{text-decoration:line-through;color:var(--text-soft)}
-.gi-cb{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--surface2);transition:all 0.2s}
-.g-item.chk .gi-cb{background:var(--sage);border-color:var(--sage);color:#fff;font-size:11px}
-.gi-name{font-size:13px;font-weight:600;flex:1}
-.gi-est{font-size:11px;color:var(--text-soft)}
-.gi-price-inp{width:68px;padding:5px 7px;border:1.5px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-size:13px;font-weight:600;text-align:right;font-family:var(--font-b)}
-.gi-price-inp:focus{outline:none;border-color:var(--sage)}
-.empty-state{text-align:center;padding:40px 20px;color:var(--text-mid)}
-.es-icon{font-size:36px;margin-bottom:10px}
-/* ── MULTI-STORE GROCERY TABS (v38) ── */
-.store-tabs-wrap{display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
-.store-tabs{display:flex;gap:6px;overflow-x:auto;flex:1;scrollbar-width:none}
-.store-tabs::-webkit-scrollbar{display:none}
-.store-tab{flex-shrink:0;padding:8px 14px;border-radius:100px;border:1.5px solid var(--border);background:transparent;color:var(--text-mid);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-b);transition:all 0.2s;display:flex;align-items:center;gap:6px}
-.store-tab.active{background:var(--sage);border-color:var(--sage);color:#fff}
-.store-tab-emoji{font-size:14px}
-.store-manage-btn{flex-shrink:0;width:36px;height:36px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);color:var(--text-mid);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
-.store-manage-btn:hover{background:var(--surface);color:var(--text)}
-.store-list-wrap{min-height:200px}
-.store-list-empty{text-align:center;padding:40px 20px;color:var(--text-mid)}
-.store-list-empty .es-icon{font-size:32px;margin-bottom:8px}
-.store-item{display:flex;align-items:center;gap:10px;padding:12px;background:var(--surface);border-radius:10px;margin-bottom:6px;border:1px solid var(--border);transition:all 0.2s}
-.store-item.checked{opacity:0.5;background:var(--surface2)}
-.store-item.checked .si-name{text-decoration:line-through;color:var(--text-soft)}
-.si-cb{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--surface2);cursor:pointer;transition:all 0.15s;font-size:12px}
-.store-item.checked .si-cb{background:var(--sage);border-color:var(--sage);color:#fff}
-.si-name{flex:1;font-size:14px;font-weight:600;cursor:pointer}
-.si-price{width:70px;padding:6px 8px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px;font-weight:600;text-align:right;font-family:var(--font-b)}
-.si-price:focus{outline:none;border-color:var(--sage)}
-.si-del{width:28px;height:28px;border-radius:6px;background:transparent;border:none;color:var(--text-soft);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
-.si-del:hover{background:var(--red-dim);color:var(--red)}
-.store-add-row{display:flex;gap:8px;margin-bottom:16px}
-.store-add-inp{flex:1;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font-family:var(--font-b);font-size:14px}
-.store-add-inp:focus{outline:none;border-color:var(--sage)}
-.store-add-btn{padding:12px 18px;background:var(--sage);color:#fff;border:none;border-radius:10px;font-family:var(--font-b);font-size:14px;font-weight:700;cursor:pointer;transition:opacity 0.2s}
-.store-add-btn:active{opacity:0.8}
-.store-budget-bar{background:var(--surface);border-radius:var(--r);padding:14px;margin-bottom:14px}
-.sbb-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.sbb-label{font-size:12px;color:var(--text-mid);font-weight:600}
-.sbb-val{font-family:var(--font-d);font-size:18px}
-.sbb-progress{background:var(--surface2);border-radius:100px;height:8px;overflow:hidden}
-.sbb-fill{height:100%;border-radius:100px;transition:width 0.4s,background 0.3s}
-/* Manage Stores Overlay */
-.manage-stores-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
-.manage-stores-box{background:var(--surface);border-radius:16px;padding:24px;width:100%;max-width:400px;max-height:85vh;overflow-y:auto}
-.msb-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-.msb-title{font-family:var(--font-d);font-size:20px}
-.msb-close{background:var(--surface2);border:none;color:var(--text-mid);padding:6px 12px;border-radius:8px;cursor:pointer;font-family:var(--font-b);font-size:13px}
-.msb-store{display:flex;align-items:center;gap:10px;padding:12px;background:var(--surface2);border-radius:10px;margin-bottom:8px}
-.msb-emoji-btn{width:40px;height:40px;border-radius:10px;background:var(--surface);border:1px solid var(--border);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
-.msb-emoji-btn:hover{background:var(--border)}
-.msb-name-inp{flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-family:var(--font-b);font-size:14px;font-weight:600}
-.msb-name-inp:focus{outline:none;border-color:var(--sage)}
-.msb-del{width:36px;height:36px;border-radius:8px;background:transparent;border:none;color:var(--text-soft);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
-.msb-del:hover{background:var(--red-dim);color:var(--red)}
-.msb-add-btn{width:100%;padding:12px;background:var(--surface2);border:2px dashed var(--border);border-radius:10px;color:var(--text-mid);font-family:var(--font-b);font-size:14px;font-weight:600;cursor:pointer;margin-top:8px;transition:all 0.2s}
-.msb-add-btn:hover{border-color:var(--sage);color:var(--sage)}
-.msb-save-btn{width:100%;padding:14px;background:var(--sage);color:#fff;border:none;border-radius:10px;font-family:var(--font-b);font-size:15px;font-weight:700;cursor:pointer;margin-top:16px}
-/* history */
-.hist-item{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--surface);border-radius:10px;margin-bottom:8px;border:1px solid var(--border)}
-.hi-week{font-size:13px;font-weight:600}.hi-date{font-size:11px;color:var(--text-mid);margin-top:1px}
-.hi-amt{font-family:var(--font-d);font-size:18px}.hi-status{font-size:10px;font-weight:700;padding:2px 7px;border-radius:100px;margin-top:2px;display:inline-block}
-.hs-under{background:var(--sage-dim);color:var(--sage)}.hs-over{background:var(--red-dim);color:var(--red)}
-/* goals */
-.goal-card{background:var(--surface);border-radius:var(--r);padding:16px;margin-bottom:10px;border-left:4px solid var(--border);border-bottom:1px solid var(--border)}
-.goal-card.g-vac{border-left-color:var(--gold)}.goal-card.g-emerg{border-left-color:var(--teal)}.goal-card.g-debt{border-left-color:var(--red)}
-.g-emoji{font-size:24px;margin-bottom:6px}
-.g-name{font-size:15px;font-weight:700;margin-bottom:4px}
-.g-desc{font-size:13px;color:var(--text-mid);line-height:1.5;margin-bottom:10px}
-.g-prog-lbl{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px}
-.impact-panel{background:linear-gradient(135deg,var(--sage-dim),rgba(90,158,138,0.05));border:1px solid rgba(90,158,138,0.2);border-radius:var(--r);padding:16px;margin-bottom:14px}
-.ip-title{font-size:13px;font-weight:700;color:var(--sage);margin-bottom:10px}
-.ip-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(90,158,138,0.1)}
-.ip-row:last-child{border-bottom:none}
-.ip-label{font-size:13px;color:var(--text-mid)}.ip-val{font-size:14px;font-weight:700;color:var(--sage)}
-/* ── CUSTOM MEAL FORM ── */
-.custom-meal-form{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:14px}
-.cmf-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px}
-.cmf-row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
-.cmf-inp{flex:1;min-width:140px;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-family:var(--font-b);font-size:13px}
-.cmf-inp:focus{outline:none;border-color:var(--sage)}
-.cmf-btn{padding:9px 14px;background:var(--sage);color:#fff;border:none;border-radius:8px;font-family:var(--font-b);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
-.cmf-btn:active{transform:scale(0.97)}
-.cmf-ing-row{display:flex;gap:6px;align-items:center;margin-bottom:6px}
-.cmf-ing-name{flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-family:var(--font-b);font-size:12px}
-.cmf-ing-name:focus{outline:none;border-color:var(--sage)}
-.cmf-ing-price{width:70px;padding:7px 8px;border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-family:var(--font-b);font-size:12px;text-align:right}
-.cmf-ing-price:focus{outline:none;border-color:var(--sage)}
-.cmf-ing-rm{background:none;border:none;color:var(--text-soft);font-size:16px;cursor:pointer;padding:0 4px;line-height:1}
-.cmf-add-ing{background:none;border:1px dashed var(--border);border-radius:7px;color:var(--text-mid);font-size:12px;padding:6px 10px;cursor:pointer;width:100%;margin-bottom:8px;font-family:var(--font-b)}
-.cmf-add-ing:hover{border-color:var(--sage);color:var(--sage)}
-.custom-meals-list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
-.custom-meal-tag{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface);border:1px solid var(--sage);border-radius:8px}
-.cmt-name{font-size:13px;font-weight:600;color:var(--sage)}
-.cmt-rm{background:none;border:none;color:var(--text-soft);font-size:14px;cursor:pointer;padding:0 4px}
-/* ── RECEIPT UPLOAD ── */
-.receipt-zone{border:2px dashed var(--border);border-radius:var(--r);padding:20px;text-align:center;cursor:pointer;position:relative;transition:all 0.3s;margin-bottom:14px}
-.receipt-zone.drag-over{border-color:var(--sage);background:var(--sage-dim)}
-.receipt-zone.scanning{border-color:var(--gold);border-style:solid;background:var(--gold-dim);pointer-events:none}
-.receipt-zone.done{border-color:var(--sage);border-style:solid;background:var(--sage-dim)}
-.receipt-inp{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
-.scan-spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,197,66,0.3);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;vertical-align:middle;margin-right:6px}
-@keyframes spin{to{transform:rotate(360deg)}}
+/* ── JAMIE AURORA — Light warm theme (v44) ── */
+#jamie-app{background:#faf7f2;color:#2c3e3a;min-height:100vh;font-family:var(--font-b);--ja-bg:#faf7f2;--ja-card:#fff;--ja-sage:#5a9e8a;--ja-sage-soft:rgba(90,158,138,0.1);--ja-coral:#e8846b;--ja-coral-soft:rgba(232,132,107,0.1);--ja-gold:#d4a853;--ja-gold-soft:rgba(212,168,83,0.12);--ja-text:#2c3e3a;--ja-text2:#7a8e8a;--ja-text3:#a8b8b4;--ja-border:#e8e2d9;--ja-shadow:0 2px 16px rgba(44,62,58,0.06);--ja-r:16px}
+#jamie-app *{color:inherit}
+#jamie-app .j-topbar{display:flex;justify-content:space-between;align-items:center;padding:14px 20px 0;background:transparent}
+#jamie-app .j-topbar .back-btn{background:var(--ja-sage-soft);color:var(--ja-sage);border:none;padding:6px 14px;border-radius:100px;font-size:12px;font-weight:600;cursor:pointer}
+#jamie-app .j-hero{padding:8px 20px 20px;text-align:center}
+#jamie-app .j-hero-greeting{font-size:14px;color:var(--ja-text2);margin-bottom:2px}
+#jamie-app .j-hero-name{font-family:var(--font-d);font-size:32px;color:var(--ja-text);margin-bottom:4px}
+#jamie-app .j-hero-ff{font-size:15px;font-weight:600;color:var(--ja-sage);margin-bottom:16px}
+#jamie-app .j-status-card{background:var(--ja-card);border-radius:20px;padding:24px;margin:0 20px 16px;box-shadow:var(--ja-shadow);text-align:center;border:1px solid var(--ja-border)}
+#jamie-app .j-status-emoji{font-size:48px;margin-bottom:8px}
+#jamie-app .j-status-msg{font-family:var(--font-d);font-size:22px;color:var(--ja-text);margin-bottom:4px}
+#jamie-app .j-status-sub{font-size:13px;color:var(--ja-text2)}
+#jamie-app .j-ring-wrap{position:relative;width:140px;height:140px;margin:0 auto 12px}
+#jamie-app .j-ring-wrap svg{width:100%;height:100%}
+#jamie-app .j-ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#jamie-app .j-ring-val{font-family:var(--font-d);font-size:28px;font-weight:700}
+#jamie-app .j-ring-label{font-size:11px;color:var(--ja-text2);font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+#jamie-app .j-nav{position:fixed;bottom:0;left:0;right:0;background:var(--ja-card);border-top:1px solid var(--ja-border);display:grid;grid-template-columns:repeat(4,1fr);z-index:50;padding:6px 0 max(10px,env(safe-area-inset-bottom));box-shadow:0 -4px 20px rgba(0,0,0,0.04)}
+#jamie-app .jn-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;background:none;border:none;font-family:var(--font-b);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;color:var(--ja-text3);padding:6px 4px;transition:all 0.2s}
+#jamie-app .jn-item .jn-icon{font-size:22px;transition:transform 0.2s}
+#jamie-app .jn-item.active{color:var(--ja-sage)}
+#jamie-app .jn-item.active .jn-icon{transform:scale(1.15)}
+#jamie-app .j-page{display:none;padding:0 20px 20px}.j-page.active{display:block}
+#jamie-app .j-sec-title{font-family:var(--font-d);font-size:22px;color:var(--ja-text);margin-bottom:4px}
+#jamie-app .j-sec-sub{font-size:13px;color:var(--ja-text2);margin-bottom:16px}
+/* Aurora Cards */
+#jamie-app .ja-card{background:var(--ja-card);border-radius:var(--ja-r);padding:20px;margin-bottom:14px;box-shadow:var(--ja-shadow);border:1px solid var(--ja-border)}
+#jamie-app .ja-card-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--ja-text2);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+#jamie-app .ja-stat-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(232,226,217,0.6)}
+#jamie-app .ja-stat-row:last-child{border-bottom:none}
+#jamie-app .ja-stat-label{font-size:13px;color:var(--ja-text2)}
+#jamie-app .ja-stat-val{font-size:15px;font-weight:700;font-family:var(--font-d)}
+/* Aurora Insight */
+#jamie-app .ja-insight{background:linear-gradient(135deg,rgba(90,158,138,0.08),rgba(212,168,83,0.06));border:1px solid rgba(90,158,138,0.15);border-radius:var(--ja-r);padding:16px 20px;margin:0 20px 16px}
+#jamie-app .ja-insight-label{font-size:11px;font-weight:700;color:var(--ja-sage);margin-bottom:4px}
+#jamie-app .ja-insight-text{font-size:14px;color:var(--ja-text);line-height:1.5}
+/* Aurora Budget Strip */
+#jamie-app .ja-budget-strip{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:0 20px 16px}
+#jamie-app .ja-budget-item{background:var(--ja-card);border-radius:14px;padding:14px 10px;text-align:center;box-shadow:var(--ja-shadow);border:1px solid var(--ja-border)}
+#jamie-app .ja-budget-val{font-family:var(--font-d);font-size:20px;font-weight:700}
+#jamie-app .ja-budget-label{font-size:9px;color:var(--ja-text2);text-transform:uppercase;letter-spacing:0.4px;font-weight:600;margin-top:3px}
+/* Aurora Gauge */
+#jamie-app .ja-gauge{background:var(--ja-card);margin:0 20px 16px;border-radius:var(--ja-r);padding:16px;box-shadow:var(--ja-shadow);border:1px solid var(--ja-border)}
+#jamie-app .gauge-title{font-size:13px;font-weight:600;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;color:var(--ja-text)}
+#jamie-app .gauge-bar-bg{background:var(--ja-border);border-radius:100px;height:12px;overflow:hidden;margin-bottom:8px}
+#jamie-app .gauge-bar-fill{height:100%;border-radius:100px;transition:width 0.5s,background 0.3s}
+#jamie-app .gauge-sub{display:flex;justify-content:space-between;font-size:12px;color:var(--ja-text2)}
+/* Day cards — meals */
+#jamie-app .day-card{background:var(--ja-card);border-radius:var(--ja-r);margin-bottom:10px;overflow:hidden;box-shadow:var(--ja-shadow);border:1px solid var(--ja-border)}
+#jamie-app .day-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;background:rgba(90,158,138,0.04)}
+#jamie-app .day-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--ja-text2)}
+#jamie-app .day-meal-name{font-size:14px;font-weight:600;color:var(--ja-sage)}
+#jamie-app .day-empty-txt{font-size:13px;color:var(--ja-text3);font-style:italic}
+#jamie-app .day-chev{font-size:11px;color:var(--ja-text3);transition:transform 0.2s}
+#jamie-app .day-chev.open{transform:rotate(180deg)}
+#jamie-app .meal-chips{display:none;padding:12px;flex-wrap:wrap;gap:4px;background:var(--ja-bg)}
+#jamie-app .meal-chips.open{display:flex}
+#jamie-app .m-chip-wrap{display:inline-flex;align-items:center;gap:2px;margin:3px 0}
+#jamie-app .m-chip{padding:8px 14px;border-radius:100px;border:1.5px solid var(--ja-border);background:var(--ja-card);color:var(--ja-text2);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;white-space:nowrap;font-family:var(--font-b)}
+#jamie-app .m-chip.sel{background:var(--ja-sage);border-color:var(--ja-sage);color:#fff}
+#jamie-app .m-chip:active{transform:scale(0.96)}
+#jamie-app .m-chip-rm{background:var(--ja-coral-soft);border:none;color:var(--ja-coral);font-size:11px;border-radius:100px;width:20px;height:20px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;margin-right:4px}
+/* Custom meal form */
+#jamie-app .custom-meal-form{background:var(--ja-card);border:1px solid var(--ja-border);border-radius:var(--ja-r);padding:16px;margin-bottom:14px;box-shadow:var(--ja-shadow)}
+#jamie-app .cmf-title{font-size:13px;font-weight:700;color:var(--ja-text);margin-bottom:12px}
+#jamie-app .cmf-row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+#jamie-app .cmf-inp{flex:1;min-width:140px;padding:10px 12px;border:1.5px solid var(--ja-border);border-radius:10px;background:var(--ja-bg);color:var(--ja-text);font-family:var(--font-b);font-size:13px}
+#jamie-app .cmf-inp:focus{outline:none;border-color:var(--ja-sage)}
+#jamie-app .cmf-btn{padding:10px 16px;background:var(--ja-sage);color:#fff;border:none;border-radius:10px;font-family:var(--font-b);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+#jamie-app .cmf-ing-row{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+#jamie-app .cmf-ing-name{flex:1;padding:8px 10px;border:1px solid var(--ja-border);border-radius:8px;background:var(--ja-bg);color:var(--ja-text);font-family:var(--font-b);font-size:12px}
+#jamie-app .cmf-ing-name:focus{outline:none;border-color:var(--ja-sage)}
+#jamie-app .cmf-ing-price{width:70px;padding:8px;border:1px solid var(--ja-border);border-radius:8px;background:var(--ja-bg);color:var(--ja-text);font-family:var(--font-b);font-size:12px;text-align:right}
+#jamie-app .cmf-ing-rm{background:none;border:none;color:var(--ja-text3);font-size:16px;cursor:pointer;padding:0 4px}
+#jamie-app .cmf-add-ing{background:none;border:1.5px dashed var(--ja-border);border-radius:8px;color:var(--ja-text2);font-size:12px;padding:8px 10px;cursor:pointer;width:100%;margin-bottom:8px;font-family:var(--font-b)}
+#jamie-app .cmf-add-ing:hover{border-color:var(--ja-sage);color:var(--ja-sage)}
+#jamie-app .custom-meals-list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+#jamie-app .custom-meal-tag{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--ja-card);border:1.5px solid var(--ja-sage);border-radius:10px}
+#jamie-app .cmt-name{font-size:13px;font-weight:600;color:var(--ja-sage)}
+#jamie-app .cmt-rm{background:none;border:none;color:var(--ja-text3);font-size:14px;cursor:pointer}
+/* Aurora buttons */
+#jamie-app .btn{width:100%;padding:14px;border:none;border-radius:14px;font-family:var(--font-b);font-size:15px;font-weight:700;cursor:pointer;margin-bottom:8px;transition:all 0.2s}
+#jamie-app .btn:active{transform:scale(0.98)}
+#jamie-app .btn-primary{background:var(--ja-sage);color:#fff;box-shadow:0 4px 12px rgba(90,158,138,0.25)}
+#jamie-app .btn-outline{background:transparent;color:var(--ja-sage);border:2px solid var(--ja-sage)}
+/* Store system — Aurora style */
+#jamie-app .store-tabs-wrap{display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--ja-border)}
+#jamie-app .store-tabs{display:flex;gap:6px;overflow-x:auto;flex:1;scrollbar-width:none}
+#jamie-app .store-tabs::-webkit-scrollbar{display:none}
+#jamie-app .store-tab{flex-shrink:0;padding:9px 16px;border-radius:100px;border:1.5px solid var(--ja-border);background:var(--ja-card);color:var(--ja-text2);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-b);transition:all 0.2s;display:flex;align-items:center;gap:6px}
+#jamie-app .store-tab.active{background:var(--ja-sage);border-color:var(--ja-sage);color:#fff}
+#jamie-app .store-tab-emoji{font-size:14px}
+#jamie-app .store-manage-btn{flex-shrink:0;width:36px;height:36px;border-radius:50%;background:var(--ja-card);border:1px solid var(--ja-border);color:var(--ja-text2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+#jamie-app .store-list-wrap{min-height:200px}
+#jamie-app .store-list-empty{text-align:center;padding:40px 20px;color:var(--ja-text2)}
+#jamie-app .store-list-empty .es-icon{font-size:36px;margin-bottom:8px}
+#jamie-app .store-item{display:flex;align-items:center;gap:10px;padding:14px;background:var(--ja-card);border-radius:14px;margin-bottom:8px;border:1px solid var(--ja-border);transition:all 0.2s;box-shadow:var(--ja-shadow)}
+#jamie-app .store-item.checked{opacity:0.45;background:rgba(90,158,138,0.05)}
+#jamie-app .store-item.checked .si-name{text-decoration:line-through;color:var(--ja-text3)}
+#jamie-app .si-cb{width:24px;height:24px;border-radius:50%;border:2px solid var(--ja-border);display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--ja-bg);cursor:pointer;transition:all 0.15s;font-size:12px}
+#jamie-app .store-item.checked .si-cb{background:var(--ja-sage);border-color:var(--ja-sage);color:#fff}
+#jamie-app .si-name{flex:1;font-size:14px;font-weight:600;cursor:pointer;color:var(--ja-text)}
+#jamie-app .si-price{width:72px;padding:8px;border:1.5px solid var(--ja-border);border-radius:10px;background:var(--ja-bg);color:var(--ja-text);font-size:13px;font-weight:600;text-align:right;font-family:var(--font-b)}
+#jamie-app .si-price:focus{outline:none;border-color:var(--ja-sage)}
+#jamie-app .si-del{width:28px;height:28px;border-radius:8px;background:transparent;border:none;color:var(--ja-text3);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+#jamie-app .si-del:hover{background:var(--ja-coral-soft);color:var(--ja-coral)}
+#jamie-app .store-add-row{display:flex;gap:8px;margin-bottom:16px}
+#jamie-app .store-add-inp{flex:1;padding:12px 14px;border:1.5px solid var(--ja-border);border-radius:12px;background:var(--ja-card);color:var(--ja-text);font-family:var(--font-b);font-size:14px}
+#jamie-app .store-add-inp:focus{outline:none;border-color:var(--ja-sage)}
+#jamie-app .store-add-btn{padding:12px 20px;background:var(--ja-sage);color:#fff;border:none;border-radius:12px;font-family:var(--font-b);font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(90,158,138,0.2)}
+#jamie-app .store-budget-bar{background:var(--ja-card);border-radius:var(--ja-r);padding:16px;margin-bottom:14px;box-shadow:var(--ja-shadow);border:1px solid var(--ja-border)}
+#jamie-app .sbb-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+#jamie-app .sbb-label{font-size:12px;color:var(--ja-text2);font-weight:600}
+#jamie-app .sbb-val{font-family:var(--font-d);font-size:18px;color:var(--ja-text)}
+#jamie-app .sbb-progress{background:var(--ja-border);border-radius:100px;height:10px;overflow:hidden}
+#jamie-app .sbb-fill{height:100%;border-radius:100px;transition:width 0.4s,background 0.3s}
+/* Store manage overlay */
+#jamie-app .manage-stores-overlay{position:fixed;inset:0;background:rgba(44,62,58,0.6);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px)}
+#jamie-app .manage-stores-box{background:var(--ja-card);border-radius:20px;padding:24px;width:100%;max-width:400px;max-height:85vh;overflow-y:auto}
+#jamie-app .msb-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+#jamie-app .msb-title{font-family:var(--font-d);font-size:20px;color:var(--ja-text)}
+#jamie-app .msb-close{background:var(--ja-bg);border:none;color:var(--ja-text2);padding:6px 14px;border-radius:8px;cursor:pointer;font-family:var(--font-b);font-size:13px}
+#jamie-app .msb-store{display:flex;align-items:center;gap:10px;padding:12px;background:var(--ja-bg);border-radius:12px;margin-bottom:8px}
+#jamie-app .msb-emoji-btn{width:40px;height:40px;border-radius:10px;background:var(--ja-card);border:1px solid var(--ja-border);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+#jamie-app .msb-name-inp{flex:1;padding:10px 12px;border:1.5px solid var(--ja-border);border-radius:8px;background:var(--ja-card);color:var(--ja-text);font-family:var(--font-b);font-size:14px;font-weight:600}
+#jamie-app .msb-del{width:36px;height:36px;border-radius:8px;background:transparent;border:none;color:var(--ja-text3);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+#jamie-app .msb-del:hover{background:var(--ja-coral-soft);color:var(--ja-coral)}
+#jamie-app .msb-add-btn{width:100%;padding:12px;background:var(--ja-bg);border:2px dashed var(--ja-border);border-radius:12px;color:var(--ja-text2);font-family:var(--font-b);font-size:14px;font-weight:600;cursor:pointer;margin-top:8px}
+#jamie-app .msb-save-btn{width:100%;padding:14px;background:var(--ja-sage);color:#fff;border:none;border-radius:12px;font-family:var(--font-b);font-size:15px;font-weight:700;cursor:pointer;margin-top:16px;box-shadow:0 4px 12px rgba(90,158,138,0.25)}
+/* History */
+#jamie-app .hist-item{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:var(--ja-card);border-radius:14px;margin-bottom:8px;border:1px solid var(--ja-border);box-shadow:var(--ja-shadow)}
+#jamie-app .hi-week{font-size:13px;font-weight:600;color:var(--ja-text)}
+#jamie-app .hi-date{font-size:11px;color:var(--ja-text2);margin-top:1px}
+#jamie-app .hi-amt{font-family:var(--font-d);font-size:18px}
+#jamie-app .hi-status{font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;margin-top:2px;display:inline-block}
+#jamie-app .hs-under{background:var(--ja-sage-soft);color:var(--ja-sage)}
+#jamie-app .hs-over{background:var(--ja-coral-soft);color:var(--ja-coral)}
+/* Goals — vision board */
+#jamie-app .ja-goal{background:var(--ja-card);border-radius:20px;padding:20px;margin-bottom:14px;box-shadow:var(--ja-shadow);border:1px solid var(--ja-border);text-align:center}
+#jamie-app .ja-goal-icon{font-size:36px;margin-bottom:8px}
+#jamie-app .ja-goal-name{font-family:var(--font-d);font-size:18px;color:var(--ja-text);margin-bottom:6px}
+#jamie-app .ja-goal-desc{font-size:13px;color:var(--ja-text2);line-height:1.5;margin-bottom:14px}
+#jamie-app .ja-goal-ring{position:relative;width:100px;height:100px;margin:0 auto 8px}
+#jamie-app .ja-goal-ring svg{width:100%;height:100%}
+#jamie-app .ja-goal-ring-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:16px;font-weight:700}
+#jamie-app .ja-goal-sub{font-size:12px;color:var(--ja-text2);font-weight:600}
+/* Receipt */
+#jamie-app .receipt-zone{border:2px dashed var(--ja-border);border-radius:var(--ja-r);padding:20px;text-align:center;cursor:pointer;position:relative;transition:all 0.3s;margin-bottom:14px;background:var(--ja-card)}
+#jamie-app .receipt-zone.drag-over{border-color:var(--ja-sage);background:var(--ja-sage-soft)}
+#jamie-app .receipt-zone.scanning{border-color:var(--ja-gold);border-style:solid;background:var(--ja-gold-soft)}
+#jamie-app .receipt-zone.done{border-color:var(--ja-sage);border-style:solid;background:var(--ja-sage-soft)}
+#jamie-app .receipt-inp{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+#jamie-app .scan-spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(212,168,83,0.3);border-top-color:var(--ja-gold);border-radius:50%;animation:spin 0.8s linear infinite;vertical-align:middle;margin-right:6px}
+#jamie-app .empty-state{text-align:center;padding:40px 20px;color:var(--ja-text2)}
+#jamie-app .es-icon{font-size:36px;margin-bottom:10px}
+#jamie-app .ai-fab{bottom:80px}
 /* buttons */
 .btn{width:100%;padding:13px;border:none;border-radius:var(--r);font-family:var(--font-b);font-size:15px;font-weight:700;cursor:pointer;margin-bottom:8px;transition:all 0.2s}
 .btn:active{transform:scale(0.98)}
@@ -340,9 +344,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .cat-picker-cancel{margin-top:12px;width:100%;padding:10px;border:none;border-radius:10px;background:var(--surface2);color:var(--text-mid);font-family:var(--font-b);font-size:13px;cursor:pointer}
 .cat-picker-cancel:hover{background:var(--border)}
 /* nav bottom for jamie */
-.j-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(4,1fr);z-index:50;padding:8px 0 10px}
-.jn-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;background:none;border:none;font-family:var(--font-b);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;color:var(--text-soft);padding:4px;transition:color 0.2s}
-.jn-item.active{color:var(--sage)}
+/* ── NAV (Jamie nav now in Aurora block above) ── */
 .jn-icon{font-size:20px}
 /* ── SANKEY / MONEY FLOW ── */
 .sankey-wrap{position:relative;width:100%;overflow-x:auto}
@@ -361,7 +363,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .ai-fab:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(0,201,167,0.45)}
 .ai-fab:active{transform:scale(0.96)}
 .ai-fab.jamie-fab{background:linear-gradient(135deg,var(--sage),#3d8b6e)}
-#jamie-app .ai-fab{bottom:80px}
 .ai-panel{position:fixed;bottom:0;right:0;width:400px;max-width:100vw;height:70vh;max-height:600px;background:var(--surface);border:1px solid var(--border);border-radius:20px 20px 0 0;box-shadow:0 -4px 40px rgba(0,0,0,0.4);z-index:100;display:flex;flex-direction:column;transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.4,0,0.2,1);overflow:hidden}
 .ai-panel.open{transform:translateY(0)}
 @media(max-width:500px){.ai-panel{width:100%;height:80vh;max-height:none;border-radius:20px 20px 0 0}}
@@ -723,49 +724,70 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   </div>
 </div>
 <!-- JAMIE APP -->
-<div id="jamie-app" class="hidden" style="padding-bottom:70px">
-  <div class="j-header">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start">
-      <div>
-        <div class="j-greeting">Hey Jamie 🎨</div>
-        <div class="j-name">Family Hub</div>
-        <div style="font-size:13px;color:var(--sage);font-weight:600;margin-top:2px" id="j-ff-balance">Family Fuel: loading...</div>
-        <div class="j-sub" id="j-week-label">Week of <span id="j-week-of"></span></div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
-        <button class="back-btn" onclick="showWho()" style="background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.8)">← Home</button>
-        <button class="back-btn" onclick="pinPrompt('douglas')" style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);font-size:11px">Douglas's View 🔒</button>
-        <span id="j-sync-badge" style="font-size:10px;color:rgba(255,255,255,0.5);cursor:pointer" onclick="forceSyncNow()">◌ Connecting...</span>
-      </div>
+<div id="jamie-app" class="hidden" style="padding-bottom:80px">
+  <!-- AURORA TOP BAR -->
+  <div class="j-topbar">
+    <button class="back-btn" onclick="showWho()">← Home</button>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span id="j-sync-badge" style="font-size:10px;color:var(--ja-text3);cursor:pointer" onclick="forceSyncNow()">◌ Connecting...</span>
+      <button class="back-btn" onclick="pinPrompt('douglas')" style="font-size:11px">Douglas 🔒</button>
     </div>
   </div>
-  <div class="j-budget-strip">
-    <div><div class="jbs-val" style="color:var(--sage)" id="j-budget-val">$200</div><div class="jbs-label">Weekly Budget</div></div>
-    <div><div class="jbs-val" style="color:var(--red)" id="j-spent-val">$0</div><div class="jbs-label">Spent</div></div>
-    <div><div class="jbs-val" id="j-left-val" style="color:var(--gold)">$200</div><div class="jbs-label">Remaining</div></div>
+  <!-- AURORA HERO -->
+  <div class="j-hero">
+    <div class="j-hero-greeting">Hey Jamie 🎨</div>
+    <div class="j-hero-name">Your Week</div>
+    <div class="j-hero-ff" id="j-ff-balance">Family Fuel: loading...</div>
   </div>
-  <div class="gauge-card">
-    <div class="gauge-title"><span>🛒 This Week's Budget</span><span id="j-gauge-week" style="font-size:12px;color:var(--text-mid);background:var(--surface2);padding:2px 8px;border-radius:100px">Week 1</span></div>
-    <div class="gauge-bar-bg"><div class="gauge-bar-fill" id="j-gauge-bar" style="width:0%;background:var(--sage)"></div></div>
-    <div class="gauge-sub"><span>Spent: <strong id="j-gauge-spent">$0</strong></span><span id="j-gauge-rem">$200 remaining</span></div>
+  <!-- STATUS CARD with budget ring -->
+  <div class="j-status-card" id="j-status-card">
+    <div class="j-ring-wrap">
+      <svg viewBox="0 0 120 120">
+        <circle cx="60" cy="60" r="52" fill="none" stroke="#e8e2d9" stroke-width="10"/>
+        <circle id="j-ring-arc" cx="60" cy="60" r="52" fill="none" stroke="#5a9e8a" stroke-width="10" stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7" transform="rotate(-90 60 60)" style="transition:stroke-dashoffset 0.8s,stroke 0.3s"/>
+      </svg>
+      <div class="j-ring-center">
+        <div class="j-ring-val" id="j-gauge-spent">$0</div>
+        <div class="j-ring-label">spent</div>
+      </div>
+    </div>
+    <div class="j-status-msg" id="j-status-msg">Loading your week...</div>
+    <div class="j-status-sub" id="j-gauge-rem">$200 remaining</div>
   </div>
-  <!-- v44: Jamie AI Insight -->
-  <div id="j-ai-insight" style="margin:0 16px 8px;padding:12px 16px;background:var(--sage-dim);border:1px solid rgba(90,158,138,0.2);border-radius:12px;font-size:13px;color:var(--text);display:none">
-    <div style="font-size:11px;font-weight:700;color:var(--sage);margin-bottom:4px">✨ Your Week</div>
-    <div id="j-ai-insight-text"></div>
+  <!-- BUDGET STRIP -->
+  <div class="ja-budget-strip">
+    <div class="ja-budget-item"><div class="ja-budget-val" style="color:#5a9e8a" id="j-budget-val">$200</div><div class="ja-budget-label">Budget</div></div>
+    <div class="ja-budget-item"><div class="ja-budget-val" style="color:#e8846b" id="j-spent-val">$0</div><div class="ja-budget-label">Spent</div></div>
+    <div class="ja-budget-item"><div class="ja-budget-val" style="color:#d4a853" id="j-left-val">$200</div><div class="ja-budget-label">Left</div></div>
   </div>
-  <!-- JAMIE NAV -->
+  <!-- AI INSIGHT -->
+  <div class="ja-insight" id="j-ai-insight" style="display:none">
+    <div class="ja-insight-label">✨ Your Week</div>
+    <div class="ja-insight-text" id="j-ai-insight-text"></div>
+  </div>
+  <!-- Hidden gauge elements for JS compatibility -->
+  <div style="display:none"><div id="j-gauge-bar"></div><span id="j-gauge-week"></span><span id="j-week-of"></span><span id="j-week-label"></span></div>
+  <!-- AURORA NAV -->
   <nav class="j-nav">
-    <button class="jn-item active" onclick="jPage('meals',this)"><span class="jn-icon">🍽️</span>Meals</button>
-    <button class="jn-item" onclick="jPage('grocery',this)"><span class="jn-icon">🛒</span>Grocery</button>
-    <button class="jn-item" onclick="jPage('tracker',this)"><span class="jn-icon">📊</span>Tracker</button>
+    <button class="jn-item active" onclick="jPage('home',this)"><span class="jn-icon">🏠</span>Home</button>
+    <button class="jn-item" onclick="jPage('meals',this)"><span class="jn-icon">🍽️</span>Meals</button>
+    <button class="jn-item" onclick="jPage('grocery',this)"><span class="jn-icon">🛒</span>Shop</button>
     <button class="jn-item" onclick="jPage('goals',this)"><span class="jn-icon">⭐</span>Goals</button>
   </nav>
-  <!-- MEALS -->
-  <div class="j-page active" id="j-meals">
+  <!-- HOME PAGE -->
+  <div class="j-page active" id="j-home">
+    <div class="ja-card">
+      <div class="ja-card-title">📊 This Month</div>
+      <div class="ja-stat-row"><span class="ja-stat-label">Grocery budget</span><span class="ja-stat-val">$800</span></div>
+      <div class="ja-stat-row"><span class="ja-stat-label">Spent so far</span><span class="ja-stat-val" id="j-month-spent" style="color:#e8846b">$0</span></div>
+      <div class="ja-stat-row"><span class="ja-stat-label">Remaining</span><span class="ja-stat-val" id="j-month-rem" style="color:#5a9e8a">$800</span></div>
+    </div>
+    <div id="j-hist-wrap"></div>
+  </div>
+  <!-- MEALS PAGE -->
+  <div class="j-page" id="j-meals">
     <div class="j-sec-title">This Week's Dinners</div>
     <div class="j-sec-sub">Tap a day → pick your meal → tap "Build List" when done</div>
-    <!-- CUSTOM MEAL FORM -->
     <div class="custom-meal-form">
       <div class="cmf-title">➕ Add Your Own Meal</div>
       <div class="cmf-row">
@@ -776,46 +798,30 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       <button class="cmf-add-ing" onclick="addCustomMealIngRow()">+ Add another ingredient</button>
       <button class="cmf-btn" style="width:100%;margin-top:4px" onclick="saveCustomMeal()">✓ Save This Meal</button>
     </div>
-    <!-- CUSTOM MEALS SAVED -->
     <div id="custom-meals-display" style="display:none;margin-bottom:12px">
-      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--sage);margin-bottom:8px">Your Custom Meals</div>
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#5a9e8a;margin-bottom:8px">Your Custom Meals</div>
       <div class="custom-meals-list" id="custom-meals-list"></div>
     </div>
     <div id="j-day-cards"></div>
     <button class="btn btn-primary" onclick="buildList()">✨ Build My Grocery List</button>
     <button class="btn btn-outline" onclick="clearMeals()">Clear & Start Over</button>
   </div>
-  <!-- GROCERY (v38 - Multi-Store Tabs) -->
+  <!-- GROCERY PAGE (v38 Multi-Store) -->
   <div class="j-page" id="j-grocery">
-    <!-- Budget Summary -->
     <div class="store-budget-bar">
-      <div class="sbb-row">
-        <span class="sbb-label">Weekly Budget</span>
-        <span class="sbb-val" style="color:var(--text)">$200.00</span>
-      </div>
-      <div class="sbb-row">
-        <span class="sbb-label">Total Across All Stores</span>
-        <span class="sbb-val" id="store-total-spent" style="color:var(--sage)">$0.00</span>
-      </div>
-      <div class="sbb-row" style="margin-bottom:10px">
-        <span class="sbb-label">Remaining</span>
-        <span class="sbb-val" id="store-total-remaining" style="color:var(--gold)">$200.00</span>
-      </div>
-      <div class="sbb-progress">
-        <div class="sbb-fill" id="store-budget-fill" style="width:0%;background:var(--sage)"></div>
-      </div>
+      <div class="sbb-row"><span class="sbb-label">Weekly Budget</span><span class="sbb-val">$200.00</span></div>
+      <div class="sbb-row"><span class="sbb-label">Total Across All Stores</span><span class="sbb-val" id="store-total-spent" style="color:#5a9e8a">$0.00</span></div>
+      <div class="sbb-row" style="margin-bottom:10px"><span class="sbb-label">Remaining</span><span class="sbb-val" id="store-total-remaining" style="color:#d4a853">$200.00</span></div>
+      <div class="sbb-progress"><div class="sbb-fill" id="store-budget-fill" style="width:0%;background:#5a9e8a"></div></div>
     </div>
-    <!-- Store Tabs -->
     <div class="store-tabs-wrap">
       <div class="store-tabs" id="store-tabs"></div>
       <button class="store-manage-btn" onclick="openManageStores()" title="Manage Stores">⚙️</button>
     </div>
-    <!-- Add Item Row -->
     <div class="store-add-row">
       <input type="text" class="store-add-inp" id="store-add-inp" placeholder="Add item to this store..." onkeydown="if(event.key==='Enter')addStoreItem()">
       <button class="store-add-btn" onclick="addStoreItem()">Add</button>
     </div>
-    <!-- Current Store's List -->
     <div class="store-list-wrap" id="store-list-wrap">
       <div class="store-list-empty" id="store-list-empty">
         <div class="es-icon">🛒</div>
@@ -823,42 +829,34 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       </div>
       <div id="store-list-items"></div>
     </div>
-    <!-- Done Shopping Button -->
     <button class="btn btn-primary" id="store-done-btn" style="display:none;margin-top:12px" onclick="finishStoreShopping()">✅ Done Shopping — Save Total</button>
   </div>
-  <!-- TRACKER -->
-  <div class="j-page" id="j-tracker">
-    <div class="j-sec-title">Spending History</div>
-    <div class="impact-panel">
-      <div class="ip-title">📊 Your Impact on the Family Budget</div>
-      <div class="ip-row"><span class="ip-label">Weekly budget</span><span class="ip-val">$200</span></div>
-      <div class="ip-row"><span class="ip-label">Monthly grocery budget</span><span class="ip-val">$800</span></div>
-      <div class="ip-row"><span class="ip-label">Grocery spending this month</span><span class="ip-val" id="j-month-spent">$0</span></div>
-      <div class="ip-row"><span class="ip-label">Remaining this month</span><span class="ip-val" id="j-month-rem">$800</span></div>
-    </div>
-    <div id="j-hist-wrap"></div>
-  </div>
-  <!-- GOALS -->
+  <!-- TRACKER (hidden — content merged into Home) -->
+  <div class="j-page" id="j-tracker"></div>
+  <!-- GOALS PAGE — Vision Board -->
   <div class="j-page" id="j-goals">
-    <div class="j-sec-title">Family Goals</div>
-    <div class="j-sec-sub">What we're building together</div>
-    <div class="goal-card g-debt">
-      <div class="g-emoji">💳</div><div class="g-name">Zero Credit Card Debt</div>
-      <div class="g-desc" id="j-goal-debt-desc">Loading...</div>
-      <div class="g-prog-lbl"><span style="color:var(--text-mid);font-weight:600">Debt Remaining</span><span style="color:var(--red)" id="j-goal-debt-val">$0</span></div>
-      <div class="prog-wrap"><div class="prog-bar" id="j-goal-debt-bar" style="background:var(--red);width:0%"></div></div>
+    <div class="j-sec-title">Our Family Goals</div>
+    <div class="j-sec-sub">What we're building together 💚</div>
+    <div class="ja-goal">
+      <div class="ja-goal-icon">💳</div>
+      <div class="ja-goal-name">Debt Freedom</div>
+      <div class="ja-goal-desc" id="j-goal-debt-desc">Loading...</div>
+      <div class="ja-goal-ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="#e8e2d9" stroke-width="8"/><circle id="j-goal-debt-bar" cx="50" cy="50" r="42" fill="none" stroke="#e8846b" stroke-width="8" stroke-linecap="round" stroke-dasharray="263.9" stroke-dashoffset="263.9" transform="rotate(-90 50 50)" style="transition:stroke-dashoffset 0.8s"/></svg><div class="ja-goal-ring-center" id="j-goal-debt-val" style="color:#e8846b">$0</div></div>
+      <div class="ja-goal-sub">remaining to kill</div>
     </div>
-    <div class="goal-card g-emerg">
-      <div class="g-emoji">🛡️</div><div class="g-name">The Martinson Foundation — $10,000</div>
-      <div class="g-desc" id="j-goal-found-desc">Our "never panic" fund — job loss only. This is what lets us sleep at night.</div>
-      <div class="g-prog-lbl"><span style="color:var(--text-mid);font-weight:600">The Foundation</span><span style="color:var(--teal)" id="j-goal-found-val">$5,000 of $10,000</span></div>
-      <div class="prog-wrap"><div class="prog-bar" id="j-goal-found-bar" style="background:var(--teal);width:50%"></div></div>
+    <div class="ja-goal">
+      <div class="ja-goal-icon">🛡️</div>
+      <div class="ja-goal-name">The Foundation</div>
+      <div class="ja-goal-desc" id="j-goal-found-desc">Our safety net. Job loss only.</div>
+      <div class="ja-goal-ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="#e8e2d9" stroke-width="8"/><circle id="j-goal-found-bar" cx="50" cy="50" r="42" fill="none" stroke="#5a9e8a" stroke-width="8" stroke-linecap="round" stroke-dasharray="263.9" stroke-dashoffset="263.9" transform="rotate(-90 50 50)" style="transition:stroke-dashoffset 0.8s"/></svg><div class="ja-goal-ring-center" id="j-goal-found-val" style="color:#5a9e8a">$5,000</div></div>
+      <div class="ja-goal-sub">of $10,000 goal</div>
     </div>
-    <div class="goal-card g-vac">
-      <div class="g-emoji">✈️</div><div class="g-name">Family Vacation</div>
-      <div class="g-desc">Every week under budget is money that stays in the family — and gets us closer to a trip together.</div>
-      <div class="g-prog-lbl"><span style="color:var(--text-mid);font-weight:600">Life Goals Fund</span><span style="color:var(--gold)" id="j-goal-vac-val">$0 of $3,000</span></div>
-      <div class="prog-wrap"><div class="prog-bar" id="j-goal-vac-bar" style="background:var(--gold);width:0%"></div></div>
+    <div class="ja-goal">
+      <div class="ja-goal-icon">✈️</div>
+      <div class="ja-goal-name">Family Vacation</div>
+      <div class="ja-goal-desc">Every dollar under budget gets us closer to our first family trip.</div>
+      <div class="ja-goal-ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="#e8e2d9" stroke-width="8"/><circle id="j-goal-vac-bar" cx="50" cy="50" r="42" fill="none" stroke="#d4a853" stroke-width="8" stroke-linecap="round" stroke-dasharray="263.9" stroke-dashoffset="263.9" transform="rotate(-90 50 50)" style="transition:stroke-dashoffset 0.8s"/></svg><div class="ja-goal-ring-center" id="j-goal-vac-val" style="color:#d4a853">$0</div></div>
+      <div class="ja-goal-sub">of $3,000 goal</div>
     </div>
   </div>
 </div>
@@ -1674,7 +1672,7 @@ function enterAs(who){
   document.getElementById('who-screen').classList.add('hidden');
   currentUser = who;
   if(who==='douglas'){document.getElementById('douglas-app').classList.remove('hidden');dPage('overview',null);}
-  else{document.getElementById('jamie-app').classList.remove('hidden');jPage('meals',null);}
+  else{document.getElementById('jamie-app').classList.remove('hidden');jPage('home',document.querySelector('#jamie-app .jn-item'));j_refreshAll();}
   // Show AI fab and configure for user
   initAIForUser(who);
 }
@@ -2818,14 +2816,24 @@ function updateCartTotal(){
 }
 function updateJamieGauge(spent){
   const pct=Math.min(100,(spent/WEEKLY_BUDGET)*100);
-  const bar=document.getElementById('j-gauge-bar');
-  bar.style.width=pct+'%';bar.style.background=pct>100?'var(--red)':pct>85?'var(--gold)':'var(--sage)';
-  document.getElementById('j-gauge-spent').textContent=fmtD(spent);
+  const ring=document.getElementById('j-ring-arc');
+  if(ring){const circ=326.7;ring.setAttribute('stroke-dashoffset',circ-(circ*pct/100));ring.setAttribute('stroke',pct>100?'#e8846b':pct>85?'#d4a853':'#5a9e8a');}
+  const spentEl=document.getElementById('j-gauge-spent');
+  if(spentEl)spentEl.textContent=fmtD(spent);
   const rem=WEEKLY_BUDGET-spent;
-  document.getElementById('j-gauge-rem').textContent=rem>=0?fmtD(rem)+' remaining':fmtD(Math.abs(rem))+' over budget';
-  document.getElementById('j-spent-val').textContent=fmtD(spent);
-  document.getElementById('j-left-val').textContent=fmtD(Math.max(0,rem));
-  document.getElementById('j-left-val').style.color=rem>=0?'var(--gold)':'var(--red)';
+  const remEl=document.getElementById('j-gauge-rem');
+  if(remEl)remEl.textContent=rem>=0?fmtD(rem)+' remaining':fmtD(Math.abs(rem))+' over budget';
+  const msg=document.getElementById('j-status-msg');
+  if(msg){
+    if(pct<=50)msg.textContent='Looking great! 💚';
+    else if(pct<=85)msg.textContent='On track this week ✨';
+    else if(pct<=100)msg.textContent='Almost at budget — watch spending 🌿';
+    else msg.textContent='Over budget this week 🧡';
+  }
+  const sVal=document.getElementById('j-spent-val');
+  if(sVal)sVal.textContent=fmtD(spent);
+  const lVal=document.getElementById('j-left-val');
+  if(lVal){lVal.textContent=fmtD(Math.max(0,rem));lVal.style.color=rem>=0?'#d4a853':'#e8846b';}
   syncJamieToDoug(spent);
 }
 function updateJamieStrip(){
@@ -3332,28 +3340,29 @@ function syncJamieToDoug(liveSpent){
 // v44 AURORA — Jamie dynamic functions (READ-ONLY from shared state)
 function j_updateGoals(){
   const totalDebt=CARDS.reduce((s,c)=>s+c.balance,0);
-  const killed=2;const totalCards=7;
-  const paidPct=Math.min(100,Math.max(0,((1-totalDebt/72184)*100)));
+  const killed=2;
+  const startDebt=72184;
+  const paidPct=Math.min(100,Math.max(0,((1-totalDebt/startDebt)*100)));
   const monthsLeft=Math.ceil(totalDebt/1220);
   const debtDesc=document.getElementById('j-goal-debt-desc');
   const debtVal=document.getElementById('j-goal-debt-val');
   const debtBar=document.getElementById('j-goal-debt-bar');
-  if(debtDesc)debtDesc.textContent='$'+Math.round(totalDebt).toLocaleString()+' across '+CARDS.length+' debts ('+killed+' already killed!). About '+monthsLeft+' months to debt-free. Every dollar we save speeds this up.';
+  if(debtDesc)debtDesc.textContent='$'+Math.round(totalDebt).toLocaleString()+' across '+CARDS.length+' debts ('+killed+' already killed!). About '+monthsLeft+' months to debt-free.';
   if(debtVal)debtVal.textContent='$'+Math.round(totalDebt).toLocaleString();
-  if(debtBar)debtBar.style.width=paidPct+'%';
+  if(debtBar){const circ=263.9;debtBar.setAttribute('stroke-dashoffset',circ-(circ*paidPct/100));}
   const foundBal=jarBalances.foundation||5000;
   const foundPct=Math.min(100,(foundBal/10000)*100);
   const foundVal=document.getElementById('j-goal-found-val');
   const foundBar=document.getElementById('j-goal-found-bar');
   const foundDesc=document.getElementById('j-goal-found-desc');
-  if(foundVal)foundVal.textContent='$'+Math.round(foundBal).toLocaleString()+' of $10,000';
-  if(foundBar)foundBar.style.width=foundPct+'%';
-  if(foundDesc)foundDesc.textContent='We have $'+Math.round(foundBal).toLocaleString()+' saved. This is our "never panic" fund — job loss only. This is what lets us sleep at night.';
+  if(foundVal)foundVal.textContent='$'+Math.round(foundBal).toLocaleString();
+  if(foundBar){const circ=263.9;foundBar.setAttribute('stroke-dashoffset',circ-(circ*foundPct/100));}
+  if(foundDesc)foundDesc.textContent='We have $'+Math.round(foundBal).toLocaleString()+' saved. Our safety net — job loss only. This is what lets us sleep at night.';
   const lgfund=familyGoals.lgfund||0;
   const vacVal=document.getElementById('j-goal-vac-val');
   const vacBar=document.getElementById('j-goal-vac-bar');
-  if(vacVal)vacVal.textContent='$'+Math.round(lgfund).toLocaleString()+' of $3,000';
-  if(vacBar)vacBar.style.width=Math.min(100,(lgfund/3000)*100)+'%';
+  if(vacVal)vacVal.textContent='$'+Math.round(lgfund).toLocaleString();
+  if(vacBar){const circ=263.9;vacBar.setAttribute('stroke-dashoffset',circ-(circ*Math.min(100,lgfund/3000*100)/100));}
 }
 function j_updateFFBalance(){
   const el=document.getElementById('j-ff-balance');
