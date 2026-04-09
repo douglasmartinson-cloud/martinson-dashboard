@@ -145,7 +145,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 #jamie-app .jn-item .jn-icon{font-size:22px;transition:transform 0.2s}
 #jamie-app .jn-item.active{color:var(--ja-sage)}
 #jamie-app .jn-item.active .jn-icon{transform:scale(1.15)}
-#jamie-app .j-page{display:none;padding:0 20px 20px}.j-page.active{display:block}
+#jamie-app .j-page{display:none;padding:0 20px 20px}
+#jamie-app .j-page.active{display:block}
 #jamie-app .j-sec-title{font-family:var(--font-d);font-size:22px;color:var(--ja-text);margin-bottom:4px}
 #jamie-app .j-sec-sub{font-size:13px;color:var(--ja-text2);margin-bottom:16px}
 /* Aurora Cards */
@@ -748,17 +749,17 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       </svg>
       <div class="j-ring-center">
         <div class="j-ring-val" id="j-gauge-spent">$0</div>
-        <div class="j-ring-label">spent</div>
+        <div class="j-ring-label">groceries this week</div>
       </div>
     </div>
-    <div class="j-status-msg" id="j-status-msg">Loading your week...</div>
-    <div class="j-status-sub" id="j-gauge-rem">$200 remaining</div>
+    <div class="j-status-msg" id="j-status-msg">Grocery budget: $200/week</div>
+    <div class="j-status-sub" id="j-gauge-rem">$200 left of $200 weekly grocery budget</div>
   </div>
   <!-- BUDGET STRIP -->
   <div class="ja-budget-strip">
-    <div class="ja-budget-item"><div class="ja-budget-val" style="color:#5a9e8a" id="j-budget-val">$200</div><div class="ja-budget-label">Budget</div></div>
-    <div class="ja-budget-item"><div class="ja-budget-val" style="color:#e8846b" id="j-spent-val">$0</div><div class="ja-budget-label">Spent</div></div>
-    <div class="ja-budget-item"><div class="ja-budget-val" style="color:#d4a853" id="j-left-val">$200</div><div class="ja-budget-label">Left</div></div>
+    <div class="ja-budget-item"><div class="ja-budget-val" style="color:#5a9e8a" id="j-budget-val">$0</div><div class="ja-budget-label">Family Fuel</div></div>
+    <div class="ja-budget-item"><div class="ja-budget-val" style="color:#e8846b" id="j-spent-val">$0</div><div class="ja-budget-label">Groceries This Wk</div></div>
+    <div class="ja-budget-item"><div class="ja-budget-val" style="color:#d4a853" id="j-left-val">$800</div><div class="ja-budget-label">Grocery Left/Mo</div></div>
   </div>
   <!-- AI INSIGHT -->
   <div class="ja-insight" id="j-ai-insight" style="display:none">
@@ -776,18 +777,41 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   </nav>
   <!-- HOME PAGE -->
   <div class="j-page active" id="j-home">
+    <!-- Quick access to grocery -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <button class="btn btn-primary" style="margin:0;padding:12px;font-size:14px;border-radius:14px" onclick="jPage('grocery',document.querySelectorAll('#jamie-app .jn-item')[2])">🛒 My Grocery List</button>
+      <button class="btn btn-outline" style="margin:0;padding:12px;font-size:14px;border-radius:14px" onclick="jPage('meals',document.querySelectorAll('#jamie-app .jn-item')[1])">🍽️ Plan Meals</button>
+    </div>
+    <!-- My Responsibilities -->
+    <div class="ja-card">
+      <div class="ja-card-title">🎨 My Responsibilities</div>
+      <div class="ja-stat-row"><span class="ja-stat-label">Family Fuel balance</span><span class="ja-stat-val" style="color:#5a9e8a" id="j-resp-ff">loading...</span></div>
+      <div class="ja-stat-row"><span class="ja-stat-label">FF monthly budget</span><span class="ja-stat-val">$2,400</span></div>
+      <div class="ja-stat-row"><span class="ja-stat-label">Groceries budget</span><span class="ja-stat-val">$800</span></div>
+      <div class="ja-stat-row"><span class="ja-stat-label">THC</span><span class="ja-stat-val">$275</span></div>
+      <div class="ja-stat-row"><span class="ja-stat-label">My cash</span><span class="ja-stat-val">$100</span></div>
+      <div class="ja-stat-row"><span class="ja-stat-label">Gas & household</span><span class="ja-stat-val" id="j-resp-remaining">~$1,025</span></div>
+      <div class="ja-stat-row"><span class="ja-stat-label">NE Furniture (my debt)</span><span class="ja-stat-val" style="color:#e8846b">$190/mo</span></div>
+      <div class="ja-stat-row"><span class="ja-stat-label">The Foundation (I guard)</span><span class="ja-stat-val" style="color:#5a9e8a" id="j-resp-foundation">$5,000</span></div>
+    </div>
+    <!-- This Month spending -->
     <div class="ja-card">
       <div class="ja-card-title">📊 This Month</div>
       <div class="ja-stat-row"><span class="ja-stat-label">Grocery budget</span><span class="ja-stat-val">$800</span></div>
       <div class="ja-stat-row"><span class="ja-stat-label">Spent so far</span><span class="ja-stat-val" id="j-month-spent" style="color:#e8846b">$0</span></div>
       <div class="ja-stat-row"><span class="ja-stat-label">Remaining</span><span class="ja-stat-val" id="j-month-rem" style="color:#5a9e8a">$800</span></div>
     </div>
+    <!-- Recent Spending from Bank -->
+    <div class="ja-card" id="j-recent-tx-card" style="display:none">
+      <div class="ja-card-title">🏦 Recent Family Fuel Spending</div>
+      <div id="j-recent-tx"></div>
+    </div>
     <div id="j-hist-wrap"></div>
   </div>
   <!-- MEALS PAGE -->
   <div class="j-page" id="j-meals">
-    <div class="j-sec-title">This Week's Dinners</div>
-    <div class="j-sec-sub">Tap a day → pick your meal → tap "Build List" when done</div>
+    <div class="j-sec-title">This Week's Dinners 🍽️</div>
+    <div class="j-sec-sub">Pick a meal for each night, then tap "Build List" to get your grocery list ready. You've got this!</div>
     <div class="custom-meal-form">
       <div class="cmf-title">➕ Add Your Own Meal</div>
       <div class="cmf-row">
@@ -808,6 +832,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   </div>
   <!-- GROCERY PAGE (v38 Multi-Store) -->
   <div class="j-page" id="j-grocery">
+    <div class="j-sec-title">Grocery Shopping 🛒</div>
+    <div class="j-sec-sub">Your weekly grocery budget is $200. Add items, check them off as you shop, enter prices to track spending.</div>
     <div class="store-budget-bar">
       <div class="sbb-row"><span class="sbb-label">Weekly Budget</span><span class="sbb-val">$200.00</span></div>
       <div class="sbb-row"><span class="sbb-label">Total Across All Stores</span><span class="sbb-val" id="store-total-spent" style="color:#5a9e8a">$0.00</span></div>
@@ -2822,18 +2848,24 @@ function updateJamieGauge(spent){
   if(spentEl)spentEl.textContent=fmtD(spent);
   const rem=WEEKLY_BUDGET-spent;
   const remEl=document.getElementById('j-gauge-rem');
-  if(remEl)remEl.textContent=rem>=0?fmtD(rem)+' remaining':fmtD(Math.abs(rem))+' over budget';
+  if(remEl)remEl.textContent=rem>=0?fmtD(rem)+' left of $200 weekly grocery budget':fmtD(Math.abs(rem))+' over $200 grocery budget';
   const msg=document.getElementById('j-status-msg');
   if(msg){
-    if(pct<=50)msg.textContent='Looking great! 💚';
-    else if(pct<=85)msg.textContent='On track this week ✨';
-    else if(pct<=100)msg.textContent='Almost at budget — watch spending 🌿';
-    else msg.textContent='Over budget this week 🧡';
+    if(pct<=50)msg.textContent='Grocery budget looking great! 💚';
+    else if(pct<=85)msg.textContent='Groceries on track this week ✨';
+    else if(pct<=100)msg.textContent='Close to grocery limit — watch spending 🌿';
+    else msg.textContent='Over grocery budget this week 🧡';
   }
   const sVal=document.getElementById('j-spent-val');
   if(sVal)sVal.textContent=fmtD(spent);
+  const bVal=document.getElementById('j-budget-val');
+  if(bVal)bVal.textContent=fmt(jarBalances.ff||0);
   const lVal=document.getElementById('j-left-val');
-  if(lVal){lVal.textContent=fmtD(Math.max(0,rem));lVal.style.color=rem>=0?'#d4a853':'#e8846b';}
+  const now=new Date();const m=now.getMonth();const y=now.getFullYear();
+  const grocTx=transactions.filter(t=>t.cat==='Groceries'&&t.amount<0&&new Date(t.date).getMonth()===m&&new Date(t.date).getFullYear()===y);
+  const moSpent=grocTx.reduce((s,t)=>s+Math.abs(t.amount),0);
+  const moRem=Math.max(0,800-moSpent);
+  if(lVal){lVal.textContent=fmt(moRem);lVal.style.color=moRem>200?'#d4a853':'#e8846b';}
   syncJamieToDoug(spent);
 }
 function updateJamieStrip(){
@@ -3365,8 +3397,11 @@ function j_updateGoals(){
   if(vacBar){const circ=263.9;vacBar.setAttribute('stroke-dashoffset',circ-(circ*Math.min(100,lgfund/3000*100)/100));}
 }
 function j_updateFFBalance(){
+  const ff=jarBalances.ff||0;
   const el=document.getElementById('j-ff-balance');
-  if(el)el.textContent='Family Fuel: '+fmt(jarBalances.ff||0);
+  if(el)el.textContent='Family Fuel: '+fmt(ff);
+  const bVal=document.getElementById('j-budget-val');
+  if(bVal)bVal.textContent=fmt(ff);
 }
 function j_updateBudgetFromBank(){
   if(!transactions.length)return;
@@ -3388,7 +3423,33 @@ function j_updateBudgetFromBank(){
 }
 // v44: Jamie-safe refresher — call after any data change
 function j_refreshAll(){
-  j_updateGoals();j_updateFFBalance();j_updateBudgetFromBank();j_showInsight();
+  j_updateGoals();j_updateFFBalance();j_updateBudgetFromBank();j_showInsight();j_updateResponsibilities();j_renderRecentTx();
+}
+function j_updateResponsibilities(){
+  const respFF=document.getElementById('j-resp-ff');
+  if(respFF)respFF.textContent=fmt(jarBalances.ff||0);
+  const respFound=document.getElementById('j-resp-foundation');
+  if(respFound)respFound.textContent=fmt(jarBalances.foundation||5000);
+  const gasHouse=Math.max(0,2400-800-275-100);
+  const respRem=document.getElementById('j-resp-remaining');
+  if(respRem)respRem.textContent='~'+fmt(gasHouse);
+}
+function j_renderRecentTx(){
+  const card=document.getElementById('j-recent-tx-card');
+  const wrap=document.getElementById('j-recent-tx');
+  if(!card||!wrap)return;
+  if(!transactions.length){card.style.display='none';return;}
+  const ffCats=['Groceries','Food & Life','Gas','Shopping','Kids','Health','Other'];
+  const recent=transactions.filter(t=>t.amount<0&&ffCats.includes(t.cat)).slice(0,8);
+  if(!recent.length){card.style.display='none';return;}
+  card.style.display='block';
+  wrap.innerHTML=recent.map(t=>{
+    const d=new Date(t.date);
+    const ds=d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    const desc=(t.desc||'').substring(0,28);
+    const color=t.cat==='Groceries'?'#5a9e8a':'#7a8e8a';
+    return`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(232,226,217,0.5)"><div><div style="font-size:13px;font-weight:600;color:#2c3e3a">${desc}</div><div style="font-size:11px;color:#7a8e8a">${ds} · ${t.cat}</div></div><div style="font-family:var(--font-d);font-size:15px;font-weight:700;color:${color}">-${fmtD(Math.abs(t.amount))}</div></div>`;
+  }).join('');
 }
 function j_showInsight(){
   const el=document.getElementById('j-ai-insight');
