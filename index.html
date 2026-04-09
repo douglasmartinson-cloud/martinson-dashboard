@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Martinson Family Dashboard v43</title>
+<title>Martinson Family Dashboard v44</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script src="https://unpkg.com/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
@@ -393,7 +393,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <!-- ENTRY SCREEN -->
 <div id="entry-screen">
   <div class="entry-logo">Martinson Family</div>
-  <div class="entry-sub">Kansas City, MO · Your Family Hub · v43</div>
+  <div class="entry-sub">Kansas City, MO · Your Family Hub · v44</div>
   <div class="entry-box">
     <div class="entry-title">🔒 Enter Password</div>
     <div class="entry-dots">
@@ -431,9 +431,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       <div class="who-role">Full Dashboard</div>
     </div>
     <div class="who-card jamie" onclick="enterAs('jamie')">
-      <div class="who-emoji">👩‍🍳</div>
+      <div class="who-emoji">🎨</div>
       <div class="who-name">Jamie</div>
-      <div class="who-role">Meals & Grocery</div>
+      <div class="who-role">Family Hub</div>
     </div>
   </div>
   <button class="sunday-btn" onclick="showSunday()">☀️ Sunday Check-In Mode</button>
@@ -727,8 +727,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   <div class="j-header">
     <div style="display:flex;justify-content:space-between;align-items:flex-start">
       <div>
-        <div class="j-greeting">Hey Jamie 👋</div>
+        <div class="j-greeting">Hey Jamie 🎨</div>
         <div class="j-name">Family Hub</div>
+        <div style="font-size:13px;color:var(--sage);font-weight:600;margin-top:2px" id="j-ff-balance">Family Fuel: loading...</div>
         <div class="j-sub" id="j-week-label">Week of <span id="j-week-of"></span></div>
       </div>
       <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
@@ -747,6 +748,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
     <div class="gauge-title"><span>🛒 This Week's Budget</span><span id="j-gauge-week" style="font-size:12px;color:var(--text-mid);background:var(--surface2);padding:2px 8px;border-radius:100px">Week 1</span></div>
     <div class="gauge-bar-bg"><div class="gauge-bar-fill" id="j-gauge-bar" style="width:0%;background:var(--sage)"></div></div>
     <div class="gauge-sub"><span>Spent: <strong id="j-gauge-spent">$0</strong></span><span id="j-gauge-rem">$200 remaining</span></div>
+  </div>
+  <!-- v44: Jamie AI Insight -->
+  <div id="j-ai-insight" style="margin:0 16px 8px;padding:12px 16px;background:var(--sage-dim);border:1px solid rgba(90,158,138,0.2);border-radius:12px;font-size:13px;color:var(--text);display:none">
+    <div style="font-size:11px;font-weight:700;color:var(--sage);margin-bottom:4px">✨ Your Week</div>
+    <div id="j-ai-insight-text"></div>
   </div>
   <!-- JAMIE NAV -->
   <nav class="j-nav">
@@ -827,9 +833,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       <div class="ip-title">📊 Your Impact on the Family Budget</div>
       <div class="ip-row"><span class="ip-label">Weekly budget</span><span class="ip-val">$200</span></div>
       <div class="ip-row"><span class="ip-label">Monthly grocery budget</span><span class="ip-val">$800</span></div>
-      <div class="ip-row"><span class="ip-label">Spent so far this month</span><span class="ip-val" id="j-month-spent">$0</span></div>
+      <div class="ip-row"><span class="ip-label">Grocery spending this month</span><span class="ip-val" id="j-month-spent">$0</span></div>
       <div class="ip-row"><span class="ip-label">Remaining this month</span><span class="ip-val" id="j-month-rem">$800</span></div>
-      <div class="ip-row"><span class="ip-label">DoorDash savings vs March</span><span class="ip-val" style="color:var(--gold)">~$800/mo</span></div>
     </div>
     <div id="j-hist-wrap"></div>
   </div>
@@ -837,30 +842,23 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   <div class="j-page" id="j-goals">
     <div class="j-sec-title">Family Goals</div>
     <div class="j-sec-sub">What we're building together</div>
-    <div class="goal-card g-vac">
-      <div class="g-emoji">✈️</div><div class="g-name">Family Vacation</div>
-      <div class="g-desc">Douglas puts $200/month into the vacation fund starting April. Every week you stay under $200 on groceries is money that stays in the family — and gets us there faster.</div>
-      <div class="g-prog-lbl"><span style="color:var(--text-mid);font-weight:600">Life Goals Fund</span><span style="color:var(--gold)">$0 of $3,000</span></div>
-      <div class="prog-wrap"><div class="prog-bar" style="background:var(--gold);width:0%"></div></div>
+    <div class="goal-card g-debt">
+      <div class="g-emoji">💳</div><div class="g-name">Zero Credit Card Debt</div>
+      <div class="g-desc" id="j-goal-debt-desc">Loading...</div>
+      <div class="g-prog-lbl"><span style="color:var(--text-mid);font-weight:600">Debt Remaining</span><span style="color:var(--red)" id="j-goal-debt-val">$0</span></div>
+      <div class="prog-wrap"><div class="prog-bar" id="j-goal-debt-bar" style="background:var(--red);width:0%"></div></div>
     </div>
     <div class="goal-card g-emerg">
       <div class="g-emoji">🛡️</div><div class="g-name">The Martinson Foundation — $10,000</div>
-      <div class="g-desc">We have $5,000 saved. Adding $200/month. This is our "never panic" fund — job loss only. Car breaks down? MC handles it. This is what lets us sleep at night.</div>
-      <div class="g-prog-lbl"><span style="color:var(--text-mid);font-weight:600">The Foundation (7708)</span><span style="color:var(--teal)">$5,000 of $10,000</span></div>
-      <div class="prog-wrap"><div class="prog-bar" style="background:var(--teal);width:50%"></div></div>
+      <div class="g-desc" id="j-goal-found-desc">Our "never panic" fund — job loss only. This is what lets us sleep at night.</div>
+      <div class="g-prog-lbl"><span style="color:var(--text-mid);font-weight:600">The Foundation</span><span style="color:var(--teal)" id="j-goal-found-val">$5,000 of $10,000</span></div>
+      <div class="prog-wrap"><div class="prog-bar" id="j-goal-found-bar" style="background:var(--teal);width:50%"></div></div>
     </div>
-    <div class="goal-card g-debt">
-      <div class="g-emoji">💳</div><div class="g-name">Zero Credit Card Debt</div>
-      <div class="g-desc">$23,707 across 3 cards (2 killed Apr 3!). On pace for debt-free by Summer 2027. Your meal plan alone saves $800/month vs what we were spending on DoorDash.</div>
-      <div class="g-prog-lbl"><span style="color:var(--text-mid);font-weight:600">Debt Remaining</span><span style="color:var(--red)">$23,707</span></div>
-      <div class="prog-wrap"><div class="prog-bar" style="background:var(--red);width:4%"></div></div>
-    </div>
-    <div class="impact-panel" style="margin-top:4px">
-      <div class="ip-title">💚 How Your Meal Plan Helps</div>
-      <div class="ip-row"><span class="ip-label">DoorDash in March</span><span class="ip-val" style="color:var(--red)">$799</span></div>
-      <div class="ip-row"><span class="ip-label">DoorDash from April</span><span class="ip-val">$0</span></div>
-      <div class="ip-row"><span class="ip-label">Saved per month</span><span class="ip-val">~$800</span></div>
-      <div class="ip-row"><span class="ip-label">Saved per year</span><span class="ip-val">~$9,600</span></div>
+    <div class="goal-card g-vac">
+      <div class="g-emoji">✈️</div><div class="g-name">Family Vacation</div>
+      <div class="g-desc">Every week under budget is money that stays in the family — and gets us closer to a trip together.</div>
+      <div class="g-prog-lbl"><span style="color:var(--text-mid);font-weight:600">Life Goals Fund</span><span style="color:var(--gold)" id="j-goal-vac-val">$0 of $3,000</span></div>
+      <div class="prog-wrap"><div class="prog-bar" id="j-goal-vac-bar" style="background:var(--gold);width:0%"></div></div>
     </div>
   </div>
 </div>
@@ -1197,7 +1195,7 @@ let activeStoreId = 'aldi'; // currently selected store tab
 
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw0q-7XhX6OztGR54bXX5_iFnUCYeaRVyfxbhoDdaIuWSeDZF7U-KYxqYXfaM4eKcJD/exec';
 // SYNC ENGINE — Google Sheets architecture
-// FIREBASE SYNC ENGINE — v43
+// FIREBASE SYNC ENGINE — v44
 //
 // One key controls everything: martinson/last_csv_data
 //
@@ -1405,11 +1403,11 @@ function applyKey(key, value) {
     case 'hidden_meals': hiddenMeals = value; break;
     case 'week_hist': weekHist = value; break;
     case 'meal_plan': mealPlan = value; break;
-    case 'cc_balances': ccBalances = value; break;
+    case 'cc_balances': ccBalances = value; j_updateGoals(); break;
     case 'family_goals': familyGoals = value; break;
     case 'jar_balances':
       if(Date.now()-_jarWriteTime<10000) break; // v42: Skip if fresh bank sync wrote within 10s
-      jarBalances = value; updateJarDisplay(); break;
+      jarBalances = value; updateJarDisplay(); j_updateFFBalance(); j_updateGoals(); break;
     case 'grocery_stores': 
       if (Array.isArray(value) && value.length > 0) {
         groceryStores = value;
@@ -1569,6 +1567,7 @@ function refreshAllUI() {
   syncJamieToDoug();
   updateCCDisplay();
   updateGoalsDisplay();
+  j_refreshAll();
 }
 // Render all transaction-dependent views
 function renderFromTransactions() {
@@ -1582,6 +1581,7 @@ function renderFromTransactions() {
   renderFreedomChart();
   renderSankey();
   updateBankSyncBar();
+  j_updateBudgetFromBank();
 }
 document.addEventListener('DOMContentLoaded', async () => {
   renderDonut();
@@ -2782,25 +2782,19 @@ function buildList(){
   const planned=Object.values(mealPlan).filter(Boolean);
   if(!planned.length){toast('Pick at least one meal first!');return;}
   const map={};
-  STAPLES.forEach(s=>{map[s.n.toLowerCase()]={...s,id:gid(),checked:false,actual:'',custom:false};});
-  planned.forEach(meal=>{meal.items.forEach(item=>{const k=(item.n||item.name||'').toLowerCase();if(!map[k])map[k]={...item,n:item.n||item.name,id:gid(),checked:false,actual:'',custom:false};});});
-  grocItems=Object.values(map);
-  renderGrocList();document.getElementById('j-done-btn').style.display='block';
-  toast('✓ '+grocItems.length+' items · Shop ALDI first');
+  STAPLES.forEach(s=>{map[s.n.toLowerCase()]={name:s.n,price:'',checked:false};});
+  planned.forEach(meal=>{meal.items.forEach(item=>{const k=(item.n||item.name||'').toLowerCase();if(!map[k])map[k]={name:item.n||item.name,price:'',checked:false};});});
+  const items=Object.values(map).map(it=>({id:'si_'+Date.now()+'_'+Math.random().toString(36).substr(2,5),name:it.name,price:it.price,checked:it.checked}));
+  const aldiStore=groceryStores.find(s=>s.name.toLowerCase().includes('aldi'));
+  const targetId=aldiStore?aldiStore.id:groceryStores[0]?.id||'aldi';
+  storeItems[targetId]=items;
+  activeStoreId=targetId;
+  saveStoreItems();renderStoreTabs();renderStoreItems();
+  toast('✓ '+items.length+' items added to '+((aldiStore||groceryStores[0])?.name||'Aldi'));
   jPage('grocery',document.querySelector('.jn-item:nth-child(2)'));
 }
 function renderGrocList(){
-  const wrap=document.getElementById('j-groc-sections');const empty=document.getElementById('j-groc-empty');
-  if(!grocItems.length){empty.style.display='block';wrap.style.display='none';return;}
-  empty.style.display='none';wrap.style.display='block';
-  const aldiAll=grocItems.filter(i=>i.s!=='other'&&i.s!=='custom');
-  const otherAll=grocItems.filter(i=>i.s==='other'||i.s==='custom');
-  const aldiSecs={};aldiAll.forEach(i=>{const s=i.sec||'Other';if(!aldiSecs[s])aldiSecs[s]=[];aldiSecs[s].push(i);});
-  const otherSecs={};otherAll.forEach(i=>{const s=i.sec||'Other';if(!otherSecs[s])otherSecs[s]=[];otherSecs[s].push(i);});
-  let html='';
-  if(aldiAll.length){html+=`<div class="store-hdr aldi"><span class="s-badge aldi">ALDI First</span><span style="font-size:12px;color:var(--text-mid)">Best prices — shop here first</span></div>${Object.entries(aldiSecs).map(([sec,items])=>`<div class="sec-label">${sec}</div>${items.map(i=>giHTML(i)).join('')}`).join('')}`;}
-  if(otherAll.length){html+=`<div class="store-hdr other" style="margin-top:12px"><span class="s-badge other">Other / Custom</span><span style="font-size:12px;color:var(--text-mid)">Price Chopper · HyVee · Added items</span></div>${Object.entries(otherSecs).map(([sec,items])=>`<div class="sec-label">${sec}</div>${items.map(i=>giHTML(i)).join('')}`).join('')}`;}
-  wrap.innerHTML=html;updateCartTotal();
+  renderStoreItems();updateStoreBudgetDisplay();
 }
 function giHTML(item){
   const name=item.n||item.name||'Item';
@@ -2816,14 +2810,10 @@ function giHTML(item){
 }
 function toggleGI(id){const i=grocItems.find(x=>x.id===id);if(!i)return;i.checked=!i.checked;const el=document.getElementById('gi-'+id);if(el){el.classList.toggle('chk',i.checked);el.querySelector('.gi-cb').textContent=i.checked?'✓':'';}updateCartTotal();}
 function updateGIPrice(id,val){const i=grocItems.find(x=>x.id===id);if(i){i.actual=val;updateCartTotal();}}
-function addCustom(){const inp=document.getElementById('j-custom-inp');const name=inp.value.trim();if(!name)return;grocItems.push({id:gid(),n:name,s:'custom',sec:'Other',e:0,checked:false,actual:'',custom:true});inp.value='';renderGrocList();document.getElementById('j-done-btn').style.display='block';}
+function addCustom(){addStoreItem();}
 function updateCartTotal(){
+  updateStoreBudgetDisplay();
   const total=grocItems.reduce((s,i)=>s+(parseFloat(i.actual)||0),0);
-  const rem=WEEKLY_BUDGET-total;
-  document.getElementById('j-cart-total').textContent=fmtD(total);
-  document.getElementById('j-cart-total').style.color=total>WEEKLY_BUDGET?'var(--red)':'var(--sage)';
-  document.getElementById('j-cart-rem').textContent=fmtD(Math.max(0,rem));
-  document.getElementById('j-cart-rem').style.color=rem>=0?'var(--sage)':'var(--red)';
   updateJamieGauge(total);
 }
 function updateJamieGauge(spent){
@@ -2843,15 +2833,7 @@ function updateJamieStrip(){
   const spent=thisWeek?thisWeek.t:0;
   updateJamieGauge(spent);
 }
-function finishShop(){
-  const total=grocItems.reduce((s,i)=>s+(parseFloat(i.actual)||i.e||0),0);
-  weekHist.unshift({wk:currentWeek,label:'Week '+currentWeek,date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),t:+total.toFixed(2),budget:WEEKLY_BUDGET});
-  fbSet('week_hist', weekHist);
-  currentWeek++;
-  renderWeekHist();syncJamieToDoug();
-  toast('✓ Saved & syncing! Total: $'+total.toFixed(2));
-  grocItems=[];renderGrocList();document.getElementById('j-done-btn').style.display='none';
-}
+function finishShop(){finishStoreShopping();}
 function renderWeekHist(){
   const monthTotal=weekHist.reduce((s,w)=>s+w.t,0);
   const monthRem=Math.max(0,800-monthTotal);
@@ -3346,6 +3328,72 @@ function syncJamieToDoug(liveSpent){
   const sub=document.getElementById('d-jamie-grocery-sub');
   if(el){el.textContent=fmt(monthTotal);}
   if(sub){const rem=800-monthTotal;sub.textContent=`of $800 budget — ${rem>=0?fmt(rem)+' remaining':'$'+Math.abs(rem).toFixed(0)+' over'}`;}
+}
+// v44 AURORA — Jamie dynamic functions (READ-ONLY from shared state)
+function j_updateGoals(){
+  const totalDebt=CARDS.reduce((s,c)=>s+c.balance,0);
+  const killed=2;const totalCards=7;
+  const paidPct=Math.min(100,Math.max(0,((1-totalDebt/72184)*100)));
+  const monthsLeft=Math.ceil(totalDebt/1220);
+  const debtDesc=document.getElementById('j-goal-debt-desc');
+  const debtVal=document.getElementById('j-goal-debt-val');
+  const debtBar=document.getElementById('j-goal-debt-bar');
+  if(debtDesc)debtDesc.textContent='$'+Math.round(totalDebt).toLocaleString()+' across '+CARDS.length+' debts ('+killed+' already killed!). About '+monthsLeft+' months to debt-free. Every dollar we save speeds this up.';
+  if(debtVal)debtVal.textContent='$'+Math.round(totalDebt).toLocaleString();
+  if(debtBar)debtBar.style.width=paidPct+'%';
+  const foundBal=jarBalances.foundation||5000;
+  const foundPct=Math.min(100,(foundBal/10000)*100);
+  const foundVal=document.getElementById('j-goal-found-val');
+  const foundBar=document.getElementById('j-goal-found-bar');
+  const foundDesc=document.getElementById('j-goal-found-desc');
+  if(foundVal)foundVal.textContent='$'+Math.round(foundBal).toLocaleString()+' of $10,000';
+  if(foundBar)foundBar.style.width=foundPct+'%';
+  if(foundDesc)foundDesc.textContent='We have $'+Math.round(foundBal).toLocaleString()+' saved. This is our "never panic" fund — job loss only. This is what lets us sleep at night.';
+  const lgfund=familyGoals.lgfund||0;
+  const vacVal=document.getElementById('j-goal-vac-val');
+  const vacBar=document.getElementById('j-goal-vac-bar');
+  if(vacVal)vacVal.textContent='$'+Math.round(lgfund).toLocaleString()+' of $3,000';
+  if(vacBar)vacBar.style.width=Math.min(100,(lgfund/3000)*100)+'%';
+}
+function j_updateFFBalance(){
+  const el=document.getElementById('j-ff-balance');
+  if(el)el.textContent='Family Fuel: '+fmt(jarBalances.ff||0);
+}
+function j_updateBudgetFromBank(){
+  if(!transactions.length)return;
+  const now=new Date();const m=now.getMonth();const y=now.getFullYear();
+  const grocTx=transactions.filter(t=>{
+    if(t.cat!=='Groceries')return false;
+    const d=new Date(t.date);return d.getMonth()===m&&d.getFullYear()===y&&t.amount<0;
+  });
+  const monthSpent=grocTx.reduce((s,t)=>s+Math.abs(t.amount),0);
+  const monthRem=Math.max(0,800-monthSpent);
+  const mSpent=document.getElementById('j-month-spent');
+  const mRem=document.getElementById('j-month-rem');
+  if(mSpent)mSpent.textContent=fmt(monthSpent);
+  if(mRem)mRem.textContent=fmt(monthRem);
+  const weekStart=new Date(y,m,now.getDate()-now.getDay());
+  const weekTx=grocTx.filter(t=>new Date(t.date)>=weekStart);
+  const weekSpent=weekTx.reduce((s,t)=>s+Math.abs(t.amount),0);
+  updateJamieGauge(weekSpent);
+}
+// v44: Jamie-safe refresher — call after any data change
+function j_refreshAll(){
+  j_updateGoals();j_updateFFBalance();j_updateBudgetFromBank();j_showInsight();
+}
+function j_showInsight(){
+  const el=document.getElementById('j-ai-insight');
+  const txt=document.getElementById('j-ai-insight-text');
+  if(!el||!txt)return;
+  const ff=jarBalances.ff||0;
+  const totalDebt=CARDS.reduce((s,c)=>s+c.balance,0);
+  const msgs=[];
+  if(ff>=5000)msgs.push('Family Fuel is looking great at '+fmt(ff)+'. You\'re covered. 💚');
+  else if(ff>=3000)msgs.push('Family Fuel at '+fmt(ff)+' — solid cushion this week.');
+  else msgs.push('Family Fuel is at '+fmt(ff)+' — let\'s watch spending this week.');
+  if(totalDebt<35000)msgs.push('Debt is down to $'+Math.round(totalDebt).toLocaleString()+' — every payment gets us closer to freedom.');
+  el.style.display='block';
+  txt.textContent=msgs[0]+(msgs[1]?' '+msgs[1]:'');
 }
 // MONEY FLOW — Sankey
 function renderSankey(){
