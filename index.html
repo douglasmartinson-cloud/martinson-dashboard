@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Martinson Family Dashboard v42</title>
+<title>Martinson Family Dashboard v43</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script src="https://unpkg.com/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
@@ -393,7 +393,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <!-- ENTRY SCREEN -->
 <div id="entry-screen">
   <div class="entry-logo">Martinson Family</div>
-  <div class="entry-sub">Kansas City, MO · Your Family Hub · v42</div>
+  <div class="entry-sub">Kansas City, MO · Your Family Hub · v43</div>
   <div class="entry-box">
     <div class="entry-title">🔒 Enter Password</div>
     <div class="entry-dots">
@@ -1087,7 +1087,7 @@ let ccBalances = {
   bofa: 13567.18,
 };
 let familyGoals = { efund: 5145, lgfund: 0 };
-// v40: Three-jar balances + Merrill — synced from BofA via SimpleFIN
+// Jar balances
 let jarBalances = { mc: 7606, ff: 5262, foundation: 5000, merrill: 157532 };
 var _jarWriteTime = 0;
 let currentWeek = Math.max(1,Math.ceil((new Date()-new Date(2026,3,1))/(7*24*60*60*1000)));
@@ -1099,8 +1099,8 @@ let currentUser = ''; // 'douglas' or 'jamie' — controls AI personality
 let aiChatHistory = []; // conversation history for AI panel
 let aiPanelOpen = false;
 let simplefinConnected = false; // whether SimpleFIN bank is linked
-let selectedPeriod = 'thisMonth'; // v40: time period filter — 'thisMonth', 'lastMonth', '3months', 'all'
-// v40: Filter transactions by selected time period
+let selectedPeriod = 'thisMonth';
+// Filter by time period
 function getFilteredTransactions() {
   if (!transactions.length || selectedPeriod === 'all') return transactions;
   const now = new Date();
@@ -1183,7 +1183,7 @@ function updateBigNumber() {
     rangeEl.textContent = `${filtered.length} transactions · ${mn} – ${mx}`;
   }
 }
-let learnedCategories = {}; // v40: User-taught merchant→category mappings {merchantPattern: category}
+let learnedCategories = {};
 // Default stores - Jamie can add/remove/rename via ⚙️
 const DEFAULT_STORES = [
   { id: 'aldi', name: 'Aldi', emoji: '🛒' },
@@ -1197,7 +1197,7 @@ let activeStoreId = 'aldi'; // currently selected store tab
 
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw0q-7XhX6OztGR54bXX5_iFnUCYeaRVyfxbhoDdaIuWSeDZF7U-KYxqYXfaM4eKcJD/exec';
 // SYNC ENGINE — Google Sheets architecture
-// FIREBASE SYNC ENGINE — v42
+// FIREBASE SYNC ENGINE — v43
 //
 // One key controls everything: martinson/last_csv_data
 //
@@ -1258,11 +1258,9 @@ function applyServerState(all) {
   
   if (all.auto_sync_data && all.auto_sync_data.transactions && all.auto_sync_data.syncedAt) {
     const csv = all.last_csv_data;
-    if (csv && csv.cleared) {
-      // User explicitly cleared — don't re-promote auto_sync data
-    } else if (!csv || !csv.uploadedAt || all.auto_sync_data.syncedAt > csv.uploadedAt) {
+    if (!csv || csv.cleared || !csv.uploadedAt || all.auto_sync_data.syncedAt > csv.uploadedAt) {
       promoteAutoSync(all.auto_sync_data);
-      return;
+      return; 
     }
   }
 
@@ -1828,26 +1826,21 @@ function parseCSV(text,fname){
   const catTotals={};
   transactions.filter(t=>t.amount<0&&t.cat!=='Transfers'&&t.cat!=='Income')
     .forEach(t=>{catTotals[t.cat]=(catTotals[t.cat]||0)+Math.abs(t.amount);});
-  // Sanitize for Firebase
-  // Sanitize for Firebase
-  function sanitize(s){ return String(s||'').replace(/[\x00-\x1F\x7F]/g,' ').trim(); }
   const txCompact = transactions.map(t=>({
-    d: sanitize(t.date),
-    n: sanitize(t.desc).substring(0,50), // cap description at 50 chars
+    d: sfSan(t.date),
+    n: sfSan(t.desc).substring(0,50),
     a: isFinite(t.amount) ? t.amount : 0,
-    c: sanitize(t.cat),
-    m: sanitize(t.month)
+    c: sfSan(t.cat),
+    m: sfSan(t.month)
   }));
-  // Build sync payload — stringify for size efficiency
   const syncData = {
-    txData: JSON.stringify(txCompact), // keep as string for size efficiency
+    txData: JSON.stringify(txCompact),
     cats: JSON.stringify(catTotals),
-    period: sanitize(mn + ' – ' + mx),
-    loadedOn: sanitize(loadedOn),
+    period: sfSan(mn + ' – ' + mx),
+    loadedOn: sfSan(loadedOn),
     count: transactions.length,
     uploadedAt: Date.now()
   };
-  // Write to Firebase
   const el = document.getElementById('tx-sync-status');
   if(el){ el.style.color='var(--text-mid)'; el.textContent='⟳ Syncing to all devices...'; }
   uploadCsvToServer(syncData)
@@ -1860,9 +1853,7 @@ function parseCSV(text,fname){
       if(el){ el.style.color='var(--red)'; el.textContent='⚠ Sync error: ' + err.message; }
       updateSyncBadge('error');
     });
-  // Archive to Firebase history
   archiveToHistory(transactions, mn + ' – ' + mx);
-  // Show AI insights button
   const aiBtn = document.getElementById('ai-btn-wrap');
   if(aiBtn) aiBtn.style.display='block';
   syncTransactionsToSheet(transactions, loadedOn);
@@ -2180,7 +2171,7 @@ function renderTxRows(cat){
   });
   document.getElementById('tx-tbody').innerHTML=html;
 }
-// v40: Transaction spending insights — patterns, anomalies, and tips
+// Spending insights
 function renderTxInsights(filtered, catTotals, totalSpend, avgPerDay){
   const insightsEl = document.getElementById('tx-insights');
   const contentEl = document.getElementById('tx-insights-content');
@@ -2211,7 +2202,7 @@ function renderTxInsights(filtered, catTotals, totalSpend, avgPerDay){
   }
   contentEl.innerHTML=insights.map(i=>`<div style="margin-bottom:8px;padding-left:12px;border-left:2px solid var(--teal)">${i}</div>`).join('');
 }
-// v40: Click-to-Recategorize — teach the system once, fix forever
+// Click-to-Recategorize
 let _pickerTxIdx = null;
 function openCategoryPicker(txIdx, e) {
   e.stopPropagation();
@@ -2436,7 +2427,7 @@ function loadCrossDeviceCsvData(data){
   transactions = data.txList.map(t=>({
     date: t.d||t.date||'',
     desc: t.n||t.desc||'',
-    // v40: Explicit null check for amounts (negative numbers are falsy)
+    // Explicit null check
     amount: (t.a !== undefined && t.a !== null) ? Number(t.a) : Number(t.amount||0),
     cat: t.c||t.cat||'Other',
     month: t.m||t.month||'',
@@ -2870,7 +2861,7 @@ function renderWeekHist(){
   if(!weekHist.length){wrap.innerHTML='<div class="empty-state"><div class="es-icon">🛒</div><p>No shopping trips logged yet.<br>Finish your first shop to see history here.</p></div>';return;}
   wrap.innerHTML=weekHist.map(w=>{const u=w.t<=w.budget;const diff=Math.abs(w.budget-w.t).toFixed(2);return`<div class="hist-item"><div><div class="hi-week">${w.label}</div><div class="hi-date">${w.date}</div></div><div style="text-align:right"><div class="hi-amt" style="color:${u?'var(--sage)':'var(--red)'}">$${w.t.toFixed(2)}</div><span class="hi-status ${u?'hs-under':'hs-over'}">${u?'✓ $'+diff+' under':'⚠ $'+diff+' over'}</span></div></div>`;}).join('');
 }
-// v38 FEATURE: MULTI-STORE GROCERY LISTS
+// GROCERY LISTS
 // Jamie's stores: Aldi, Costco, Target, Walmart (configurable)
 // Per-store grocery lists with budget tracking
 // Syncs to Firebase for cross-device visibility.
@@ -3192,7 +3183,7 @@ function updateGoalsDisplay(){
   updateJarDisplay();
   updateNetWorth();
 }
-// v40: Update the 3-jar metric cards with current balances
+// Update jar metric cards
 function updateJarDisplay(){
   const mcEl=document.getElementById('d-mc-val');
   const mcSub=document.getElementById('d-mc-sub');
@@ -3260,7 +3251,7 @@ function updateDebtMetrics(){
   // Also update the banner style — green for plan, not default
   const banner = document.getElementById('debt-freedom-banner');
   if(banner) banner.innerHTML = `🎯 Debt free in <strong>${freedomMonths} months</strong> — <span>${mlabel(freedomMonths)}</span> · Kill weapon: $${KILL_WEAPON_MONTHLY.toLocaleString()}/mo`;
-  // v40: Sync CC table rows to match CARDS array
+  // Sync CC rows
   const ccTable = document.getElementById('cc-table');
   if(ccTable){
     const tbody = ccTable.querySelector('tbody');
@@ -3356,7 +3347,7 @@ function syncJamieToDoug(liveSpent){
   if(el){el.textContent=fmt(monthTotal);}
   if(sub){const rem=800-monthTotal;sub.textContent=`of $800 budget — ${rem>=0?fmt(rem)+' remaining':'$'+Math.abs(rem).toFixed(0)+' over'}`;}
 }
-// v35 FEATURE 1: MONEY FLOW — Interactive Sankey Diagram
+// MONEY FLOW — Sankey
 function renderSankey(){
   const filtered = getFilteredTransactions();
   if(!filtered.length){
@@ -3587,7 +3578,7 @@ function renderFlowSummary(totalSpend,income,surplus,catCount){
       </div>
     </div>`;
 }
-// v35 FEATURE 2: AI ASSISTANT — Floating Chat Panel
+// AI ASSISTANT
 function initAIForUser(who){
   const fab=document.getElementById('ai-fab');
   const panel=document.getElementById('ai-panel');
@@ -3798,6 +3789,7 @@ function updateBankSyncBar(){
     document.getElementById('bank-connect-btn').style.display='none';
     document.getElementById('bank-sync-btn').style.display='inline-block';
     document.getElementById('bank-disconnect-btn').style.display='inline-block';
+    showAutoSyncStatus();
   } else if(_sfRehydrated) {
     bar.style.display = 'flex';
     if(label){label.textContent='Connect Your Bank';label.style.color='var(--text)';}
@@ -3806,6 +3798,21 @@ function updateBankSyncBar(){
     document.getElementById('bank-sync-btn').style.display='none';
     document.getElementById('bank-disconnect-btn').style.display='none';
   }
+}
+// v43: Show 3AM auto-sync status in bank bar
+function showAutoSyncStatus(){
+  FB_ROOT.child('auto_sync_status').once('value').then(function(snap){
+    var status = snap.val();
+    var sub = document.getElementById('bank-sync-sub');
+    if(!sub || !status) return;
+    var lastSync = localStorage.getItem('simplefin_last_sync');
+    var prefix = lastSync ? 'Last sync: '+lastSync : '';
+    if(status.status === 'ok' && status.atHuman){
+      sub.textContent = prefix + (prefix?' \u00B7 ':'') + '3AM: \u2705 ' + status.atHuman;
+    } else if(status.status === 'error'){
+      sub.textContent = prefix + (prefix?' \u00B7 ':'') + '3AM: \u26A0 ' + (status.detail||'error');
+    }
+  }).catch(function(){});
 }
 
 function rehydrateSimpleFINState(){
@@ -3825,7 +3832,20 @@ function rehydrateSimpleFINState(){
     }
     _sfRehydrated = true;
     updateBankSyncBar();
+    // v43: Auto-fresh sync on open if bank connected
+    if(simplefinConnected) autoFreshSyncOnOpen();
   }).catch(function(){ _sfRehydrated = true; updateBankSyncBar(); });
+}
+// v43: Once/day auto-sync — shared across devices via Firebase
+function autoFreshSyncOnOpen(){
+  FB_ROOT.child('last_fresh_sync').once('value').then(function(snap){
+    var data = snap.val();
+    var todayStr = new Date().toISOString().substring(0,10);
+    if(!data || data.date !== todayStr){
+      toast('\uD83D\uDD04 Auto-refreshing today\'s data...');
+      syncFromBank();
+    }
+  }).catch(function(){});
 }
 function showBankConnect(){
   const existing = document.getElementById('bank-connect-overlay');
@@ -3900,11 +3920,21 @@ async function claimSimpleFINToken(){
     status.style.color = 'var(--red)';
   }
 }
+var _freshSyncInProgress = false;
 async function syncFromBank(){
+  if(_freshSyncInProgress) return;
+  _freshSyncInProgress = true;
   var syncBtn = document.getElementById('bank-sync-btn');
   var sub = document.getElementById('bank-sync-sub');
   if(syncBtn) syncBtn.textContent = '\u23F3 Syncing...';
-  if(sub) sub.textContent = 'Pulling from BofA...';
+  if(sub) sub.textContent = 'Pulling fresh data from BofA...';
+  // v43: Visual reset — show loading so user sees the refresh
+  var dz = document.getElementById('drop-zone');
+  if(dz) dz.classList.remove('loaded');
+  var dc = document.getElementById('drop-content');
+  if(dc) dc.innerHTML = '<div style="text-align:center;padding:16px"><div style="font-size:24px;margin-bottom:8px">\u23F3</div><div style="font-size:14px;color:var(--gold);font-weight:600">Pulling fresh data from BofA...</div></div>';
+  transactions = [];
+  _loadedUploadedAt = 0;
   try {
     var res = await fetch(SHEET_URL, {method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'simplefinSync'})});
     var data = await res.json();
@@ -3912,11 +3942,13 @@ async function syncFromBank(){
       toast('\u26A0 Bank sync error: '+data.error);
       if(syncBtn)syncBtn.textContent='Sync Now';
       if(sub)sub.textContent='Sync failed';
+      if(dc) dc.innerHTML = '<div style="font-size:32px;margin-bottom:8px">\uD83D\uDCC2</div><div style="font-size:14px;font-weight:600">Sync failed \u2014 tap Sync Now to retry</div>';
       if(data.error.includes('403')||data.error.includes('auth')){
         localStorage.removeItem('simplefin_connected');
         fbSet('simplefin_state',{connected:false,error:'auth_failed',at:Date.now()});
         simplefinConnected=false;updateBankSyncBar();
       }
+      _freshSyncInProgress = false;
       return;
     }
     if(data.transactions&&data.transactions.length>0){
@@ -3924,14 +3956,21 @@ async function syncFromBank(){
       var now=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
       localStorage.setItem('simplefin_last_sync',now);
       fbSet('simplefin_state',{connected:true,lastSync:now,syncAt:Date.now()});
+      // v43: Record today so auto-fresh doesn't re-trigger
+      fbSet('last_fresh_sync',{date:new Date().toISOString().substring(0,10),at:Date.now(),source:'manual'});
       toast('\u2705 '+data.transactions.length+' txns | MC $'+jarBalances.mc+' | FF $'+jarBalances.ff+' | Merrill $'+(jarBalances.merrill||0));
-    }else{toast('No transactions found');}
+    }else{
+      toast('No new transactions from BofA yet');
+      checkAutoSyncData();
+    }
     if(syncBtn)syncBtn.textContent='Sync Now';
     updateBankSyncBar();
   }catch(e){
     toast('\u26A0 Could not reach bank: '+e.message);
     if(syncBtn)syncBtn.textContent='Sync Now';
+    checkAutoSyncData();
   }
+  _freshSyncInProgress = false;
 }
 function processSimpleFINTransactions(txns, accountBalances, newCount){
   transactions = [];
@@ -3975,6 +4014,7 @@ function processSimpleFINTransactions(txns, accountBalances, newCount){
   _loadedUploadedAt = 0;
   // v39: Update account balances if provided
   if (accountBalances) {
+    
     
     if (accountBalances.missionControl) jarBalances.mc = Math.round(accountBalances.missionControl.balance);
     else if (accountBalances.checking) jarBalances.mc = Math.round(accountBalances.checking.balance);
