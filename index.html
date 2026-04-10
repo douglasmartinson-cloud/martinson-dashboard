@@ -3220,6 +3220,9 @@ function deleteStore(index) {
   if (activeStoreId === storeId) {
     activeStoreId = groceryStores[0].id;
   }
+  _storeWriteTime = Date.now();
+  fbSet('grocery_stores', groceryStores);
+  fbSet('store_items', storeItems);
   // Re-render the overlay
   closeManageStores();
   openManageStores();
@@ -3233,6 +3236,10 @@ function addNewStore() {
     name: 'New Store',
     emoji: '🛍️'
   });
+  storeItems[newId] = [];
+  _storeWriteTime = Date.now();
+  fbSet('grocery_stores', groceryStores);
+  fbSet('store_items', storeItems);
   
   // Re-render the overlay
   closeManageStores();
