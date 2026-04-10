@@ -809,7 +809,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       <div class="ja-card-title">🏦 Recent Family Fuel Spending</div>
       <div id="j-recent-tx"></div>
     </div>
-    <div id="j-hist-wrap"></div>
+    <!-- Compact My Lists card -->
+    <div class="ja-card" id="j-lists-summary">
+      <div class="ja-card-title" style="cursor:pointer" onclick="jPage('grocery',document.querySelectorAll('#jamie-app .jn-item')[2])">📋 My Grocery Lists <span style="font-size:12px;color:#5a9e8a;float:right">View All →</span></div>
+      <div id="j-lists-summary-content"><span style="font-size:13px;color:#7a8e8a">No saved lists yet. Finish a shopping trip to save one!</span></div>
+    </div>
   </div>
   <!-- MEALS PAGE -->
   <div class="j-page" id="j-meals">
@@ -1416,7 +1420,7 @@ async function syncAll() {
   // Load non-CSV keys from localStorage instantly (no network)
   ['custom_meals','hidden_meals','week_hist','meal_plan',
    'cc_balances','family_goals','financial_settings',
-   'grocery_stores','store_items','learned_categories'].forEach(k => {
+   'grocery_stores','store_items','learned_categories','price_memory'].forEach(k => {
     const v = localStorage.getItem('fb_' + k);
     if (v) try { applyKey(k, JSON.parse(v)); } catch(e) {}
   });
@@ -1494,6 +1498,9 @@ function applyKey(key, value) {
       if (typeof value === 'object') {
         learnedCategories = value;
       }
+      break;
+    case 'price_memory':
+      if (typeof value === 'object') priceMemory = value;
       break;
   }
 }
@@ -1627,7 +1634,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Load cached state
   ['custom_meals','hidden_meals','week_hist','meal_plan',
    'cc_balances','family_goals','financial_settings',
-   'grocery_stores','store_items','learned_categories'].forEach(k => {
+   'grocery_stores','store_items','learned_categories','price_memory'].forEach(k => {
     const v = localStorage.getItem('fb_' + k);
     if (v) try { applyKey(k, JSON.parse(v)); } catch(e) {}
   });
@@ -2062,6 +2069,7 @@ function applyReceiptToList(receiptItems){
   receiptItems.forEach(ri=>{
     const rName=(ri.name||ri.item||'').toLowerCase();
     const price=parseFloat(ri.price)||0;
+    const storeName=(groceryStores.find(s=>s.id===activeStoreId)||{}).name||'Store';
     const match=items.find(si=>{
       const siName=(si.name||'').toLowerCase();
       return siName.includes(rName)||rName.includes(siName)||rName.split(' ').some(w=>w.length>3&&siName.includes(w));
@@ -2073,11 +2081,10 @@ function applyReceiptToList(receiptItems){
     } else {
       items.push({id:'si_'+Date.now()+'_'+Math.random().toString(36).substr(2,5),name:ri.name||ri.item,price:price.toFixed(2),checked:true,fromReceipt:true});
     }
+    if(price>0)j_savePriceMemory(ri.name||ri.item,price,storeName);
   });
   storeItems[activeStoreId]=items;
-  saveStoreItems();
-  renderStoreItems();
-  updateStoreBudgetDisplay();
+  saveStoreItems();renderStoreItems();updateStoreBudgetDisplay();
 }
 function resetReceipt(){
   const zone=document.getElementById('receipt-zone');
@@ -2877,11 +2884,11 @@ function finishShop(){finishStoreShopping();}
 function renderWeekHist(){
   const monthTotal=weekHist.reduce((s,w)=>s+w.t,0);
   const monthRem=Math.max(0,800-monthTotal);
-  document.getElementById('j-month-spent').textContent=fmt(monthTotal);
-  document.getElementById('j-month-rem').textContent=fmt(monthRem);
-  const wrap=document.getElementById('j-hist-wrap');
-  if(!weekHist.length){wrap.innerHTML='<div class="empty-state"><div class="es-icon">🛒</div><p>No shopping trips logged yet.<br>Finish your first shop to see history here.</p></div>';return;}
-  wrap.innerHTML=weekHist.map(w=>{const u=w.t<=w.budget;const diff=Math.abs(w.budget-w.t).toFixed(2);return`<div class="hist-item"><div><div class="hi-week">${w.label}</div><div class="hi-date">${w.date}</div></div><div style="text-align:right"><div class="hi-amt" style="color:${u?'var(--sage)':'var(--red)'}">$${w.t.toFixed(2)}</div><span class="hi-status ${u?'hs-under':'hs-over'}">${u?'✓ $'+diff+' under':'⚠ $'+diff+' over'}</span></div></div>`;}).join('');
+  const ms=document.getElementById('j-month-spent');
+  const mr=document.getElementById('j-month-rem');
+  if(ms)ms.textContent=fmt(monthTotal);
+  if(mr)mr.textContent=fmt(monthRem);
+  j_renderListsSummary();
 }
 // GROCERY LISTS
 // Jamie's stores: Aldi, Costco, Target, Walmart (configurable)
@@ -2938,17 +2945,18 @@ function addStoreItem() {
   const name = inp.value.trim();
   if (!name) return;
   if (!storeItems[activeStoreId]) storeItems[activeStoreId] = [];
-  
+  const est=j_getPriceEst(name);
   storeItems[activeStoreId].push({
     id: 'si_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
     name: name,
-    price: '',
+    price: est?est.price.toFixed(2):'',
     checked: false
   });
   inp.value = '';
   renderStoreItems();
   saveStoreItems();
-  toast('✓ Added to ' + groceryStores.find(s => s.id === activeStoreId)?.name);
+  const storeName=groceryStores.find(s => s.id === activeStoreId)?.name||'store';
+  toast(est?'\u2713 '+name+' added ($'+est.price.toFixed(2)+' last time at '+est.store+')':'\u2713 Added to '+storeName);
 }
 function toggleStoreItem(itemId) {
   const items = storeItems[activeStoreId] || [];
@@ -3151,14 +3159,20 @@ function finishStoreShopping() {
     if (Array.isArray(items)) {
       const storeName=(groceryStores.find(s=>s.id===storeId)||{}).name||storeId;
       items.forEach(i => {
-        total += parseFloat(i.price) || 0;
-        archivedItems.push({name:i.name,price:parseFloat(i.price)||0,store:storeName,checked:i.checked});
+        const p=parseFloat(i.price)||0;
+        total += p;
+        archivedItems.push({name:i.name,price:p,store:storeName,checked:i.checked});
+        if(p>0)j_savePriceMemory(i.name,p,storeName);
       });
     }
   });
+  if(!archivedItems.length){toast('Add some items first!');return;}
+  const defaultName=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'})+' Shopping';
+  const name=prompt('Name this grocery list:',defaultName);
+  if(name===null)return;
   const listArchive={
-    wk: currentWeek,
-    label: 'Week ' + currentWeek,
+    id:'gl_'+Date.now(),
+    label: name||defaultName,
     date: new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}),
     t: +total.toFixed(2),
     budget: WEEKLY_BUDGET,
@@ -3166,15 +3180,18 @@ function finishStoreShopping() {
   };
   weekHist.unshift(listArchive);
   fbSet('week_hist', weekHist);
-  currentWeek++;
   storeItems = {};
   fbSet('store_items', storeItems);
-  renderStoreItems();
-  renderWeekHist();
-  j_renderPastLists();
-  syncJamieToDoug();
-  toast('✓ Week saved! Total: $' + total.toFixed(2));
+  renderStoreItems();renderWeekHist();j_renderPastLists();syncJamieToDoug();
+  toast('\u2713 "'+listArchive.label+'" saved! $'+total.toFixed(2));
 }
+let priceMemory={};
+function j_savePriceMemory(name,price,store){
+  const k=name.toLowerCase().trim();
+  priceMemory[k]={price:price,store:store,date:new Date().toISOString().substring(0,10)};
+  scheduleSave('price_memory',priceMemory);
+}
+function j_getPriceEst(name){return priceMemory[name.toLowerCase().trim()]||null;}
 function initStoreGrocery() {
   // Initialize store items object if empty
   groceryStores.forEach(s => {
@@ -3464,19 +3481,55 @@ function j_showPrice(itemId){
 function j_renderPastLists(){
   const wrap=document.getElementById('j-past-lists');
   if(!wrap)return;
-  const listsWithItems=weekHist.filter(w=>w.items&&w.items.length);
-  if(!listsWithItems.length){wrap.innerHTML='';return;}
-  wrap.innerHTML=`<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#7a8e8a;margin:16px 0 8px">📋 Past Grocery Lists</div>`+
-    listsWithItems.slice(0,4).map(w=>{
+  if(!weekHist.length){wrap.innerHTML='<div style="text-align:center;padding:20px;color:#7a8e8a;font-size:13px">No saved lists yet. Finish a shopping trip to save your first!</div>';return;}
+  wrap.innerHTML=`<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#7a8e8a;margin:16px 0 8px">📋 Saved Grocery Lists</div>`+
+    weekHist.map((w,i)=>{
       const under=w.t<=w.budget;
+      const hasItems=w.items&&w.items.length;
       return`<div class="ja-card" style="padding:14px;margin-bottom:10px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div><span style="font-weight:700;font-size:14px">${w.label}</span><span style="font-size:12px;color:#7a8e8a;margin-left:8px">${w.date}</span></div>
-          <span style="font-family:var(--font-d);font-size:16px;font-weight:700;color:${under?'#5a9e8a':'#e8846b'}">$${w.t.toFixed(2)}</span>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <div style="flex:1;cursor:pointer" onclick="j_toggleListDetail(${i})">
+            <span style="font-weight:700;font-size:14px">${w.label||'Untitled'}</span>
+            <span style="font-size:11px;color:#7a8e8a;margin-left:6px">${w.date||''}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-family:var(--font-d);font-size:16px;font-weight:700;color:${under?'#5a9e8a':'#e8846b'}">$${(w.t||0).toFixed(2)}</span>
+            <button onclick="j_renameList(${i})" style="background:none;border:none;font-size:14px;cursor:pointer;padding:2px" title="Rename">✏️</button>
+            <button onclick="j_deleteList(${i})" style="background:none;border:none;font-size:14px;cursor:pointer;padding:2px" title="Delete">🗑️</button>
+          </div>
         </div>
-        <div style="display:flex;flex-wrap:wrap;gap:4px">${w.items.slice(0,10).map(i=>`<span style="font-size:11px;padding:3px 8px;background:rgba(90,158,138,0.08);border-radius:100px;color:#2c3e3a">${i.name}${i.price?' $'+i.price.toFixed(2):''}</span>`).join('')}${w.items.length>10?`<span style="font-size:11px;padding:3px 8px;color:#7a8e8a">+${w.items.length-10} more</span>`:''}</div>
+        <div id="j-list-detail-${i}" style="display:none">${hasItems?w.items.map(it=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(232,226,217,0.4);font-size:12px"><span style="color:#2c3e3a">${it.name}</span><span style="color:#7a8e8a;font-weight:600">${it.price?'$'+it.price.toFixed(2):'—'}</span></div>`).join(''):'<div style="font-size:12px;color:#a8b8b4;padding:4px 0">No item details saved</div>'}</div>
       </div>`;
     }).join('');
+  j_renderListsSummary();
+}
+function j_toggleListDetail(i){
+  const el=document.getElementById('j-list-detail-'+i);
+  if(el)el.style.display=el.style.display==='none'?'block':'none';
+}
+function j_deleteList(i){
+  if(!confirm('Delete "'+((weekHist[i]||{}).label||'this list')+'"?'))return;
+  weekHist.splice(i,1);
+  fbSet('week_hist',weekHist);
+  renderWeekHist();j_renderPastLists();
+  toast('List deleted');
+}
+function j_renameList(i){
+  const w=weekHist[i];if(!w)return;
+  const name=prompt('Rename this list:',w.label||'');
+  if(name===null)return;
+  w.label=name||w.label;
+  fbSet('week_hist',weekHist);
+  j_renderPastLists();
+  toast('Renamed to "'+w.label+'"');
+}
+function j_renderListsSummary(){
+  const wrap=document.getElementById('j-lists-summary-content');
+  if(!wrap)return;
+  if(!weekHist.length){wrap.innerHTML='<span style="font-size:13px;color:#7a8e8a">No saved lists yet</span>';return;}
+  const latest=weekHist[0];
+  wrap.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0"><span style="font-size:13px;font-weight:600">${latest.label||'Latest'}</span><span style="font-family:var(--font-d);font-size:15px;font-weight:700;color:#5a9e8a">$${(latest.t||0).toFixed(2)}</span></div>`+
+    (weekHist.length>1?`<div style="font-size:11px;color:#a8b8b4;margin-top:2px">${weekHist.length} total lists saved</div>`:'');
 }
 function j_showInsight(){
   const el=document.getElementById('j-ai-insight');
