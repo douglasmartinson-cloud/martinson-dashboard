@@ -2051,10 +2051,20 @@ function scanReceipt(file){
         try{items=JSON.parse(data.text.replace(/```json|```/g,'').trim());}catch(e){items=[];}
       }
       if(!items.length){throw new Error('No items found');}
-      applyReceiptToList(items);
       zone.classList.remove('scanning');
       zone.classList.add('done');
-      document.getElementById('receipt-content').innerHTML=`<div style="font-size:22px;margin-bottom:4px">✅</div><div style="font-size:14px;font-weight:600;color:var(--sage)">${items.length} items read from receipt</div><div style="font-size:12px;color:var(--text-mid);margin-top:3px">Prices updated · new items added · <span style="color:var(--sage);cursor:pointer;text-decoration:underline" onclick="resetReceipt()">Scan another</span></div>`;
+      // Apply to current store items immediately
+      applyReceiptToList(items);
+      // If saved lists exist, offer to assign
+      if(weekHist.length){
+        const listNames=weekHist.map((w,i)=>(i+1)+'. '+w.label).join('\n');
+        const pick=prompt('Assign this receipt to a saved list?\nEnter the number, or leave blank to skip:\n\n'+listNames);
+        if(pick&&parseInt(pick)>0){
+          const idx=parseInt(pick)-1;
+          if(weekHist[idx])j_assignReceiptToList(items,idx);
+        }
+      }
+      document.getElementById('receipt-content').innerHTML=`<div style="font-size:22px;margin-bottom:4px">✅</div><div style="font-size:14px;font-weight:600;color:#5a9e8a">${items.length} items read from receipt</div><div style="font-size:12px;color:#7a8e8a;margin-top:3px">Prices updated · <span style="color:#5a9e8a;cursor:pointer;text-decoration:underline" onclick="resetReceipt()">Scan another</span></div>`;
       toast('✓ Receipt scanned — '+items.length+' items updated');
     }catch(err){
       zone.classList.remove('scanning');
@@ -3045,7 +3055,7 @@ function openManageStores() {
       <button class="msb-save-btn" onclick="saveAndCloseStores()">Save Changes</button>
     </div>
   `;
-  document.body.appendChild(overlay);
+  document.getElementById('jamie-app').appendChild(overlay);
   
   // Event delegation for buttons
   overlay.addEventListener('click', function(e) {
@@ -3481,31 +3491,115 @@ function j_showPrice(itemId){
 function j_renderPastLists(){
   const wrap=document.getElementById('j-past-lists');
   if(!wrap)return;
-  if(!weekHist.length){wrap.innerHTML='<div style="text-align:center;padding:20px;color:#7a8e8a;font-size:13px">No saved lists yet. Finish a shopping trip to save your first!</div>';return;}
+  if(!weekHist.length){wrap.innerHTML='<div style="text-align:center;padding:20px;color:#7a8e8a;font-size:13px">No saved lists yet</div>';return;}
   wrap.innerHTML=`<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#7a8e8a;margin:16px 0 8px">📋 Saved Grocery Lists</div>`+
     weekHist.map((w,i)=>{
-      const under=w.t<=w.budget;
-      const hasItems=w.items&&w.items.length;
+      const under=(w.t||0)<=(w.budget||200);
       return`<div class="ja-card" style="padding:14px;margin-bottom:10px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
           <div style="flex:1;cursor:pointer" onclick="j_toggleListDetail(${i})">
             <span style="font-weight:700;font-size:14px">${w.label||'Untitled'}</span>
             <span style="font-size:11px;color:#7a8e8a;margin-left:6px">${w.date||''}</span>
           </div>
-          <div style="display:flex;align-items:center;gap:8px">
-            <span style="font-family:var(--font-d);font-size:16px;font-weight:700;color:${under?'#5a9e8a':'#e8846b'}">$${(w.t||0).toFixed(2)}</span>
-            <button onclick="j_renameList(${i})" style="background:none;border:none;font-size:14px;cursor:pointer;padding:2px" title="Rename">✏️</button>
-            <button onclick="j_deleteList(${i})" style="background:none;border:none;font-size:14px;cursor:pointer;padding:2px" title="Delete">🗑️</button>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-family:var(--font-d);font-size:15px;font-weight:700;color:${under?'#5a9e8a':'#e8846b'}">$${(w.t||0).toFixed(2)}</span>
+            <button onclick="j_renameList(${i})" style="background:none;border:none;font-size:13px;cursor:pointer;padding:2px" title="Rename">✏️</button>
+            <button onclick="j_deleteList(${i})" style="background:none;border:none;font-size:13px;cursor:pointer;padding:2px" title="Delete">🗑️</button>
           </div>
         </div>
-        <div id="j-list-detail-${i}" style="display:none">${hasItems?w.items.map(it=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(232,226,217,0.4);font-size:12px"><span style="color:#2c3e3a">${it.name}</span><span style="color:#7a8e8a;font-weight:600">${it.price?'$'+it.price.toFixed(2):'—'}</span></div>`).join(''):'<div style="font-size:12px;color:#a8b8b4;padding:4px 0">No item details saved</div>'}</div>
+        <div style="font-size:11px;color:#a8b8b4;margin-top:2px;cursor:pointer" onclick="j_toggleListDetail(${i})">${(w.items||[]).length} items · tap to ${document.getElementById('j-ld-'+i)&&document.getElementById('j-ld-'+i).style.display!=='none'?'hide':'view & edit'}</div>
+        <div id="j-ld-${i}" style="display:none;margin-top:10px"></div>
       </div>`;
     }).join('');
   j_renderListsSummary();
 }
 function j_toggleListDetail(i){
-  const el=document.getElementById('j-list-detail-'+i);
-  if(el)el.style.display=el.style.display==='none'?'block':'none';
+  const el=document.getElementById('j-ld-'+i);
+  if(!el)return;
+  if(el.style.display!=='none'){el.style.display='none';return;}
+  el.style.display='block';
+  j_renderListItems(i);
+}
+function j_renderListItems(i){
+  const w=weekHist[i];if(!w)return;
+  const el=document.getElementById('j-ld-'+i);if(!el)return;
+  const items=w.items||[];
+  el.innerHTML=items.map((it,idx)=>{
+    const crossed=it.checked;
+    const priceStr=it.price?'$'+parseFloat(it.price).toFixed(2):'';
+    return`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(232,226,217,0.4)">
+      <div onclick="j_toggleListItem(${i},${idx})" style="width:22px;height:22px;border-radius:50%;border:2px solid ${crossed?'#5a9e8a':'#e8e2d9'};background:${crossed?'#5a9e8a':'transparent'};display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:11px;color:#fff">${crossed?'✓':''}</div>
+      <div style="flex:1;${crossed?'text-decoration:line-through;color:#a8b8b4':'color:#2c3e3a'};font-size:13px;font-weight:600">${it.name}</div>
+      ${it.store?'<span style="font-size:10px;color:#a8b8b4;flex-shrink:0">'+it.store+'</span>':''}
+      ${priceStr?'<span style="font-size:12px;font-weight:700;color:#5a9e8a;flex-shrink:0">'+priceStr+'</span>':'<span onclick="j_addListItemPrice('+i+','+idx+')" style="font-size:11px;color:#a8b8b4;cursor:pointer;border:1px dashed #e8e2d9;padding:2px 6px;border-radius:6px;flex-shrink:0">+ price</span>'}
+      <button onclick="j_deleteListItem(${i},${idx})" style="background:none;border:none;color:#a8b8b4;font-size:12px;cursor:pointer;padding:0 2px">✕</button>
+    </div>`;
+  }).join('')+
+  `<div style="display:flex;gap:6px;margin-top:8px">
+    <input type="text" id="j-add-li-${i}" placeholder="Add item..." style="flex:1;padding:8px 10px;border:1.5px solid #e8e2d9;border-radius:8px;font-family:var(--font-b);font-size:12px;background:#faf7f2;color:#2c3e3a" onkeydown="if(event.key==='Enter')j_addListItem(${i})">
+    <button onclick="j_addListItem(${i})" style="padding:8px 14px;background:#5a9e8a;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Add</button>
+  </div>`;
+}
+function j_toggleListItem(li,idx){
+  const items=weekHist[li]?.items;if(!items||!items[idx])return;
+  items[idx].checked=!items[idx].checked;
+  weekHist[li].t=items.reduce((s,it)=>s+(parseFloat(it.price)||0),0);
+  fbSet('week_hist',weekHist);
+  j_renderListItems(li);
+}
+function j_addListItemPrice(li,idx){
+  const it=weekHist[li]?.items?.[idx];if(!it)return;
+  const p=prompt('Price for '+it.name+':','');
+  if(p===null)return;
+  it.price=parseFloat(p)||0;
+  if(it.price>0)j_savePriceMemory(it.name,it.price,it.store||'');
+  weekHist[li].t=(weekHist[li].items||[]).reduce((s,x)=>s+(parseFloat(x.price)||0),0);
+  fbSet('week_hist',weekHist);
+  j_renderListItems(li);j_renderPastLists();
+}
+function j_deleteListItem(li,idx){
+  const items=weekHist[li]?.items;if(!items)return;
+  items.splice(idx,1);
+  weekHist[li].t=items.reduce((s,x)=>s+(parseFloat(x.price)||0),0);
+  fbSet('week_hist',weekHist);
+  j_renderListItems(li);j_renderPastLists();
+}
+function j_addListItem(li){
+  const inp=document.getElementById('j-add-li-'+li);if(!inp)return;
+  const name=inp.value.trim();if(!name)return;
+  if(!weekHist[li].items)weekHist[li].items=[];
+  const est=j_getPriceEst(name);
+  weekHist[li].items.push({name:name,price:est?est.price:0,store:'',checked:false});
+  weekHist[li].t=(weekHist[li].items||[]).reduce((s,x)=>s+(parseFloat(x.price)||0),0);
+  inp.value='';
+  fbSet('week_hist',weekHist);
+  j_renderListItems(li);
+  toast(est?'Added '+name+' ($'+est.price.toFixed(2)+' last time)':'Added '+name);
+}
+function j_assignReceiptToList(receiptItems,listIdx){
+  const w=weekHist[listIdx];if(!w||!w.items)return;
+  let matched=0;let added=0;
+  receiptItems.forEach(ri=>{
+    const rName=(ri.name||ri.item||'').toLowerCase();
+    const price=parseFloat(ri.price)||0;
+    const match=w.items.find(it=>{
+      const n=(it.name||'').toLowerCase();
+      return n.includes(rName)||rName.includes(n)||rName.split(' ').some(word=>word.length>3&&n.includes(word));
+    });
+    if(match){
+      match.price=price;match.checked=true;
+      match.receiptName=ri.name||ri.item;
+      matched++;
+    } else {
+      w.items.push({name:ri.name||ri.item,price:price,store:'Receipt',checked:true,fromReceipt:true});
+      added++;
+    }
+    if(price>0)j_savePriceMemory(ri.name||ri.item,price,'Receipt');
+  });
+  w.t=w.items.reduce((s,x)=>s+(parseFloat(x.price)||0),0);
+  fbSet('week_hist',weekHist);
+  j_renderPastLists();
+  toast('\u2713 Receipt matched to "'+w.label+'": '+matched+' matched, '+added+' new');
 }
 function j_deleteList(i){
   if(!confirm('Delete "'+((weekHist[i]||{}).label||'this list')+'"?'))return;
