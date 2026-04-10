@@ -276,6 +276,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 /* Receipt */
 #jamie-app .receipt-zone{border:2px dashed var(--ja-border);border-radius:var(--ja-r);padding:20px;text-align:center;cursor:pointer;position:relative;transition:all 0.3s;margin-bottom:14px;background:var(--ja-card)}
 #jamie-app .receipt-zone.drag-over{border-color:var(--ja-sage);background:var(--ja-sage-soft)}
+#jamie-app .receipt-zone.done .receipt-inp{display:none;pointer-events:none}
+#jamie-app .receipt-zone.scanning .receipt-inp{display:none;pointer-events:none}
 #jamie-app .receipt-zone.scanning{border-color:var(--ja-gold);border-style:solid;background:var(--ja-gold-soft)}
 #jamie-app .receipt-zone.done{border-color:var(--ja-sage);border-style:solid;background:var(--ja-sage-soft)}
 #jamie-app .receipt-inp{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
@@ -3208,10 +3210,18 @@ function addNewStore() {
   }, 100);
 }
 function saveAndCloseStores() {
-  // Save stores to Firebase
+  // Read all current input values before saving
+  const overlay=document.getElementById('manage-stores-overlay');
+  if(overlay){
+    overlay.querySelectorAll('.msb-name-inp').forEach(inp=>{
+      const idx=parseInt(inp.dataset.idx);
+      if(groceryStores[idx]&&inp.value.trim())groceryStores[idx].name=inp.value.trim();
+    });
+  }
+  // Init items for any new stores
+  groceryStores.forEach(s=>{if(!storeItems[s.id])storeItems[s.id]=[];});
   fbSet('grocery_stores', groceryStores);
   fbSet('store_items', storeItems);
-  
   closeManageStores();
   renderStoreTabs();
   renderStoreItems();
