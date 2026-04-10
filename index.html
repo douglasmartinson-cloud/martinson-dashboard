@@ -2025,16 +2025,32 @@ function onReceiptDragOver(e){e.preventDefault();document.getElementById('receip
 function onReceiptDragLeave(){document.getElementById('receipt-zone').classList.remove('drag-over');}
 function onReceiptDrop(e){e.preventDefault();document.getElementById('receipt-zone').classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/'))scanReceipt(f);}
 function onReceiptSel(e){const f=e.target.files[0];if(f)scanReceipt(f);}
+function j_resizeImage(file,maxDim,quality){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    img.onload=()=>{
+      let w=img.width,h=img.height;
+      if(w>maxDim||h>maxDim){
+        if(w>h){h=Math.round(h*(maxDim/w));w=maxDim;}
+        else{w=Math.round(w*(maxDim/h));h=maxDim;}
+      }
+      const canvas=document.createElement('canvas');
+      canvas.width=w;canvas.height=h;
+      const ctx=canvas.getContext('2d');
+      ctx.drawImage(img,0,0,w,h);
+      const dataUrl=canvas.toDataURL('image/jpeg',quality||0.85);
+      resolve(dataUrl.split(',')[1]);
+    };
+    img.onerror=()=>reject(new Error('Could not load image'));
+    img.src=URL.createObjectURL(file);
+  });
+}
 function scanReceipt(file){
   const zone=document.getElementById('receipt-zone');
   zone.classList.add('scanning');
-  document.getElementById('receipt-content').innerHTML=`<div><span class="scan-spinner"></span><span style="font-size:14px;font-weight:600;color:var(--gold)">Reading your receipt...</span></div><div style="font-size:12px;color:var(--text-mid);margin-top:6px">This takes about 10 seconds</div>`;
-  const reader=new FileReader();
-  reader.onload=async(e)=>{
-    const base64=e.target.result.split(',')[1];
-    const mediaType=file.type;
+  document.getElementById('receipt-content').innerHTML=`<div><span class="scan-spinner"></span><span style="font-size:14px;font-weight:600;color:#d4a853">Reading your receipt...</span></div><div style="font-size:12px;color:#7a8e8a;margin-top:6px">Resizing & scanning — about 10 seconds</div>`;
+  j_resizeImage(file,1200,0.85).then(async(base64)=>{
     try{
-      // Route through Google Apps Script proxy to avoid CORS issues
       const response=await fetch(SHEET_URL,{
         method:'POST',
         headers:{'Content-Type':'text/plain'},
@@ -2044,35 +2060,72 @@ function scanReceipt(file){
         })
       });
       const data=await response.json();
+      if(data.error){throw new Error(data.error);}
       let items=[];
-      if(data.items && data.items.length){
-        items=data.items;
-      } else if(data.text){
-        try{items=JSON.parse(data.text.replace(/```json|```/g,'').trim());}catch(e){items=[];}
-      }
-      if(!items.length){throw new Error('No items found');}
-      zone.classList.remove('scanning');
-      zone.classList.add('done');
-      // Apply to current store items immediately
-      applyReceiptToList(items);
-      // If saved lists exist, offer to assign
-      if(weekHist.length){
-        const listNames=weekHist.map((w,i)=>(i+1)+'. '+w.label).join('\n');
-        const pick=prompt('Assign this receipt to a saved list?\nEnter the number, or leave blank to skip:\n\n'+listNames);
-        if(pick&&parseInt(pick)>0){
-          const idx=parseInt(pick)-1;
-          if(weekHist[idx])j_assignReceiptToList(items,idx);
-        }
-      }
-      document.getElementById('receipt-content').innerHTML=`<div style="font-size:22px;margin-bottom:4px">✅</div><div style="font-size:14px;font-weight:600;color:#5a9e8a">${items.length} items read from receipt</div><div style="font-size:12px;color:#7a8e8a;margin-top:3px">Prices updated · <span style="color:#5a9e8a;cursor:pointer;text-decoration:underline" onclick="resetReceipt()">Scan another</span></div>`;
-      toast('✓ Receipt scanned — '+items.length+' items updated');
+      if(data.items&&data.items.length){items=data.items;}
+      else if(data.text){try{items=JSON.parse(data.text.replace(/```json|```/g,'').trim());}catch(e){}}
+      if(!items.length){throw new Error('No items found on receipt');}
+      zone.classList.remove('scanning');zone.classList.add('done');
+      j_showReceiptResults(items);
     }catch(err){
       zone.classList.remove('scanning');
-      document.getElementById('receipt-content').innerHTML=`<div style="font-size:22px;margin-bottom:4px">⚠️</div><div style="font-size:14px;font-weight:600;color:var(--red)">Could not read receipt</div><div style="font-size:12px;color:var(--text-mid);margin-top:3px">Make sure photo is clear and well-lit · <span style="color:var(--sage);cursor:pointer;text-decoration:underline" onclick="resetReceipt()">Try again</span></div>`;
-      toast('Receipt scan failed — try a clearer, well-lit photo');
+      document.getElementById('receipt-content').innerHTML=`<div style="font-size:22px;margin-bottom:4px">⚠️</div><div style="font-size:14px;font-weight:600;color:#e8846b">Could not read receipt</div><div style="font-size:12px;color:#7a8e8a;margin-top:3px">${err.message||'Make sure photo is clear and well-lit'} · <span style="color:#5a9e8a;cursor:pointer;text-decoration:underline" onclick="resetReceipt()">Try again</span></div>`;
     }
-  };
-  reader.readAsDataURL(file);
+  }).catch(err=>{
+    zone.classList.remove('scanning');
+    document.getElementById('receipt-content').innerHTML=`<div style="font-size:22px;margin-bottom:4px">⚠️</div><div style="font-size:14px;font-weight:600;color:#e8846b">Image error</div><div style="font-size:12px;color:#7a8e8a;margin-top:3px">${err.message} · <span style="color:#5a9e8a;cursor:pointer;text-decoration:underline" onclick="resetReceipt()">Try again</span></div>`;
+  });
+}
+function j_showReceiptResults(items){
+  const total=items.reduce((s,i)=>s+(parseFloat(i.price)||0),0);
+  const listItems=storeItems[activeStoreId]||[];
+  let matched=0,impulse=0;
+  items.forEach(ri=>{
+    const rn=(ri.name||'').toLowerCase();
+    const m=listItems.find(si=>(si.name||'').toLowerCase().includes(rn)||rn.includes((si.name||'').toLowerCase())||rn.split(' ').some(w=>w.length>3&&(si.name||'').toLowerCase().includes(w)));
+    ri._matched=!!m;
+    if(m){matched++;m.price=(parseFloat(ri.price)||0).toFixed(2);m.checked=true;}else{impulse++;}
+    if(parseFloat(ri.price)>0)j_savePriceMemory(ri.name,parseFloat(ri.price),(groceryStores.find(s=>s.id===activeStoreId)||{}).name||'');
+  });
+  const missed=listItems.filter(si=>!si.checked&&!items.some(ri=>ri._matched&&(ri.name||'').toLowerCase().includes((si.name||'').toLowerCase())));
+  saveStoreItems();renderStoreItems();updateStoreBudgetDisplay();
+  const weekSpent=parseFloat(document.getElementById('j-gauge-spent')?.textContent?.replace(/[^0-9.]/g,''))||0;
+  const weekRem=200-weekSpent-total;
+  let resultsHTML=`<div style="padding:16px">
+    <div style="text-align:center;margin-bottom:12px">
+      <div style="font-size:28px;margin-bottom:4px">🧾</div>
+      <div style="font-family:var(--font-d);font-size:24px;color:#2c3e3a">$${total.toFixed(2)}</div>
+      <div style="font-size:12px;color:#7a8e8a">Receipt Total · ${items.length} items</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;text-align:center">
+      <div style="background:#5a9e8a12;border-radius:10px;padding:8px"><div style="font-size:18px;font-weight:700;color:#5a9e8a">${matched}</div><div style="font-size:10px;color:#7a8e8a">On your list</div></div>
+      <div style="background:#d4a85312;border-radius:10px;padding:8px"><div style="font-size:18px;font-weight:700;color:#d4a853">${impulse}</div><div style="font-size:10px;color:#7a8e8a">Extra items</div></div>
+      <div style="background:${weekRem>=0?'#5a9e8a12':'#e8846b12'};border-radius:10px;padding:8px"><div style="font-size:18px;font-weight:700;color:${weekRem>=0?'#5a9e8a':'#e8846b'}">$${Math.abs(weekRem).toFixed(0)}</div><div style="font-size:10px;color:#7a8e8a">${weekRem>=0?'Budget left':'Over budget'}</div></div>
+    </div>`;
+  resultsHTML+=items.map(i=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(232,226,217,0.4)">
+    <div style="display:flex;align-items:center;gap:6px"><span style="font-size:10px">${i._matched?'✅':'🆕'}</span><span style="font-size:13px;color:#2c3e3a">${i.name}</span></div>
+    <span style="font-size:13px;font-weight:700;color:#5a9e8a">$${(parseFloat(i.price)||0).toFixed(2)}</span>
+  </div>`).join('');
+  if(missed.length){
+    resultsHTML+=`<div style="margin-top:12px;padding:10px;background:#e8846b0d;border-radius:10px;border:1px solid #e8846b22">
+      <div style="font-size:11px;font-weight:700;color:#e8846b;margin-bottom:4px">🤔 On your list but not on receipt:</div>
+      ${missed.slice(0,5).map(m=>`<div style="font-size:12px;color:#7a8e8a;padding:2px 0">${m.name}</div>`).join('')}
+    </div>`;
+  }
+  resultsHTML+=`<div style="display:flex;gap:8px;margin-top:14px">
+    <button onclick="resetReceipt()" style="flex:1;padding:10px;background:#5a9e8a;color:#fff;border:none;border-radius:10px;font-family:var(--font-b);font-size:13px;font-weight:700;cursor:pointer">📸 Scan Another</button>
+    ${weekHist.length?`<button onclick="j_receiptToSavedList()" style="flex:1;padding:10px;background:#d4a853;color:#fff;border:none;border-radius:10px;font-family:var(--font-b);font-size:13px;font-weight:700;cursor:pointer">📋 Save to List</button>`:''}
+  </div></div>`;
+  document.getElementById('receipt-content').innerHTML=resultsHTML;
+  window._lastReceiptItems=items;
+}
+function j_receiptToSavedList(){
+  if(!window._lastReceiptItems||!weekHist.length)return;
+  const listNames=weekHist.map((w,i)=>(i+1)+'. '+w.label).join('\n');
+  const pick=prompt('Save receipt to which list?\n\n'+listNames);
+  if(!pick||!parseInt(pick))return;
+  const idx=parseInt(pick)-1;
+  if(weekHist[idx])j_assignReceiptToList(window._lastReceiptItems,idx);
 }
 function applyReceiptToList(receiptItems){
   const items=storeItems[activeStoreId]||[];
@@ -2099,8 +2152,10 @@ function applyReceiptToList(receiptItems){
 function resetReceipt(){
   const zone=document.getElementById('receipt-zone');
   zone.classList.remove('done','scanning');
-  document.getElementById('receipt-content').innerHTML=`<div style="font-size:24px;margin-bottom:6px">📸</div><div style="font-size:14px;font-weight:600;margin-bottom:3px">Scan Receipt</div><div style="font-size:12px;color:var(--text-mid)">Take a photo or upload a receipt image — AI reads it and updates your list automatically</div>`;
-  document.getElementById('receipt-inp').value='';
+  document.getElementById('receipt-content').innerHTML=`<div style="font-size:24px;margin-bottom:6px">📸</div><div style="font-size:14px;font-weight:600;margin-bottom:3px">Scan Your Receipt</div><div style="font-size:12px;color:#7a8e8a">Take a photo or upload a receipt — AI reads it, matches items to your list, and fills in prices</div>`;
+  const inp=document.getElementById('receipt-inp');
+  if(inp)inp.value='';
+  window._lastReceiptItems=null;
 }
 function renderCatTable(){
   const EXCLUDE_CAT = ['Transfers','Income'];
