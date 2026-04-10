@@ -1128,6 +1128,7 @@ let familyGoals = { efund: 5145, lgfund: 0 };
 // Jar balances
 let jarBalances = { mc: 7606, ff: 5262, foundation: 5000, merrill: 157532 };
 var _jarWriteTime = 0;
+var _storeWriteTime = 0;
 let currentWeek = Math.max(1,Math.ceil((new Date()-new Date(2026,3,1))/(7*24*60*60*1000)));
 let pinBuffer = '';
 let pinTarget = '';
@@ -1449,6 +1450,7 @@ function applyKey(key, value) {
       if(Date.now()-_jarWriteTime<10000) break; // v42: Skip if fresh bank sync wrote within 10s
       jarBalances = value; updateJarDisplay(); j_updateFFBalance(); j_updateGoals(); break;
     case 'grocery_stores': 
+      if(Date.now()-_storeWriteTime<8000) break;
       if (Array.isArray(value) && value.length > 0) {
         groceryStores = value;
         if (!groceryStores.find(s => s.id === activeStoreId)) {
@@ -2116,18 +2118,55 @@ function j_showReceiptResults(items){
   }
   resultsHTML+=`<div style="display:flex;gap:8px;margin-top:14px">
     <button onclick="resetReceipt()" style="flex:1;padding:10px;background:#5a9e8a;color:#fff;border:none;border-radius:10px;font-family:var(--font-b);font-size:13px;font-weight:700;cursor:pointer">📸 Scan Another</button>
-    ${weekHist.length?`<button onclick="j_receiptToSavedList()" style="flex:1;padding:10px;background:#d4a853;color:#fff;border:none;border-radius:10px;font-family:var(--font-b);font-size:13px;font-weight:700;cursor:pointer">📋 Save to List</button>`:''}
+    <button onclick="j_receiptToSavedList()" style="flex:1;padding:10px;background:#d4a853;color:#fff;border:none;border-radius:10px;font-family:var(--font-b);font-size:13px;font-weight:700;cursor:pointer">📋 Save to List</button>
   </div></div>`;
   document.getElementById('receipt-content').innerHTML=resultsHTML;
   window._lastReceiptItems=items;
 }
 function j_receiptToSavedList(){
-  if(!window._lastReceiptItems||!weekHist.length)return;
-  const listNames=weekHist.map((w,i)=>(i+1)+'. '+w.label).join('\n');
-  const pick=prompt('Save receipt to which list?\n\n'+listNames);
-  if(!pick||!parseInt(pick))return;
-  const idx=parseInt(pick)-1;
-  if(weekHist[idx])j_assignReceiptToList(window._lastReceiptItems,idx);
+  if(!window._lastReceiptItems)return;
+  const items=window._lastReceiptItems;
+  const total=items.reduce((s,i)=>s+(parseFloat(i.price)||0),0);
+  const overlay=document.createElement('div');
+  overlay.className='manage-stores-overlay';
+  overlay.id='receipt-list-overlay';
+  overlay.onclick=(e)=>{if(e.target===overlay)overlay.remove();};
+  let listHTML='';
+  if(weekHist.length){
+    listHTML=weekHist.map((w,i)=>`<button onclick="j_doReceiptToList(${i})" style="width:100%;padding:14px;background:#faf7f2;border:1.5px solid #e8e2d9;border-radius:12px;font-family:var(--font-b);font-size:14px;font-weight:600;cursor:pointer;text-align:left;margin-bottom:8px;color:#2c3e3a;display:flex;justify-content:space-between;align-items:center"><span>📋 ${w.label||'Untitled'}</span><span style="font-size:12px;color:#7a8e8a">${(w.items||[]).length} items</span></button>`).join('');
+  }
+  overlay.innerHTML=`<div class="manage-stores-box" style="text-align:center">
+    <div style="font-size:28px;margin-bottom:8px">🧾</div>
+    <div style="font-family:var(--font-d);font-size:20px;color:#2c3e3a;margin-bottom:4px">Save Receipt</div>
+    <div style="font-size:13px;color:#7a8e8a;margin-bottom:16px">${items.length} items · $${total.toFixed(2)}</div>
+    ${listHTML?'<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#7a8e8a;margin-bottom:8px;text-align:left">Add to existing list:</div>'+listHTML:''}
+    <button onclick="j_doReceiptNewList()" style="width:100%;padding:14px;background:#5a9e8a;color:#fff;border:none;border-radius:12px;font-family:var(--font-b);font-size:14px;font-weight:700;cursor:pointer;margin-top:4px">✨ Create New List from Receipt</button>
+    <button onclick="document.getElementById('receipt-list-overlay').remove()" style="width:100%;padding:12px;background:transparent;border:none;color:#7a8e8a;font-family:var(--font-b);font-size:13px;cursor:pointer;margin-top:8px">Cancel</button>
+  </div>`;
+  document.getElementById('jamie-app').appendChild(overlay);
+}
+function j_doReceiptToList(idx){
+  document.getElementById('receipt-list-overlay')?.remove();
+  if(!window._lastReceiptItems||!weekHist[idx])return;
+  j_assignReceiptToList(window._lastReceiptItems,idx);
+  resetReceipt();
+  j_renderPastLists();
+  toast('\u2713 Receipt saved to "'+weekHist[idx].label+'"');
+}
+function j_doReceiptNewList(){
+  document.getElementById('receipt-list-overlay')?.remove();
+  if(!window._lastReceiptItems)return;
+  const items=window._lastReceiptItems;
+  const total=items.reduce((s,i)=>s+(parseFloat(i.price)||0),0);
+  const defaultName=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'})+' Receipt';
+  const name=prompt('Name this list:',defaultName);
+  if(name===null)return;
+  const archivedItems=items.map(i=>({name:i.name||i.item,price:parseFloat(i.price)||0,store:(groceryStores.find(s=>s.id===activeStoreId)||{}).name||'Receipt',checked:true,fromReceipt:true}));
+  weekHist.unshift({id:'gl_'+Date.now(),label:name||defaultName,date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),t:+total.toFixed(2),budget:WEEKLY_BUDGET,items:archivedItems});
+  fbSet('week_hist',weekHist);
+  resetReceipt();
+  renderWeekHist();j_renderPastLists();
+  toast('\u2713 "'+( name||defaultName)+'" created with '+items.length+' items');
 }
 function applyReceiptToList(receiptItems){
   const items=storeItems[activeStoreId]||[];
@@ -3220,11 +3259,12 @@ function saveAndCloseStores() {
   }
   // Init items for any new stores
   groceryStores.forEach(s=>{if(!storeItems[s.id])storeItems[s.id]=[];});
+  _storeWriteTime=Date.now();
   fbSet('grocery_stores', groceryStores);
   fbSet('store_items', storeItems);
   closeManageStores();
   renderStoreTabs();
-  renderStoreItems();
+  initStoreGrocery();
   toast('✓ Stores saved');
 }
 function finishStoreShopping() {
