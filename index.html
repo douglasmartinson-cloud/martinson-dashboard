@@ -1252,7 +1252,7 @@ let SHEET_URL = 'https://script.google.com/macros/s/AKfycbw0q-7XhX6OztGR54bXX5_i
 // localStorage caches the cleared marker as a fallback guard.
 //
 const FB = 'https://martinson-family-default-rtdb.firebaseio.com';
-firebase.initializeApp({ databaseURL: FB });
+firebase.initializeApp({ apiKey: 'AIzaSyASDXW-OLTzaUBCxjvwx3V8r0b8kvPYUiE', authDomain: 'martinson-family.firebaseapp.com', databaseURL: FB });
 const FBDB = firebase.database();
 const FB_ROOT = FBDB.ref('martinson');
 let lastSyncTime = null;
